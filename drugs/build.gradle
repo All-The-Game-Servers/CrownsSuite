@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(':api')
+    compileOnly project(':economy')
+}
+
+jar {
+    archiveBaseName = 'CrownsDrugs'
+}

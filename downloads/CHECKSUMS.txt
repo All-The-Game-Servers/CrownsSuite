@@ -1,0 +1,8 @@
+2a8971447994c9624beeac3dc9951cdb4b2fbffa  CrownsAdmin-1.1.0.jar
+ff3d05cb5a54b09bfa86011a3b418c64388371f3  CrownsAPI-1.1.0.jar
+c32bbe37aad147b470d553e430780e109a570c70  CrownsDrugs-1.1.0.jar
+0cc76928aa6049a09b35aa3708c756e84a8ad5a1  CrownsEconomy-1.1.0.jar
+0a6119bef3f156ae65c92af5697806a55f1341e0  CrownsEvents-1.1.0.jar
+789f61bed6321d47a02c69128d6b71dd42c23a1a  CrownsSuite-ResourcePack-1.1.0.sha1
+268589339a708d79b03cb850c85feb7fcd54742e  CrownsSuite-ResourcePack-1.1.0.zip
+946dde0e3c02b165ca02bf359eb795b1055bd87c  README.md

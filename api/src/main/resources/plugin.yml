@@ -1,0 +1,7 @@
+name: CrownsAPI
+version: 1.1.0
+main: com.xkstudios.crowns.api.CrownsAPIPlugin
+api-version: "1.21"
+load: STARTUP
+authors: [XKStudios]
+description: Shared API, data, and service registry for Crowns Suite.

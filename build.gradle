@@ -1,0 +1,38 @@
+subprojects {
+    apply plugin: 'java'
+
+    group = 'com.xkstudios'
+    version = '1.1.0'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    }
+
+    dependencies {
+        compileOnly files(
+                "${rootDir}/paper-api.jar",
+                "${rootDir}/adventure-api.jar",
+                "${rootDir}/adventure-key.jar",
+                "${rootDir}/adventure-plain.jar",
+                "${rootDir}/examination-api.jar",
+                "${rootDir}/examination-string.jar",
+                "${rootDir}/bungeecord-chat.jar"
+        )
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 21
+    }
+
+    processResources {
+        filteringCharset = 'UTF-8'
+    }
+}

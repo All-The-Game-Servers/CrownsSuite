@@ -1,0 +1,14 @@
+currency:
+  crowns-per-shilling: 100
+  shillings-per-penny: 100
+  crown-name: Crowns
+  shilling-name: Shillings
+  penny-name: Pennies
+
+player-data:
+  starting-balance: 500
+
+inbox:
+  enabled: true
+  max-per-player: 50
+  live-chat-notifications: true

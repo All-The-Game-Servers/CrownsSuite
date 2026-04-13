@@ -1,0 +1,15 @@
+events:
+  enabled: true
+  active-event: nether-opening
+
+  nether-opening:
+    enabled: true
+    title: Nether Opening Week
+    start-time: "2030-01-01 12:00"
+    duration-days: 7
+
+  end-opening:
+    enabled: true
+    title: Endfall Opening Week
+    start-time: "2030-01-08 12:00"
+    duration-days: 7

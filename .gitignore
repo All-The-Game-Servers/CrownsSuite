@@ -1,0 +1,17 @@
+/build/
+/decompiled/
+/cfr.jar
+/src/
+/config.yml
+/plugin.yml
+/paper-api.jar
+/paper-api.pom
+/paper-metadata.xml
+/spigot-api-1.21.4.jar
+/spigot-metadata.xml
+/adventure-api.jar
+/adventure-key.jar
+/adventure-plain.jar
+/bungeecord-chat.jar
+/examination-api.jar
+/examination-string.jar

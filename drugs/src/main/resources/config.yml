@@ -1,0 +1,6 @@
+drugs:
+  enabled: true
+  black-market:
+    refresh-minutes: 30
+  seeds-restock-cost: 120
+  supplies-restock-cost: 180
