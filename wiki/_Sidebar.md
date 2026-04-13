@@ -1,5 +1,9 @@
 # Crowns Suite Wiki
 
 - [Home](Home)
-- [CrownsEconomy](Home#crownseconomy-overview)
-- [Upgrade Notes](Home#upgrade-notes)
+- [CrownsEconomy](CrownsEconomy)
+- [CrownsAdmin](CrownsAdmin)
+- [CrownsEvents](CrownsEvents)
+- [CrownsDrugs](CrownsDrugs)
+- [Resource Pack](Resource-Pack)
+- [Installation](Installation)

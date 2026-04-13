@@ -46,6 +46,8 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
             case "slots" -> this.cmdSlots(player, args);
             case "trader" -> this.plugin.getDemandManager().openTraderMenu(player);
             case "demand" -> this.plugin.getDemandManager().openDemandMenu(player);
+            case "commissions", "commission" -> this.cmdCommissions(player, args);
+            case "contracts", "contract" -> this.cmdContracts(player, args);
             case "inbox" -> this.plugin.getMenuManager().openInboxMenu(player);
             case "help" -> this.sendHelp(player);
             default -> this.sendHelp(player);
@@ -242,6 +244,29 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
         this.plugin.getSlotsManager().openMenu(player);
     }
 
+    private void cmdCommissions(Player player, String[] args) {
+        if (args.length >= 2 && args[1].equalsIgnoreCase("post")) {
+            if (args.length < 4) {
+                this.msg(player, "Usage: /ce commissions post <amount> <total payout>", NamedTextColor.RED);
+                return;
+            }
+            try {
+                int amount = Integer.parseInt(args[2]);
+                long payout = Currency.parse(args[3]);
+                boolean created = this.plugin.getContractManager().createCommissionFromHand(player, amount, payout);
+                this.msg(player, created ? "Commission posted." : "Could not post that commission. Hold the item you want and check your balance.", created ? NamedTextColor.GREEN : NamedTextColor.RED);
+            } catch (NumberFormatException exception) {
+                this.msg(player, "Invalid amount or payout.", NamedTextColor.RED);
+            }
+            return;
+        }
+        this.plugin.getContractManager().openCommissionsMenu(player);
+    }
+
+    private void cmdContracts(Player player, String[] args) {
+        this.plugin.getContractManager().openContractsMenu(player);
+    }
+
     private void sendHelp(Player player) {
         player.sendMessage(Component.text("=== CrownsEconomy ===", NamedTextColor.GOLD, TextDecoration.BOLD));
         for (String line : List.of(
@@ -260,6 +285,9 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                 "/ce slots - Open the slots machine",
                 "/ce jobs complete <id> - Finish a delivery contract",
                 "/ce demand - Open the server demand board",
+                "/ce commissions - Open player commissions",
+                "/ce commissions post <amount> <payout> - Post a buy order from your held item",
+                "/ce contracts - Open server contracts",
                 "/ce trader - Open The Server trader",
                 "/ce inbox - Open your stored notifications")) {
             player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
@@ -273,7 +301,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("menu", "bal", "pay", "top", "auction", "stalls", "jobs", "lottery", "coinflip", "slots", "demand", "trader", "inbox", "help")
+            return List.of("menu", "bal", "pay", "top", "auction", "stalls", "jobs", "lottery", "coinflip", "slots", "demand", "commissions", "contracts", "trader", "inbox", "help")
                     .stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("pay")) {
@@ -299,6 +327,9 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("slots")) {
             return List.of("small", "standard", "high").stream().filter(s -> s.startsWith(args[1].toLowerCase())).toList();
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("commissions") || args[0].equalsIgnoreCase("commission"))) {
+            return List.of("post").stream().filter(s -> s.startsWith(args[1].toLowerCase())).toList();
         }
         return List.of();
     }

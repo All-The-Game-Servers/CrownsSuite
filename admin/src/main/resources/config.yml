@@ -30,6 +30,7 @@ moderation:
     silent-join-quit: true
     staff-can-see-vanished: true
     hide-from-tab: true
+    fake-presence-messages: true
 
 analytics:
   playtime:

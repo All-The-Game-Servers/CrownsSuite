@@ -4,3 +4,13 @@ drugs:
     refresh-minutes: 30
   seeds-restock-cost: 120
   supplies-restock-cost: 180
+  progression:
+    marijuana:
+      grow-tier: 1
+      processor-tier: 1
+    cocaine:
+      grow-tier: 2
+      processor-tier: 2
+    meth:
+      grow-tier: 3
+      processor-tier: 3

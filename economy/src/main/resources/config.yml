@@ -131,48 +131,96 @@ server-trader:
     - material: GOLDEN_CARROT
       amount: 16
       price: 240
-      display-name: Trail Snack Bundle
+      display-name: Builder's Snack Bundle
       cosmetic: false
+      theme: builder
+      rarity: common
+    - material: SCAFFOLDING
+      amount: 24
+      price: 360
+      display-name: Scaffold Crate
+      cosmetic: false
+      theme: builder
+      rarity: standard
     - material: ENDER_PEARL
       amount: 4
       price: 320
-      display-name: Pearl Pouch
+      display-name: Traveler Pearl Pouch
       cosmetic: false
+      theme: traveler
+      rarity: standard
     - material: EXPERIENCE_BOTTLE
       amount: 8
       price: 280
       display-name: Scholar's Vials
       cosmetic: false
+      theme: utility
+      rarity: common
     - material: FIREWORK_ROCKET
-      amount: 12
+      amount: 18
       price: 340
-      display-name: Travel Rocket Pack
+      display-name: Skytrail Rocket Pack
       cosmetic: false
+      theme: traveler
+      rarity: standard
     - material: SHULKER_BOX
       amount: 1
       price: 780
       display-name: Portable Storage Crate
       cosmetic: false
+      theme: utility
+      rarity: rare
     - material: ARMOR_STAND
       amount: 2
       price: 360
-      display-name: Display Stand Set
+      display-name: Display Stand Pair
       cosmetic: true
-    - material: ITEM_FRAME
-      amount: 6
-      price: 260
-      display-name: Gallery Frame Pack
-      cosmetic: true
+      theme: prestige
+      rarity: standard
     - material: CYAN_BANNER
       amount: 1
       price: 450
-      display-name: Crowns Market Banner
+      display-name: Crowns Showcase Banner
       cosmetic: true
+      theme: prestige
+      rarity: rare
     - material: GLOW_INK_SAC
-      amount: 6
+      amount: 4
       price: 300
-      display-name: Signmaker Bundle
-      cosmetic: false
+      display-name: Showcase Frame Set
+      cosmetic: true
+      theme: prestige
+      rarity: rare
+
+server-contracts:
+  enabled: true
+  refresh-hours: 18
+  slots: 3
+  templates:
+    - material: IRON_BLOCK
+      amount: 12
+      payout: 1400
+      claims: 2
+      theme: builder
+      display-name: Builder's Iron Bulk Order
+    - material: FIREWORK_ROCKET
+      amount: 24
+      payout: 1200
+      claims: 2
+      theme: traveler
+      display-name: Traveler's Rocket Consignment
+    - material: EXPERIENCE_BOTTLE
+      amount: 24
+      payout: 1600
+      claims: 1
+      theme: prestige
+      display-name: Scholar's XP Shipment
+    - material: ENDER_PEARL
+      amount: 16
+      payout: 1350
+      claims: 2
+      theme: utility
+      display-name: Expedition Pearl Reserve
 
 lottery:
   enabled: true
@@ -199,6 +247,7 @@ stalls:
   spotlight-upgrade-cost: 1500
   max-spotlight-level: 3
   allow-categories: true
+  allow-branding: true
   categories:
     - General
     - Blocks

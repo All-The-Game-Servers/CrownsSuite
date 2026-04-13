@@ -54,6 +54,7 @@ public class EventManager {
     private final CrownsPlugin plugin;
     private final EventItemFactory itemFactory;
     private final Set<Integer> announcedCheckpoints = ConcurrentHashMap.newKeySet();
+    private final Map<String, LiveMoment> liveMoments = new ConcurrentHashMap<>();
     private BossBar bossBar;
     private BukkitTask heartbeatTask;
     private EventState state = EventState.SCHEDULED;
@@ -221,6 +222,50 @@ public class EventManager {
                     : "Countdown paused with " + this.formatDuration(this.pausedRemainingMs) + " remaining.";
             case ENDED -> "Opening Week has concluded.";
         };
+    }
+
+    public String getProgressSummary(UUID playerId, String playerName) {
+        EventProgress progress = this.getProgress(playerId, playerName);
+        return progress.relics() + " relics, "
+                + progress.cacheLoot() + " " + (this.isEndEvent() ? "survey caches" : "caches")
+                + ", " + progress.blazeKills() + " " + (this.isEndEvent() ? "elite kills" : "blaze kills");
+    }
+
+    public List<String> getLiveMomentSummaries() {
+        this.pruneLiveMoments();
+        return this.liveMoments.values().stream()
+                .sorted(Comparator.comparingLong(LiveMoment::expiresAt))
+                .map(moment -> moment.label() + " - " + moment.detail())
+                .toList();
+    }
+
+    public boolean triggerLiveMoment(String key, String label, String detail, long durationMs, String startedBy) {
+        if (key == null || key.isBlank() || label == null || label.isBlank()) {
+            return false;
+        }
+        long now = System.currentTimeMillis();
+        long expiresAt = now + Math.max(60000L, durationMs);
+        LiveMoment moment = new LiveMoment(key.toLowerCase(Locale.ROOT), label, detail == null ? "" : detail, now, expiresAt, startedBy == null ? "Staff" : startedBy);
+        this.liveMoments.put(moment.key(), moment);
+        this.broadcast(Component.text("Live Event: " + moment.label(), NamedTextColor.LIGHT_PURPLE));
+        if (!moment.detail().isBlank()) {
+            this.broadcast(Component.text(moment.detail(), NamedTextColor.GRAY));
+        }
+        this.logEvent(null, moment.startedBy(), "live_moment_start", 0L, moment.key() + ":" + moment.label());
+        return true;
+    }
+
+    public boolean stopLiveMoment(String key) {
+        if (key == null || key.isBlank()) {
+            return false;
+        }
+        LiveMoment removed = this.liveMoments.remove(key.toLowerCase(Locale.ROOT));
+        if (removed == null) {
+            return false;
+        }
+        this.broadcast(Component.text("Live Event Ended: " + removed.label(), NamedTextColor.YELLOW));
+        this.logEvent(null, removed.startedBy(), "live_moment_end", 0L, removed.key() + ":" + removed.label());
+        return true;
     }
 
     public String getDimensionLockMessage(World.Environment environment) {
@@ -1083,6 +1128,7 @@ public class EventManager {
         if (!this.isEnabled()) {
             return;
         }
+        this.pruneLiveMoments();
         long now = System.currentTimeMillis();
         if (this.state == EventState.PAUSED) {
             this.updateBossBarPaused();
@@ -1132,6 +1178,11 @@ public class EventManager {
         this.broadcast(Component.text(this.isEndEvent()
                 ? "Recover void relics, gather craft materials, and claim rewards with /ce event."
                 : "Recover relics, turn them in from /ce relics, and claim rewards with /ce event.", NamedTextColor.GOLD));
+        if (this.isEndEvent()) {
+            this.triggerLiveMoment("dragon-ceremony", "Dragon Ceremony",
+                    "The End has opened. Rally at the central island and begin the first expedition.",
+                    20L * 60L * 1000L, manual ? "Staff" : "System");
+        }
         this.logEvent(null, null, "event_started", 0L, manual ? "Started manually" : "Countdown completed");
     }
 
@@ -1139,6 +1190,7 @@ public class EventManager {
         this.state = EventState.ENDED;
         this.resumeState = EventState.ENDED;
         this.pausedRemainingMs = 0L;
+        this.liveMoments.clear();
         this.saveState();
         this.clearBossBar();
         if (broadcast) {
@@ -1409,6 +1461,11 @@ public class EventManager {
                 player.sendActionBar(Component.text(this.getDimensionName() + " opens in " + this.formatDuration(remainingMs), NamedTextColor.RED));
             }
         }
+    }
+
+    private void pruneLiveMoments() {
+        long now = System.currentTimeMillis();
+        this.liveMoments.entrySet().removeIf(entry -> entry.getValue().expiresAt() <= now);
     }
 
     private void updateBossBarCountdown(long remainingMs) {
@@ -1931,6 +1988,9 @@ public class EventManager {
     }
 
     public record EventLogEntry(String playerName, String type, long amount, String detail, long recordedAt) {
+    }
+
+    public record LiveMoment(String key, String label, String detail, long startedAt, long expiresAt, String startedBy) {
     }
 
     public record RewardStatus(String key, String display, String description, boolean claimed, boolean claimable,

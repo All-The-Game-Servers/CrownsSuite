@@ -5,6 +5,7 @@ import com.xkstudios.crowns.api.EconomyProvider;
 import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.command.EconomyCommand;
 import com.xkstudios.crowns.economy.CoinflipManager;
+import com.xkstudios.crowns.economy.ContractManager;
 import com.xkstudios.crowns.economy.DemandManager;
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.economy.Currency;
@@ -37,6 +38,7 @@ public class CrownsPlugin extends JavaPlugin {
     private EventsBridge eventsBridge;
     private EconomyManager economyManager;
     private DemandManager demandManager;
+    private ContractManager contractManager;
     private JobManager jobManager;
     private LotteryManager lotteryManager;
     private CoinflipManager coinflipManager;
@@ -61,6 +63,7 @@ public class CrownsPlugin extends JavaPlugin {
         this.eventsBridge = new EventsBridge();
         this.economyManager = new EconomyManager(this);
         this.demandManager = new DemandManager(this);
+        this.contractManager = new ContractManager(this);
         this.jobManager = new JobManager(this);
         this.lotteryManager = new LotteryManager(this);
         this.coinflipManager = new CoinflipManager(this);
@@ -70,6 +73,7 @@ public class CrownsPlugin extends JavaPlugin {
         this.menuManager = new MenuManager(this);
         this.auctionManager.load();
         this.demandManager.initialize();
+        this.contractManager.initialize();
         this.stallManager.load();
         this.jobManager.initialize();
         CrownsAPI.setEconomyProvider(new EconomyProvider() {
@@ -102,7 +106,7 @@ public class CrownsPlugin extends JavaPlugin {
                 player -> this.menuManager.openMainMenu(player),
                 player -> {
                     int unread = this.inboxManager.getUnreadCount(player.getUniqueId());
-                    return unread > 0 ? "Inbox: " + unread + " unread" : this.demandManager.getSuiteSummary();
+                    return unread > 0 ? "Inbox: " + unread + " unread" : this.demandManager.getSuiteSummary() + " " + this.contractManager.getSummary();
                 }
         ));
         EconomyCommand command = new EconomyCommand(this);
@@ -204,6 +208,10 @@ public class CrownsPlugin extends JavaPlugin {
 
     public DemandManager getDemandManager() {
         return demandManager;
+    }
+
+    public ContractManager getContractManager() {
+        return contractManager;
     }
 
     public PermanentStallManager getStallManager() {

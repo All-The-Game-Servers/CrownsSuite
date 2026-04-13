@@ -51,6 +51,26 @@ public class CrownsPlugin extends JavaPlugin {
             public String getDimensionLockMessage(World.Environment environment) {
                 return eventManager.getDimensionLockMessage(environment);
             }
+
+            @Override
+            public String getActiveEventLabel() {
+                return eventManager.getMenuLabel();
+            }
+
+            @Override
+            public String getStatusLabel() {
+                return eventManager.getStatusLabel();
+            }
+
+            @Override
+            public String getPlayerProgressSummary(java.util.UUID playerId, String playerName) {
+                return eventManager.getProgressSummary(playerId, playerName);
+            }
+
+            @Override
+            public java.util.List<String> getLiveEventSummaries() {
+                return eventManager.getLiveMomentSummaries();
+            }
         });
 
         EventsCommand command = new EventsCommand(this);

@@ -5,11 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.potion.PotionEffectType;
 
 public enum DrugProduct {
-    MARIJUANA("marijuana", "Marijuana", Material.FERN, Material.DRIED_KELP, 2, 55L,
+    MARIJUANA("marijuana", "Marijuana", Material.FERN, Material.DRIED_KELP, 2, 55L, 1, 1, "street",
             PotionEffectType.NIGHT_VISION, 20 * 60, 0, PotionEffectType.REGENERATION, 20 * 20, 0),
-    COCAINE("cocaine", "Cocaine", Material.SUGAR_CANE, Material.SUGAR, 1, 95L,
+    COCAINE("cocaine", "Cocaine", Material.SUGAR_CANE, Material.SUGAR, 1, 95L, 2, 2, "club",
             PotionEffectType.SPEED, 20 * 45, 1, PotionEffectType.HASTE, 20 * 45, 0),
-    METH("meth", "Meth", Material.PRISMARINE_CRYSTALS, Material.LIGHT_BLUE_DYE, 1, 120L,
+    METH("meth", "Meth", Material.PRISMARINE_CRYSTALS, Material.LIGHT_BLUE_DYE, 1, 120L, 3, 3, "high-risk",
             PotionEffectType.SPEED, 20 * 35, 2, PotionEffectType.STRENGTH, 20 * 35, 0);
 
     private final String key;
@@ -18,6 +18,9 @@ public enum DrugProduct {
     private final Material packagedMaterial;
     private final int growYield;
     private final long baseSellPrice;
+    private final int requiredLabTier;
+    private final int requiredProcessorTier;
+    private final String buyerMood;
     private final PotionEffectType primaryEffect;
     private final int primaryDurationTicks;
     private final int primaryAmplifier;
@@ -26,6 +29,7 @@ public enum DrugProduct {
     private final int secondaryAmplifier;
 
     DrugProduct(String key, String display, Material rawMaterial, Material packagedMaterial, int growYield, long baseSellPrice,
+                int requiredLabTier, int requiredProcessorTier, String buyerMood,
                 PotionEffectType primaryEffect, int primaryDurationTicks, int primaryAmplifier,
                 PotionEffectType secondaryEffect, int secondaryDurationTicks, int secondaryAmplifier) {
         this.key = key;
@@ -34,6 +38,9 @@ public enum DrugProduct {
         this.packagedMaterial = packagedMaterial;
         this.growYield = growYield;
         this.baseSellPrice = baseSellPrice;
+        this.requiredLabTier = requiredLabTier;
+        this.requiredProcessorTier = requiredProcessorTier;
+        this.buyerMood = buyerMood;
         this.primaryEffect = primaryEffect;
         this.primaryDurationTicks = primaryDurationTicks;
         this.primaryAmplifier = primaryAmplifier;
@@ -68,6 +75,18 @@ public enum DrugProduct {
 
     public long baseSellPrice() {
         return baseSellPrice;
+    }
+
+    public int requiredLabTier() {
+        return requiredLabTier;
+    }
+
+    public int requiredProcessorTier() {
+        return requiredProcessorTier;
+    }
+
+    public String buyerMood() {
+        return buyerMood;
     }
 
     public PotionEffectType primaryEffect() {

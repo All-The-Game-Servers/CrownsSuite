@@ -15,6 +15,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
     private DataManager dataManager;
     private InboxManager inboxManager;
     private SuiteGuiManager suiteGuiManager;
+    private ResourcePackService resourcePackService;
 
     @Override
     public void onEnable() {
@@ -24,9 +25,11 @@ public class CrownsAPIPlugin extends JavaPlugin {
         this.dataManager.setStartingBalance(this.getConfig().getLong("player-data.starting-balance", 500L));
         this.dataManager.initialize();
         this.inboxManager = new InboxManager(this, this.dataManager);
+        this.resourcePackService = new ResourcePackService(this);
         this.suiteGuiManager = new SuiteGuiManager(this);
         CrownsAPI.setDataManager(this.dataManager);
         CrownsAPI.setSuiteGui(this.suiteGuiManager);
+        CrownsAPI.setResourcePackService(this.resourcePackService);
         CrownsAPI.setPlayerDataProvider(new PlayerDataProvider() {
             @Override
             public PlayerData getOrCreate(UUID uuid, String name) {
@@ -56,6 +59,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setPlayerDataProvider(null);
         CrownsAPI.setDataManager(null);
         CrownsAPI.setSuiteGui(null);
+        CrownsAPI.setResourcePackService(null);
         CrownsAPI.clearSections();
         if (this.dataManager != null) {
             this.dataManager.close();

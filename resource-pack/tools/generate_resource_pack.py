@@ -8,7 +8,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 PACK_NAME = f"CrownsSuite-ResourcePack-{VERSION}"
 PACK_DIR = ROOT / "resource-pack" / PACK_NAME
 BUILD_DIR = ROOT / "build" / "resource-pack"
@@ -311,13 +311,13 @@ def draw_icon(kind: str, palette_name: str):
 
 def write_pack_files():
     PACK_DIR.mkdir(parents=True, exist_ok=True)
-    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({"pack": {"pack_format": 46, "supported_formats": {"min_inclusive": 34, "max_inclusive": 46}, "description": "Crowns Suite 1.1.0 - Dark Arcane branding pack."}}, indent=2), encoding="utf-8")
+    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({"pack": {"pack_format": 46, "supported_formats": {"min_inclusive": 34, "max_inclusive": 46}, "description": "Crowns Suite 1.2.0 - Dark Arcane branding pack."}}, indent=2), encoding="utf-8")
     lowlight = PACK_DIR / "assets" / "lowlight"
     (lowlight / "font").mkdir(parents=True, exist_ok=True)
     (lowlight / "sounds").mkdir(parents=True, exist_ok=True)
     (lowlight / "font" / "default.json").write_text(json.dumps({"providers": []}, indent=2), encoding="utf-8")
     (lowlight / "sounds.json").write_text("{}", encoding="utf-8")
-    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.1.0\nTheme: Dark Arcane\n", encoding="utf-8")
+    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.2.0\nTheme: Dark Arcane\n", encoding="utf-8")
 
 
 def write_asset_index():

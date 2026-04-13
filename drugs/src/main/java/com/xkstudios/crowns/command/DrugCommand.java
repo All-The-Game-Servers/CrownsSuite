@@ -37,6 +37,7 @@ public class DrugCommand implements CommandExecutor, TabCompleter {
             case "sell" -> this.sell(player, args);
             case "use" -> this.use(player);
             case "upgrades" -> this.upgrades(player);
+            case "recipes" -> this.recipes(player);
             case "storage" -> this.storage(player);
             case "help" -> {
                 this.sendHelp(player);
@@ -77,6 +78,11 @@ public class DrugCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean recipes(Player player) {
+        this.plugin.getMenuManager().openRecipesMenu(player);
+        return true;
+    }
+
     private boolean storage(Player player) {
         this.plugin.getMenuManager().openStorageMenu(player);
         return true;
@@ -98,6 +104,7 @@ public class DrugCommand implements CommandExecutor, TabCompleter {
                 "/drugs process [product]",
                 "/drugs sell [product]",
                 "/drugs use",
+                "/drugs recipes",
                 "/drugs upgrades",
                 "/drugs storage")) {
             player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
@@ -111,7 +118,7 @@ public class DrugCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("business", "grow", "process", "sell", "use", "upgrades", "storage", "help").stream()
+            return List.of("business", "grow", "process", "sell", "use", "recipes", "upgrades", "storage", "help").stream()
                     .filter(value -> value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && List.of("grow", "process", "sell").contains(args[0].toLowerCase(Locale.ROOT))) {

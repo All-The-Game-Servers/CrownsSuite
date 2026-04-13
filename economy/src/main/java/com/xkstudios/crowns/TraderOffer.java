@@ -9,14 +9,18 @@ public class TraderOffer {
     private final String displayName;
     private final long price;
     private final boolean cosmetic;
+    private final String theme;
+    private final String rarity;
     private final long refreshAt;
 
-    public TraderOffer(int id, ItemStack item, String displayName, long price, boolean cosmetic, long refreshAt) {
+    public TraderOffer(int id, ItemStack item, String displayName, long price, boolean cosmetic, String theme, String rarity, long refreshAt) {
         this.id = id;
         this.item = item;
         this.displayName = displayName;
         this.price = price;
         this.cosmetic = cosmetic;
+        this.theme = theme;
+        this.rarity = rarity;
         this.refreshAt = refreshAt;
     }
 
@@ -42,6 +46,14 @@ public class TraderOffer {
 
     public boolean isCosmetic() {
         return this.cosmetic;
+    }
+
+    public String getTheme() {
+        return this.theme;
+    }
+
+    public String getRarity() {
+        return this.rarity;
     }
 
     public long getRefreshAt() {

@@ -13,3 +13,7 @@ events:
     title: Endfall Opening Week
     start-time: "2030-01-08 12:00"
     duration-days: 7
+
+  live-moments:
+    enabled: true
+    default-duration-minutes: 20

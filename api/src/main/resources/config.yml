@@ -12,3 +12,10 @@ inbox:
   enabled: true
   max-per-player: 50
   live-chat-notifications: true
+
+resource-pack:
+  enabled: true
+  version: 1.2.0
+  url: ""
+  sha1: ""
+  prompt: Lowlight SMP uses the Crowns Suite resource pack for custom items and menus.

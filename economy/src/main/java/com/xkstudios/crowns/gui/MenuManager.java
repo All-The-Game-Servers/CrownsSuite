@@ -39,15 +39,22 @@ public class MenuManager {
                 Component.text("Claim delivery contracts and turn them in.", NamedTextColor.GRAY)
         ), "ce:menu:jobs", "lowlight/economy/jobs"));
         inventory.setItem(28, this.button(Material.HOPPER, "Demand Board", NamedTextColor.GREEN, List.of(
-                Component.text("Sell gathered goods to The Server.", NamedTextColor.GRAY)
+                Component.text("Sell gathered goods to The Server.", NamedTextColor.GRAY),
+                Component.text("Orders only, no player buy orders here.", NamedTextColor.DARK_GRAY)
         ), "ce:menu:demand", "lowlight/economy/demand_board"));
-        inventory.setItem(30, this.button(Material.WANDERING_TRADER_SPAWN_EGG, "Server Trader", NamedTextColor.LIGHT_PURPLE, List.of(
+        inventory.setItem(30, this.button(Material.NAME_TAG, "Commissions", NamedTextColor.AQUA, List.of(
+                Component.text("Post and fulfill player buy orders.", NamedTextColor.GRAY)
+        ), "ce:menu:commissions", "lowlight/economy/commissions"));
+        inventory.setItem(32, this.button(Material.WRITABLE_BOOK, "Server Contracts", NamedTextColor.YELLOW, List.of(
+                Component.text("Take curated premium delivery contracts.", NamedTextColor.GRAY)
+        ), "ce:menu:contracts", "lowlight/economy/contracts"));
+        inventory.setItem(34, this.button(Material.WANDERING_TRADER_SPAWN_EGG, "Server Trader", NamedTextColor.LIGHT_PURPLE, List.of(
                 Component.text("Spend money on rotating stock.", NamedTextColor.GRAY)
         ), "ce:menu:trader", "lowlight/economy/server_trader"));
-        inventory.setItem(32, this.button(Material.JUKEBOX, "Gambling", NamedTextColor.RED, List.of(
+        inventory.setItem(36, this.button(Material.JUKEBOX, "Gambling", NamedTextColor.RED, List.of(
                 Component.text("Lottery, coinflip, and slots.", NamedTextColor.GRAY)
         ), "ce:menu:gambling", "lowlight/economy/gambling"));
-        inventory.setItem(34, this.button(Material.PAPER, "Inbox", NamedTextColor.YELLOW, List.of(
+        inventory.setItem(38, this.button(Material.PAPER, "Inbox", NamedTextColor.YELLOW, List.of(
                 Component.text("Unread: " + this.plugin.getInboxManager().getUnreadCount(player.getUniqueId()), NamedTextColor.GRAY)
         ), "ce:menu:inbox", "lowlight/economy/inbox"));
         inventory.setItem(40, this.button(Material.PLAYER_HEAD, "Top Balances", NamedTextColor.WHITE, List.of(

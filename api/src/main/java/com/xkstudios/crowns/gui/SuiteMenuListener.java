@@ -1,6 +1,7 @@
 package com.xkstudios.crowns.gui;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.ResourcePackService;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,6 +30,22 @@ public class SuiteMenuListener implements Listener {
             player.closeInventory();
         } else if (action.equals("suite:home")) {
             CrownsAPI.openSuiteHome(player);
+        } else if (action.equals("suite:profile")) {
+            CrownsAPI.getSuiteGui().openProfile(player);
+        } else if (action.equals("suite:pack")) {
+            CrownsAPI.getSuiteGui().openResourcePack(player);
+        } else if (action.equals("suite:pack:share")) {
+            ResourcePackService service = CrownsAPI.getResourcePackService();
+            if (service != null) {
+                player.closeInventory();
+                service.sendManualInstall(player);
+            }
+        } else if (action.equals("suite:pack:broadcast")) {
+            ResourcePackService service = CrownsAPI.getResourcePackService();
+            if (service != null && (player.isOp() || player.hasPermission("crowns.admin"))) {
+                player.closeInventory();
+                service.broadcastManualInstall();
+            }
         } else if (action.startsWith("suite:open:")) {
             CrownsAPI.getSuiteGui().openSection(player, action.substring("suite:open:".length()));
         }

@@ -107,10 +107,36 @@ public class PermanentStallManager {
         this.awaitingActions.put(playerUuid, "edit:" + listingId);
     }
 
+    public void setAwaitingRename(UUID playerUuid) {
+        this.awaitingActions.put(playerUuid, "rename");
+    }
+
+    public void setAwaitingDescription(UUID playerUuid) {
+        this.awaitingActions.put(playerUuid, "describe");
+    }
+
     public void handleChatInput(Player player, String action, String message) {
         String trimmed = message.trim();
         if (trimmed.equalsIgnoreCase("cancel")) {
             player.sendMessage(Component.text("Cancelled.", NamedTextColor.GRAY));
+            return;
+        }
+        if ("rename".equals(action)) {
+            if (this.renameStall(player, trimmed)) {
+                player.sendMessage(Component.text("Stall renamed.", NamedTextColor.GREEN));
+            } else {
+                player.sendMessage(Component.text("Could not rename your stall.", NamedTextColor.RED));
+            }
+            this.openMyStall(player);
+            return;
+        }
+        if ("describe".equals(action)) {
+            if (this.updateDescription(player, trimmed)) {
+                player.sendMessage(Component.text("Stall description updated.", NamedTextColor.GREEN));
+            } else {
+                player.sendMessage(Component.text("Could not update your stall description.", NamedTextColor.RED));
+            }
+            this.openMyStall(player);
             return;
         }
         try {
@@ -153,6 +179,8 @@ public class PermanentStallManager {
                 player.getUniqueId(),
                 player.getName(),
                 player.getName() + "'s Stall",
+                "Freshly opened and ready for trade.",
+                Material.CHEST_MINECART.name(),
                 this.allowCategories() ? this.getConfiguredCategories().get(0) : "General",
                 System.currentTimeMillis(),
                 this.getBaseListingSlots(),
@@ -204,6 +232,43 @@ public class PermanentStallManager {
         List<String> categories = this.getConfiguredCategories();
         int currentIndex = Math.max(0, categories.indexOf(profile.getCategory()));
         profile.setCategory(categories.get((currentIndex + 1) % categories.size()));
+        this.saveProfile(profile);
+        return true;
+    }
+
+    public boolean cycleEmblem(Player player) {
+        StallProfile profile = this.getProfile(player.getUniqueId());
+        if (profile == null) {
+            return false;
+        }
+        List<Material> emblems = this.getEmblemChoices();
+        Material current = this.resolveEmblem(profile);
+        int currentIndex = Math.max(0, emblems.indexOf(current));
+        profile.setEmblemMaterial(emblems.get((currentIndex + 1) % emblems.size()).name());
+        this.saveProfile(profile);
+        return true;
+    }
+
+    public boolean renameStall(Player player, String name) {
+        StallProfile profile = this.getProfile(player.getUniqueId());
+        if (profile == null) {
+            return false;
+        }
+        String sanitized = this.sanitizeText(name, 28);
+        if (sanitized.isBlank()) {
+            return false;
+        }
+        profile.setStallName(sanitized);
+        this.saveProfile(profile);
+        return true;
+    }
+
+    public boolean updateDescription(Player player, String description) {
+        StallProfile profile = this.getProfile(player.getUniqueId());
+        if (profile == null) {
+            return false;
+        }
+        profile.setDescription(this.sanitizeText(description, 72));
         this.saveProfile(profile);
         return true;
     }
@@ -365,18 +430,29 @@ public class PermanentStallManager {
                     Component.text("Hold an item and add your first listing.", NamedTextColor.GRAY)
             )));
         }
-        inventory.setItem(46, this.info(Material.NAME_TAG, "Category", List.of(Component.text(this.displayCategory(profile.getCategory()), NamedTextColor.WHITE))));
-        inventory.setItem(47, this.info(Material.CHEST, "Listing Slots", List.of(Component.text(ownedListings.size() + "/" + profile.getListingSlots(), NamedTextColor.WHITE))));
-        inventory.setItem(48, this.info(Material.GLOW_ITEM_FRAME, "Spotlight", List.of(Component.text("Level " + profile.getSpotlightLevel(), NamedTextColor.WHITE))));
-        inventory.setItem(50, this.button(Material.EMERALD, "Add Held Item", NamedTextColor.GREEN, List.of(
-                Component.text("Hold an item and type its price in chat.", NamedTextColor.GRAY)
-        ), "ce:stalls:add"));
-        inventory.setItem(51, this.button(Material.HOPPER, "Cycle Category", NamedTextColor.YELLOW, List.of(
+        inventory.setItem(45, this.button(Material.NAME_TAG, "Rename Stall", NamedTextColor.YELLOW, List.of(
+                Component.text("Current: " + profile.getStallName(), NamedTextColor.GRAY),
+                Component.text("Set a branded stall name.", NamedTextColor.GRAY)
+        ), "ce:stalls:rename"));
+        inventory.setItem(46, this.button(Material.WRITABLE_BOOK, "Edit Tagline", NamedTextColor.AQUA, List.of(
+                Component.text(this.safeDescription(profile), NamedTextColor.GRAY),
+                Component.text("Add a short seller tagline.", NamedTextColor.GRAY)
+        ), "ce:stalls:describe"));
+        inventory.setItem(47, this.button(this.resolveEmblem(profile), "Cycle Emblem", NamedTextColor.LIGHT_PURPLE, List.of(
+                Component.text("Current emblem: " + this.niceName(this.resolveEmblem(profile)), NamedTextColor.GRAY),
+                Component.text("Give your stall a recognizable badge.", NamedTextColor.GRAY)
+        ), "ce:stalls:emblem"));
+        inventory.setItem(48, this.button(Material.HOPPER, "Cycle Category", NamedTextColor.YELLOW, List.of(
                 Component.text("Current: " + this.displayCategory(profile.getCategory()), NamedTextColor.GRAY)
         ), "ce:stalls:category"));
-        inventory.setItem(52, this.button(Material.ANVIL, "Upgrades", NamedTextColor.AQUA, List.of(
+        inventory.setItem(49, this.button(Material.EMERALD, "Add Held Item", NamedTextColor.GREEN, List.of(
+                Component.text("Hold an item and type its price in chat.", NamedTextColor.GRAY)
+        ), "ce:stalls:add"));
+        inventory.setItem(50, this.button(Material.ANVIL, "Upgrades", NamedTextColor.AQUA, List.of(
                 Component.text("Expand your storefront.", NamedTextColor.GRAY)
         ), "ce:stalls:upgrades"));
+        inventory.setItem(51, this.info(Material.CHEST, "Listing Slots", List.of(Component.text(ownedListings.size() + "/" + profile.getListingSlots(), NamedTextColor.WHITE))));
+        inventory.setItem(52, this.info(Material.GLOW_ITEM_FRAME, "Spotlight", List.of(Component.text("Level " + profile.getSpotlightLevel(), NamedTextColor.WHITE))));
         inventory.setItem(53, this.button(Material.ARROW, "Back", NamedTextColor.GRAY, List.of(), "ce:stalls:hub"));
         this.fillBorder(inventory);
         player.openInventory(inventory);
@@ -416,11 +492,12 @@ public class PermanentStallManager {
         int slot = 10;
         for (int index = start; index < Math.min(start + pageSize, browse.size()); index++) {
             StallProfile profile = browse.get(index);
-            inventory.setItem(slot, this.button(Material.CHEST, profile.getStallName(), NamedTextColor.YELLOW, List.of(
+            inventory.setItem(slot, this.button(this.resolveEmblem(profile), profile.getStallName(), NamedTextColor.YELLOW, List.of(
                     Component.text("Owner: " + profile.getOwnerName(), NamedTextColor.GRAY),
                     Component.text("Category: " + this.displayCategory(profile.getCategory()), NamedTextColor.GRAY),
                     Component.text("Listings: " + this.getListingsForOwner(profile.getOwnerUuid()).size(), NamedTextColor.GRAY),
                     Component.text("Spotlight: " + profile.getSpotlightLevel(), NamedTextColor.GRAY),
+                    Component.text(this.safeDescription(profile), NamedTextColor.DARK_GRAY),
                     Component.text("Click to browse this stall.", NamedTextColor.GREEN)
             ), "ce:stalls:view:" + profile.getOwnerUuid()));
             slot = slot % 9 == 7 ? slot + 3 : slot + 1;
@@ -482,6 +559,9 @@ public class PermanentStallManager {
                     Component.text("This stall is between stock right now.", NamedTextColor.GRAY)
             )));
         }
+        inventory.setItem(45, this.info(this.resolveEmblem(profile), "Brand", List.of(
+                Component.text(this.safeDescription(profile), NamedTextColor.WHITE)
+        )));
         inventory.setItem(46, this.info(Material.NAME_TAG, "Owner", List.of(Component.text(profile.getOwnerName(), NamedTextColor.WHITE))));
         inventory.setItem(47, this.info(Material.PAPER, "Category", List.of(Component.text(this.displayCategory(profile.getCategory()), NamedTextColor.WHITE))));
         inventory.setItem(48, this.info(Material.GLOW_ITEM_FRAME, "Spotlight", List.of(Component.text("Level " + profile.getSpotlightLevel(), NamedTextColor.WHITE))));
@@ -497,6 +577,8 @@ public class PermanentStallManager {
                         owner_uuid TEXT PRIMARY KEY,
                         owner_name TEXT,
                         stall_name TEXT NOT NULL,
+                        description TEXT NOT NULL DEFAULT '',
+                        emblem_material TEXT NOT NULL DEFAULT 'CHEST_MINECART',
                         category TEXT,
                         purchased_at INTEGER NOT NULL,
                         listing_slots INTEGER NOT NULL DEFAULT 6,
@@ -504,6 +586,14 @@ public class PermanentStallManager {
                         prestige_level INTEGER NOT NULL DEFAULT 0
                     )
                     """);
+            try {
+                statement.executeUpdate("ALTER TABLE economy_stall_profiles ADD COLUMN description TEXT NOT NULL DEFAULT ''");
+            } catch (SQLException ignored) {
+            }
+            try {
+                statement.executeUpdate("ALTER TABLE economy_stall_profiles ADD COLUMN emblem_material TEXT NOT NULL DEFAULT 'CHEST_MINECART'");
+            } catch (SQLException ignored) {
+            }
             statement.executeUpdate("""
                     CREATE TABLE IF NOT EXISTS economy_stall_listings (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -527,6 +617,8 @@ public class PermanentStallManager {
                         UUID.fromString(resultSet.getString("owner_uuid")),
                         resultSet.getString("owner_name"),
                         resultSet.getString("stall_name"),
+                        resultSet.getString("description"),
+                        resultSet.getString("emblem_material"),
                         resultSet.getString("category"),
                         resultSet.getLong("purchased_at"),
                         resultSet.getInt("listing_slots"),
@@ -577,18 +669,20 @@ public class PermanentStallManager {
     private void saveProfile(StallProfile profile) {
         String sql = """
                 INSERT OR REPLACE INTO economy_stall_profiles (
-                    owner_uuid, owner_name, stall_name, category, purchased_at, listing_slots, spotlight_level, prestige_level
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    owner_uuid, owner_name, stall_name, description, emblem_material, category, purchased_at, listing_slots, spotlight_level, prestige_level
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (PreparedStatement statement = this.plugin.getDataManager().getConnection().prepareStatement(sql)) {
             statement.setString(1, profile.getOwnerUuid().toString());
             statement.setString(2, profile.getOwnerName());
             statement.setString(3, profile.getStallName());
-            statement.setString(4, profile.getCategory());
-            statement.setLong(5, profile.getPurchasedAt());
-            statement.setInt(6, profile.getListingSlots());
-            statement.setInt(7, profile.getSpotlightLevel());
-            statement.setInt(8, profile.getPrestigeLevel());
+            statement.setString(4, profile.getDescription());
+            statement.setString(5, profile.getEmblemMaterial());
+            statement.setString(6, profile.getCategory());
+            statement.setLong(7, profile.getPurchasedAt());
+            statement.setInt(8, profile.getListingSlots());
+            statement.setInt(9, profile.getSpotlightLevel());
+            statement.setInt(10, profile.getPrestigeLevel());
             statement.executeUpdate();
         } catch (SQLException exception) {
             this.plugin.getLogger().warning("[Stalls] Save profile failed: " + exception.getMessage());
@@ -661,6 +755,57 @@ public class PermanentStallManager {
 
     private String describeItem(ItemStack item) {
         return item.getAmount() + "x " + item.getType().name();
+    }
+
+    private String niceName(Material material) {
+        String[] parts = material.name().toLowerCase(java.util.Locale.ROOT).split("_");
+        StringBuilder builder = new StringBuilder();
+        for (String part : parts) {
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        return builder.toString();
+    }
+
+    private List<Material> getEmblemChoices() {
+        return List.of(
+                Material.CHEST_MINECART,
+                Material.EMERALD,
+                Material.GOLD_INGOT,
+                Material.DIAMOND,
+                Material.COMPASS,
+                Material.BRUSH,
+                Material.GLOW_ITEM_FRAME,
+                Material.NETHER_STAR
+        );
+    }
+
+    private Material resolveEmblem(StallProfile profile) {
+        if (profile == null || profile.getEmblemMaterial() == null || profile.getEmblemMaterial().isBlank()) {
+            return Material.CHEST_MINECART;
+        }
+        Material material = Material.matchMaterial(profile.getEmblemMaterial());
+        return material == null ? Material.CHEST_MINECART : material;
+    }
+
+    private String safeDescription(StallProfile profile) {
+        if (profile == null || profile.getDescription() == null || profile.getDescription().isBlank()) {
+            return "No tagline set yet.";
+        }
+        return profile.getDescription();
+    }
+
+    private String sanitizeText(String text, int maxLength) {
+        if (text == null) {
+            return "";
+        }
+        String trimmed = text.trim();
+        if (trimmed.length() > maxLength) {
+            trimmed = trimmed.substring(0, maxLength).trim();
+        }
+        return trimmed;
     }
 
     private String nextCategoryFilter(String current) {

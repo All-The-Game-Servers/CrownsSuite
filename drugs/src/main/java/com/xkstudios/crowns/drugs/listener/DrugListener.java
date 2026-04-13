@@ -73,6 +73,7 @@ public class DrugListener implements Listener {
                 case "use" -> this.plugin.getMenuManager().openUseMenu(player);
                 case "sell" -> this.plugin.getMenuManager().openSellMenu(player);
                 case "upgrades" -> this.plugin.getMenuManager().openUpgrades(player);
+                case "recipes" -> this.plugin.getMenuManager().openRecipesMenu(player);
                 case "storage" -> this.plugin.getMenuManager().openStorageMenu(player);
             }
             return;

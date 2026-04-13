@@ -1,14 +1,14 @@
 # Crowns Suite Resource Pack
 
-This folder contains the source and build tooling for the `Crowns Suite 1.1.0` resource pack.
+This folder contains the source and build tooling for the `Crowns Suite 1.2.0` resource pack.
 
 ## What It Covers
 
-- `CrownsAPI` suite-shell icons
+- `CrownsAPI` suite-shell icons, suite profile, and resource-pack surfaces
 - `CrownsEconomy` hub and gambling icons
-- `CrownsAdmin` staff-tool icons
-- `CrownsEvents` Nether Week and Endfall item models
-- `CrownsDrugs` raw and packaged item families
+- `CrownsAdmin` staff-tool and dashboard icons
+- `CrownsEvents` Nether Week and Endfall item models and live-moment surfaces
+- `CrownsDrugs` raw, packaged, and recipe/equipment item families
 
 ## Build
 
@@ -20,9 +20,9 @@ python resource-pack\tools\generate_resource_pack.py
 
 That generates:
 
-- source pack at `resource-pack/CrownsSuite-ResourcePack-1.1.0`
-- distributable zip at `build/resource-pack/CrownsSuite-ResourcePack-1.1.0.zip`
-- SHA1 file at `build/resource-pack/CrownsSuite-ResourcePack-1.1.0.sha1`
+- source pack at `resource-pack/CrownsSuite-ResourcePack-1.2.0`
+- distributable zip at `build/resource-pack/CrownsSuite-ResourcePack-1.2.0.zip`
+- SHA1 file at `build/resource-pack/CrownsSuite-ResourcePack-1.2.0.sha1`
 - model/asset index at `resource-pack/ASSET_INDEX.md`
 
 ## Server Install
@@ -37,3 +37,4 @@ That generates:
 - Event items already use stable `lowlight/...` model ids in code.
 - Suite, economy, admin, and drugs menu icons now also target stable `lowlight/...` item-model ids.
 - The pack is designed for `32x` readability with a `Dark Arcane` visual direction.
+- `1.2.0` continues the premium polish pass with richer suite identity and broader GUI icon coverage.

@@ -92,7 +92,20 @@ public class EventListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onKill(EntityDeathEvent event) {
         Player killer = event.getEntity().getKiller();
-        if (killer == null || !this.plugin.getEventManager().isActiveEnvironment(event.getEntity().getWorld().getEnvironment())) {
+        if (!this.plugin.getEventManager().isActiveEnvironment(event.getEntity().getWorld().getEnvironment())) {
+            return;
+        }
+        if (event.getEntityType() == EntityType.ENDER_DRAGON && this.plugin.getEventManager().isEndEvent()) {
+            this.plugin.getEventManager().triggerLiveMoment(
+                    "dragon-fall",
+                    "Dragon Fall",
+                    killer == null
+                            ? "The dragon has fallen. The outer islands are now open for deeper Endfall expeditions."
+                            : killer.getName() + " led the first dragon takedown. The outer islands are now open for deeper Endfall expeditions.",
+                    20L * 60L * 1000L,
+                    killer == null ? "System" : killer.getName());
+        }
+        if (killer == null) {
             return;
         }
         boolean elite = event.getEntity().getPersistentDataContainer().has(this.eliteKey, PersistentDataType.BYTE);

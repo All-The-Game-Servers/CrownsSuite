@@ -2,6 +2,8 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
+`1.2.0` is the `Live Identity and Progression` release.
+
 It currently includes:
 
 - `CrownsAPI` for shared data, GUI shell, and provider wiring
@@ -14,13 +16,13 @@ It currently includes:
 
 The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads):
 
-- `CrownsAPI-1.1.0.jar`
-- `CrownsEconomy-1.1.0.jar`
-- `CrownsAdmin-1.1.0.jar`
-- `CrownsEvents-1.1.0.jar`
-- `CrownsDrugs-1.1.0.jar`
-- `CrownsSuite-ResourcePack-1.1.0.zip`
-- `CrownsSuite-ResourcePack-1.1.0.sha1`
+- `CrownsAPI-1.2.0.jar`
+- `CrownsEconomy-1.2.0.jar`
+- `CrownsAdmin-1.2.0.jar`
+- `CrownsEvents-1.2.0.jar`
+- `CrownsDrugs-1.2.0.jar`
+- `CrownsSuite-ResourcePack-1.2.0.zip`
+- `CrownsSuite-ResourcePack-1.2.0.sha1`
 
 ## Wiki
 
@@ -49,8 +51,16 @@ The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirg
 - [wiki](C:\Users\sirgi\OneDrive\Documents\New project\wiki)
 - [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack)
 
+## 1.2.0 Highlights
+
+- `CrownsAPI`: suite profile, resource-pack page, recent alert stream, richer section badges
+- `CrownsEconomy`: themed server trader, stall branding, player commissions, server contracts
+- `CrownsAdmin`: stronger operations dashboard, case-file style player summaries, cleaner vanish/staff-mode separation
+- `CrownsEvents`: richer selector/archive flow, Endfall live-moment support, admin-triggered ceremony moments
+- `CrownsDrugs`: stronger equipment and recipe progression with Crowns-backed buying and selling
+
 ## Notes
 
-- Versions are currently aligned to `1.1.0`.
+- Versions are currently aligned to `1.2.0`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

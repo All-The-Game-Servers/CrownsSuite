@@ -73,18 +73,26 @@ public class GUIListener implements Listener {
         Player player = event.getPlayer();
         String action = this.plugin.getAuctionManager().getAwaitingAction(player.getUniqueId());
         String stallAction = this.plugin.getStallManager().getAwaitingAction(player.getUniqueId());
-        if (action == null && stallAction == null) {
+        String contractAction = this.plugin.getContractManager().getAwaitingAction(player.getUniqueId());
+        if (action == null && stallAction == null && contractAction == null) {
             return;
         }
         event.setCancelled(true);
         if (action != null) {
             this.plugin.getAuctionManager().clearAwaiting(player.getUniqueId());
-        } else {
+        } else if (stallAction != null) {
             this.plugin.getStallManager().clearAwaiting(player.getUniqueId());
+        } else {
+            this.plugin.getContractManager().clearAwaiting(player.getUniqueId());
         }
         String msg = event.getMessage().trim();
         if (stallAction != null) {
             Bukkit.getScheduler().runTask(this.plugin, () -> this.plugin.getStallManager().handleChatInput(player, stallAction, msg));
+            return;
+        }
+        if (contractAction != null) {
+            Bukkit.getScheduler().runTask(this.plugin, () -> player.sendMessage(Component.text(
+                    this.plugin.getContractManager().handleChatInput(player, contractAction, msg), NamedTextColor.AQUA)));
             return;
         }
         if (msg.equalsIgnoreCase("cancel")) {
@@ -198,6 +206,10 @@ public class GUIListener implements Listener {
                     this.plugin.getStallManager().openHub(player);
                 } else if (parts[2].equals("demand")) {
                     this.plugin.getDemandManager().openDemandMenu(player);
+                } else if (parts[2].equals("commissions")) {
+                    this.plugin.getContractManager().openCommissionsMenu(player);
+                } else if (parts[2].equals("contracts")) {
+                    this.plugin.getContractManager().openContractsMenu(player);
                 } else if (parts[2].equals("trader")) {
                     this.plugin.getDemandManager().openTraderMenu(player);
                 } else if (parts[2].equals("gambling")) {
@@ -236,7 +248,9 @@ public class GUIListener implements Listener {
                 }
             }
             case "demand" -> {
-                if (parts[2].equals("sell")) {
+                if (parts[2].equals("open")) {
+                    this.plugin.getDemandManager().openDemandOrdersMenu(player);
+                } else if (parts[2].equals("sell")) {
                     player.closeInventory();
                     if (this.plugin.getDemandManager().fulfillOrder(player, Integer.parseInt(parts[3]))) {
                         player.sendMessage(Component.text("Demand order fulfilled.", NamedTextColor.GREEN));
@@ -253,6 +267,41 @@ public class GUIListener implements Listener {
                     } else {
                         player.sendMessage(Component.text("Could not buy that offer.", NamedTextColor.RED));
                     }
+                }
+            }
+            case "commissions" -> {
+                switch (parts[2]) {
+                    case "open" -> this.plugin.getContractManager().openCommissionsMenu(player);
+                    case "post" -> {
+                        player.closeInventory();
+                        player.sendMessage(Component.text("Hold the requested item and type <amount> <total payout>. Type 'cancel' to cancel.", NamedTextColor.AQUA));
+                        this.plugin.getContractManager().setAwaitingCommission(player.getUniqueId());
+                    }
+                    case "fill" -> {
+                        player.closeInventory();
+                        boolean filled = this.plugin.getContractManager().fulfillCommission(player, Integer.parseInt(parts[3]));
+                        player.sendMessage(Component.text(
+                                filled ? "Commission fulfilled." : "Could not fulfill that commission.",
+                                filled ? NamedTextColor.GREEN : NamedTextColor.RED));
+                    }
+                    case "cancel" -> {
+                        player.closeInventory();
+                        boolean cancelled = this.plugin.getContractManager().cancelCommission(player, Integer.parseInt(parts[3]));
+                        player.sendMessage(Component.text(
+                                cancelled ? "Commission cancelled and refunded." : "Could not cancel that commission.",
+                                cancelled ? NamedTextColor.YELLOW : NamedTextColor.RED));
+                    }
+                }
+            }
+            case "contracts" -> {
+                if (parts[2].equals("open")) {
+                    this.plugin.getContractManager().openContractsMenu(player);
+                } else if (parts[2].equals("complete")) {
+                    player.closeInventory();
+                    boolean success = this.plugin.getContractManager().fulfillContract(player, Integer.parseInt(parts[3]));
+                    player.sendMessage(Component.text(
+                            success ? "Server contract completed." : "You do not have the required materials.",
+                            success ? NamedTextColor.GREEN : NamedTextColor.RED));
                 }
             }
             case "gambling" -> {
@@ -336,6 +385,21 @@ public class GUIListener implements Listener {
                 player.closeInventory();
                 player.sendMessage(Component.text("Type the new price. Type 'cancel' to cancel.", NamedTextColor.AQUA));
                 this.plugin.getStallManager().setAwaitingEdit(player.getUniqueId(), Integer.parseInt(parts[3]));
+            }
+            case "rename" -> {
+                player.closeInventory();
+                player.sendMessage(Component.text("Type the new stall name. Type 'cancel' to cancel.", NamedTextColor.AQUA));
+                this.plugin.getStallManager().setAwaitingRename(player.getUniqueId());
+            }
+            case "describe" -> {
+                player.closeInventory();
+                player.sendMessage(Component.text("Type a short stall tagline. Type 'cancel' to cancel.", NamedTextColor.AQUA));
+                this.plugin.getStallManager().setAwaitingDescription(player.getUniqueId());
+            }
+            case "emblem" -> {
+                player.closeInventory();
+                this.plugin.getStallManager().cycleEmblem(player);
+                this.plugin.getStallManager().openMyStall(player);
             }
             case "remove" -> {
                 player.closeInventory();

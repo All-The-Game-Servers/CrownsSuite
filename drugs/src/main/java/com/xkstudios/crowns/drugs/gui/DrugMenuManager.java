@@ -40,16 +40,19 @@ public class DrugMenuManager {
         inventory.setItem(16, CrownsAPI.getSuiteGui().button(Material.EMERALD, "Sell", NamedTextColor.GOLD, List.of(
                 Component.text("Sell packaged stock directly for Crowns.", NamedTextColor.GRAY)
         ), "drugs:open:sell", "lowlight/drugs/sell"));
-        inventory.setItem(29, CrownsAPI.getSuiteGui().button(Material.ANVIL, "Upgrades", NamedTextColor.YELLOW, List.of(
+        inventory.setItem(29, CrownsAPI.getSuiteGui().button(Material.ANVIL, "Equipment", NamedTextColor.YELLOW, List.of(
                 Component.text("Lab tier: " + business.labTier(), NamedTextColor.GRAY),
                 Component.text("Storage tier: " + business.storageTier(), NamedTextColor.GRAY),
                 Component.text("Processor tier: " + business.processorTier(), NamedTextColor.GRAY)
         ), "drugs:open:upgrades", "lowlight/drugs/upgrades"));
-        inventory.setItem(31, CrownsAPI.getSuiteGui().button(Material.CHEST, "Storage", NamedTextColor.WHITE, List.of(
+        inventory.setItem(31, CrownsAPI.getSuiteGui().button(Material.BREWING_STAND, "Recipes", NamedTextColor.LIGHT_PURPLE, List.of(
+                Component.text("See unlock requirements and product effects.", NamedTextColor.GRAY)
+        ), "drugs:open:recipes", "lowlight/drugs/use"));
+        inventory.setItem(33, CrownsAPI.getSuiteGui().button(Material.CHEST, "Storage", NamedTextColor.WHITE, List.of(
                 Component.text("Raw stock: " + manager.rawStock(player), NamedTextColor.GRAY),
                 Component.text("Packaged stock: " + manager.packagedStock(player), NamedTextColor.GRAY)
         ), "drugs:open:storage", "lowlight/drugs/storage"));
-        inventory.setItem(33, CrownsAPI.getSuiteGui().info(Material.GOLD_INGOT, "Crowns Economy", NamedTextColor.GOLD, List.of(
+        inventory.setItem(40, CrownsAPI.getSuiteGui().info(Material.GOLD_INGOT, "Crowns Economy", NamedTextColor.GOLD, List.of(
                 Component.text("Drug sales pay straight into your Crowns balance.", NamedTextColor.GRAY),
                 Component.text("Restocks and upgrades also cost Crowns.", NamedTextColor.GRAY)
         ), "lowlight/drugs/crowns_economy"));
@@ -102,6 +105,34 @@ public class DrugMenuManager {
                 Component.text("Hold a packaged drug item and right-click.", NamedTextColor.GRAY),
                 Component.text("Only packaged stock can be consumed.", NamedTextColor.GRAY)
         ), "lowlight/drugs/use"));
+        inventory.setItem(49, CrownsAPI.getSuiteGui().button(Material.ARROW, "Back", NamedTextColor.GRAY, List.of(), "drugs:hub", "lowlight/suite/nav_back"));
+        CrownsAPI.getSuiteGui().fillBorder(inventory);
+        player.openInventory(inventory);
+    }
+
+    public void openRecipesMenu(Player player) {
+        DrugManager manager = this.plugin.getDrugManager();
+        DrugBusiness business = manager.getBusiness(player.getUniqueId());
+        Inventory inventory = CrownsMenuHolder.create("drugs-recipes", 54, Component.text("Drug Recipes", NamedTextColor.LIGHT_PURPLE));
+        inventory.setItem(10, CrownsAPI.getSuiteGui().info(DrugProduct.MARIJUANA.packagedMaterial(), "Marijuana", NamedTextColor.GREEN, List.of(
+                Component.text(manager.recipeSummary(DrugProduct.MARIJUANA), NamedTextColor.GRAY),
+                Component.text("Status: " + (manager.isUnlocked(business, DrugProduct.MARIJUANA) ? "Unlocked" : "Locked"), manager.isUnlocked(business, DrugProduct.MARIJUANA) ? NamedTextColor.GREEN : NamedTextColor.RED),
+                Component.text("Use: Night vision + short regeneration burst.", NamedTextColor.GRAY)
+        ), "lowlight/drugs/marijuana_packaged"));
+        inventory.setItem(13, CrownsAPI.getSuiteGui().info(DrugProduct.COCAINE.packagedMaterial(), "Cocaine", NamedTextColor.WHITE, List.of(
+                Component.text(manager.recipeSummary(DrugProduct.COCAINE), NamedTextColor.GRAY),
+                Component.text("Status: " + (manager.isUnlocked(business, DrugProduct.COCAINE) ? "Unlocked" : "Locked"), manager.isUnlocked(business, DrugProduct.COCAINE) ? NamedTextColor.GREEN : NamedTextColor.RED),
+                Component.text("Use: Speed + haste for fast runs and gathering.", NamedTextColor.GRAY)
+        ), "lowlight/drugs/cocaine_packaged"));
+        inventory.setItem(16, CrownsAPI.getSuiteGui().info(DrugProduct.METH.packagedMaterial(), "Meth", NamedTextColor.AQUA, List.of(
+                Component.text(manager.recipeSummary(DrugProduct.METH), NamedTextColor.GRAY),
+                Component.text("Status: " + (manager.isUnlocked(business, DrugProduct.METH) ? "Unlocked" : "Locked"), manager.isUnlocked(business, DrugProduct.METH) ? NamedTextColor.GREEN : NamedTextColor.RED),
+                Component.text("Use: High-risk speed spike with strength.", NamedTextColor.GRAY)
+        ), "lowlight/drugs/meth_packaged"));
+        inventory.setItem(31, CrownsAPI.getSuiteGui().info(Material.ANVIL, "Equipment Path", NamedTextColor.YELLOW, List.of(
+                Component.text(manager.equipmentSummary(player), NamedTextColor.GRAY),
+                Component.text("Upgrade your grow gear and processor to unlock stronger products.", NamedTextColor.GRAY)
+        ), "lowlight/drugs/upgrades"));
         inventory.setItem(49, CrownsAPI.getSuiteGui().button(Material.ARROW, "Back", NamedTextColor.GRAY, List.of(), "drugs:hub", "lowlight/suite/nav_back"));
         CrownsAPI.getSuiteGui().fillBorder(inventory);
         player.openInventory(inventory);
@@ -161,23 +192,29 @@ public class DrugMenuManager {
         return CrownsAPI.getSuiteGui().button(product.rawMaterial(), product.display(), NamedTextColor.RED, List.of(
                 Component.text("Seeds on hand: " + business.seeds(), NamedTextColor.GRAY),
                 Component.text("Storage used: " + manager.rawStock(player) + "/" + business.storageCap(), NamedTextColor.GRAY),
-                Component.text("Click to grow more.", NamedTextColor.GREEN)
+                Component.text(manager.recipeSummary(product), NamedTextColor.DARK_GRAY),
+                Component.text(manager.isUnlocked(business, product) ? "Click to grow more." : "Locked until the right equipment tiers.", manager.isUnlocked(business, product) ? NamedTextColor.GREEN : NamedTextColor.RED)
         ), action, "lowlight/drugs/" + product.key() + "_raw");
     }
 
     private org.bukkit.inventory.ItemStack processCard(DrugManager manager, Player player, DrugProduct product) {
+        DrugBusiness business = manager.getBusiness(player.getUniqueId());
         return CrownsAPI.getSuiteGui().button(product.packagedMaterial(), product.display(), NamedTextColor.AQUA, List.of(
                 Component.text("Raw in inventory: " + manager.countItems(player, product, "raw"), NamedTextColor.GRAY),
                 Component.text("Packaged in inventory: " + manager.countItems(player, product, "packaged"), NamedTextColor.GRAY),
-                Component.text("Click to process a batch.", NamedTextColor.GREEN)
+                Component.text(manager.recipeSummary(product), NamedTextColor.DARK_GRAY),
+                Component.text(manager.isUnlocked(business, product) ? "Click to process a batch." : "Locked until the right equipment tiers.", manager.isUnlocked(business, product) ? NamedTextColor.GREEN : NamedTextColor.RED)
         ), "drugs:process:" + product.key(), "lowlight/drugs/" + product.key() + "_packaged");
     }
 
     private org.bukkit.inventory.ItemStack sellCard(DrugManager manager, Player player, DrugProduct product) {
+        DrugBusiness business = manager.getBusiness(player.getUniqueId());
         return CrownsAPI.getSuiteGui().button(product.packagedMaterial(), product.display(), NamedTextColor.GOLD, List.of(
                 Component.text("Buyer wants: " + manager.currentOrderAmount(player.getUniqueId(), product), NamedTextColor.GRAY),
                 Component.text("Price each: " + manager.formatCrowns(manager.currentPrice(player.getUniqueId(), product)), NamedTextColor.YELLOW),
-                Component.text("Packaged in inventory: " + manager.countItems(player, product, "packaged"), NamedTextColor.GRAY)
+                Component.text("Packaged in inventory: " + manager.countItems(player, product, "packaged"), NamedTextColor.GRAY),
+                Component.text("Buyer mood: " + product.buyerMood(), NamedTextColor.DARK_GRAY),
+                Component.text(manager.isUnlocked(business, product) ? "Black-market route is open." : "Locked until this product is discovered.", manager.isUnlocked(business, product) ? NamedTextColor.GREEN : NamedTextColor.RED)
         ), "drugs:sell:" + product.key(), "lowlight/drugs/" + product.key() + "_packaged");
     }
 

@@ -2,6 +2,8 @@
 
 Crowns Suite is the Lowlight SMP management toolkit by XKStudios. It is split into focused plugins so the server can grow without one giant jar doing everything.
 
+`1.2.0` focuses on live identity, stronger progression loops, and cleaner suite cohesion.
+
 ## Plugins
 
 ### CrownsAPI
@@ -11,22 +13,26 @@ The shared backbone for the suite.
 - Shared database access
 - Shared GUI shell and section registration
 - Shared inbox, menu, and provider contracts
+- Manual resource-pack distribution and install info
+- Suite profile and recent alert surfaces
 
 ### CrownsEconomy
 The player trade and money loop.
 
 - Wallets and player payments
 - Auction House for timed bidding
-- Permanent Market Stalls with GUI upgrades
+- Permanent Market Stalls with branding and GUI upgrades
 - Jobs for reliable contract income
 - Server Demand Board for rotating buy orders
-- Server Trader for curated money sinks
+- Server Trader for themed curated money sinks
+- Player commissions and server contracts
 
 ### CrownsAdmin
 The staff and moderation toolkit.
 
 - Moderation actions and logs
 - Vanish, freeze, reports, and staff tools
+- Operations dashboard and case-file style player review
 - Entity tools and analytics
 
 ### CrownsEvents
@@ -35,12 +41,13 @@ The seasonal content and server event framework.
 - Event lifecycle management
 - Relics, milestones, and rewards
 - Opening-week style SMP content
+- Admin-triggered live moments for ceremonies and future server events
 
 ### CrownsDrugs
 The arcade-style criminal business plugin.
 
 - Solo cartel progression
-- Grow, process, use, and sell physical contraband items
+- Buy seeds and equipment, then grow, process, use, and sell physical contraband items
 - CrownsEconomy-backed payouts, costs, and upgrades
 - Black-market style business gameplay
 
@@ -83,6 +90,7 @@ Market Stalls are the long-term player storefront system.
 - Add fixed-price listings through the GUI
 - Upgrade how many listings you can carry
 - Upgrade spotlight level so your stall appears higher in browse order
+- Brand your stall with a name, emblem, and short description
 
 Stalls are meant to be the everyday market layer, while auctions handle premium bidding.
 
@@ -113,9 +121,16 @@ The Server Trader is a curated money sink.
 
 - Rotating utility items
 - Rotating prestige or decorative stock
+- Themed rotations like builder, traveler, utility, and prestige
 - Controlled prices so money leaves circulation without feeling wasted
 
 The trader is designed to make money worth spending, not just collecting.
+
+### Player Commissions and Server Contracts
+
+- Player commissions let players post buy orders for specific items from their own wallet.
+- Server contracts are larger curated deliveries with stronger payouts and limited slots.
+- Together they keep the market moving even when players are not actively auctioning items.
 
 ## Upgrade Notes
 

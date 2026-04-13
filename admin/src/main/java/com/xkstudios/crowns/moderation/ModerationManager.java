@@ -146,6 +146,47 @@ public class ModerationManager {
         return actions;
     }
 
+    public List<ModerationAction> getRecentActions(int limit) {
+        List<ModerationAction> actions = new ArrayList<>();
+        try (PreparedStatement statement = this.plugin.getDataManager().getConnection().prepareStatement(
+                "SELECT id, actor_name, target_name, action_type, reason, created_at, expires_at, active FROM moderation_actions ORDER BY created_at DESC LIMIT ?")) {
+            statement.setInt(1, limit);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    actions.add(new ModerationAction(
+                            resultSet.getLong("id"),
+                            resultSet.getString("actor_name"),
+                            resultSet.getString("target_name"),
+                            resultSet.getString("action_type"),
+                            resultSet.getString("reason"),
+                            resultSet.getLong("created_at"),
+                            resultSet.getLong("expires_at"),
+                            resultSet.getInt("active") == 1
+                    ));
+                }
+            }
+        } catch (Exception exception) {
+            this.plugin.getLogger().warning("[Moderation] Load recent actions failed: " + exception.getMessage());
+        }
+        return actions;
+    }
+
+    public int getActiveMuteCount() {
+        return this.activeMutes.size();
+    }
+
+    public int getFrozenCount() {
+        return this.activeFreezes.size();
+    }
+
+    public int getVanishedCount() {
+        return this.vanishedPlayers.size();
+    }
+
+    public int getPuppeteerCount() {
+        return this.puppeteerSessions.size();
+    }
+
     public boolean assignRole(Player actor, OfflinePlayer target, String roleKey) {
         StaffRole role = this.roles.get(roleKey.toLowerCase(Locale.ROOT));
         if (role == null || target.getUniqueId() == null) {
@@ -435,9 +476,6 @@ public class ModerationManager {
         this.stopPuppeteer(controller.getUniqueId(), "replaced");
         if (this.puppetedTargets.containsKey(target.getUniqueId())) {
             return false;
-        }
-        if (!this.staffModeStates.containsKey(controller.getUniqueId())) {
-            this.enableStaffMode(controller);
         }
         PuppeteerSession session = new PuppeteerSession(
                 controller.getUniqueId(),
@@ -826,6 +864,9 @@ public class ModerationManager {
         inventory.setItem(30, this.button(Material.NAME_TAG, "Roles", NamedTextColor.AQUA, List.of(
                 Component.text("Your role: " + this.describeRole(player.getUniqueId()), NamedTextColor.GRAY)
         ), "ce:mod:roleself", "lowlight/admin/roles"));
+        inventory.setItem(32, this.info(Material.PAPER, "Operations Snapshot",
+                "Reports: " + this.getOpenReports().size() + " | Mutes: " + this.getActiveMuteCount() + " | Freezes: " + this.getFrozenCount(),
+                "lowlight/admin/operations"));
         if (this.isPuppeteering(player.getUniqueId())) {
             PuppeteerSession session = this.puppeteerSessions.get(player.getUniqueId());
             inventory.setItem(34, this.button(Material.BARRIER, "Stop Puppet", NamedTextColor.RED, List.of(
@@ -834,6 +875,21 @@ public class ModerationManager {
         } else {
             inventory.setItem(34, this.info(Material.FEATHER, "Puppeteering", "No active puppet session.", "lowlight/admin/puppeteering"));
         }
+        inventory.setItem(37, this.info(Material.COMPASS, "Open Reports", this.getOpenReports().isEmpty()
+                ? "No open reports."
+                : this.getOpenReports().get(0).targetName() + " needs review.", "lowlight/admin/reports"));
+        inventory.setItem(39, this.info(Material.ENDER_EYE, "Vanished Staff",
+                this.getVanishedCount() == 0 ? "Nobody vanished right now." : this.getVanishedCount() + " staff hidden right now.",
+                "lowlight/admin/true_vanish"));
+        inventory.setItem(41, this.info(Material.ICE, "Frozen Players",
+                this.getFrozenCount() == 0 ? "Nobody frozen right now." : this.getFrozenCount() + " player(s) currently locked.",
+                "lowlight/admin/moderation"));
+        List<ModerationAction> recentActions = this.getRecentActions(1);
+        inventory.setItem(43, this.info(Material.WRITABLE_BOOK, "Recent Action",
+                recentActions.isEmpty()
+                        ? "No recent moderation action logged."
+                        : recentActions.get(0).actorName() + " -> " + recentActions.get(0).targetName() + " (" + recentActions.get(0).actionType() + ")",
+                "lowlight/admin/analytics"));
         inventory.setItem(49, this.button(Material.ARROW, "Back", NamedTextColor.GRAY, List.of(), "ce:mod:suite", "lowlight/suite/nav_back"));
         player.openInventory(inventory);
     }
@@ -920,6 +976,13 @@ public class ModerationManager {
         Inventory inventory = CrownsMenuHolder.create("mod-profile", 54, Component.text("Profile: " + safeName(target), NamedTextColor.GOLD));
         inventory.setItem(10, this.info(Material.PLAYER_HEAD, safeName(target), this.describeRole(target.getUniqueId())));
         List<ModerationAction> history = target.getUniqueId() == null ? List.of() : this.getHistory(target.getUniqueId(), 5);
+        long warnCount = history.stream().filter(action -> "warn".equalsIgnoreCase(action.actionType())).count();
+        long muteCount = history.stream().filter(action -> action.actionType().toLowerCase(Locale.ROOT).contains("mute")).count();
+        long banCount = history.stream().filter(action -> action.actionType().toLowerCase(Locale.ROOT).contains("ban")).count();
+        long noteCount = history.stream().filter(action -> "note".equalsIgnoreCase(action.actionType())).count();
+        inventory.setItem(12, this.info(Material.BOOK, "Case File", "Warns: " + warnCount + " | Notes: " + noteCount, "lowlight/admin/case_file"));
+        inventory.setItem(13, this.info(Material.CLOCK, "Punishments", "Mutes: " + muteCount + " | Bans: " + banCount, "lowlight/admin/analytics"));
+        inventory.setItem(14, this.info(Material.PAPER, "Recent History", history.isEmpty() ? "No moderation history yet." : history.get(0).actionType() + ": " + (history.get(0).reason() == null ? "No reason" : history.get(0).reason()), "lowlight/admin/reports"));
         int slot = 19;
         for (ModerationAction action : history) {
             if (slot > 23) {

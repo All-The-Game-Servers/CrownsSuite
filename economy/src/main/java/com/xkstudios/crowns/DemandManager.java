@@ -136,6 +136,10 @@ public class DemandManager {
         player.openInventory(inventory);
     }
 
+    public void openDemandOrdersMenu(Player player) {
+        this.openDemandMenu(player);
+    }
+
     public void openTraderMenu(Player player) {
         Inventory inventory = CrownsMenuHolder.create("ce-trader", 54, Component.text("The Server Trader", NamedTextColor.GOLD));
         List<TraderOffer> activeOffers = this.getOffers();
@@ -148,10 +152,12 @@ public class DemandManager {
             ItemMeta meta = display.getItemMeta();
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("Price: " + Currency.format(offer.getPrice()), NamedTextColor.YELLOW));
+            lore.add(Component.text("Theme: " + this.prettyKey(offer.getTheme()), NamedTextColor.GRAY));
+            lore.add(Component.text("Rarity: " + this.prettyKey(offer.getRarity()), this.rarityColor(offer.getRarity())));
             lore.add(Component.text(offer.isCosmetic() ? "Prestige stock." : "Utility stock.", NamedTextColor.GRAY));
             lore.add(Component.text("Click to purchase.", NamedTextColor.AQUA));
             lore.add(Component.text("ce:trader:buy:" + offer.getId(), NamedTextColor.DARK_GRAY));
-            meta.displayName(Component.text(offer.getDisplayName(), NamedTextColor.GOLD));
+            meta.displayName(Component.text(offer.getDisplayName(), this.rarityColor(offer.getRarity())));
             meta.lore(lore);
             display.setItemMeta(meta);
             inventory.setItem(slot, display);
@@ -208,9 +214,19 @@ public class DemandManager {
                         amount INTEGER NOT NULL,
                         price INTEGER NOT NULL,
                         cosmetic INTEGER NOT NULL DEFAULT 0,
+                        theme TEXT NOT NULL DEFAULT 'utility',
+                        rarity TEXT NOT NULL DEFAULT 'standard',
                         refresh_at INTEGER NOT NULL
                     )
                     """);
+            try {
+                statement.executeUpdate("ALTER TABLE economy_trader_offers ADD COLUMN theme TEXT NOT NULL DEFAULT 'utility'");
+            } catch (SQLException ignored) {
+            }
+            try {
+                statement.executeUpdate("ALTER TABLE economy_trader_offers ADD COLUMN rarity TEXT NOT NULL DEFAULT 'standard'");
+            } catch (SQLException ignored) {
+            }
         } catch (SQLException exception) {
             this.plugin.getLogger().warning("[Demand] Table setup failed: " + exception.getMessage());
         }
@@ -256,6 +272,8 @@ public class DemandManager {
                         resultSet.getString("display_name"),
                         resultSet.getLong("price"),
                         resultSet.getInt("cosmetic") == 1,
+                        resultSet.getString("theme"),
+                        resultSet.getString("rarity"),
                         resultSet.getLong("refresh_at")
                 );
                 if (!offer.isExpired()) {
@@ -325,9 +343,9 @@ public class DemandManager {
             List<OfferTemplate> pool = available.isEmpty() ? templates : available;
             OfferTemplate template = pool.get(this.random.nextInt(pool.size()));
             long refreshAt = System.currentTimeMillis() + Math.max(1, this.plugin.getConfig().getInt("server-trader.refresh-hours", 8)) * 3600000L;
-            int id = this.insertTraderOffer(template.material(), template.amount(), template.displayName(), template.price(), template.cosmetic(), refreshAt);
+            int id = this.insertTraderOffer(template.material(), template.amount(), template.displayName(), template.price(), template.cosmetic(), template.theme(), template.rarity(), refreshAt);
             if (id != -1) {
-                this.offers.put(id, new TraderOffer(id, new ItemStack(template.material(), template.amount()), template.displayName(), template.price(), template.cosmetic(), refreshAt));
+                this.offers.put(id, new TraderOffer(id, new ItemStack(template.material(), template.amount()), template.displayName(), template.price(), template.cosmetic(), template.theme(), template.rarity(), refreshAt));
                 usedMaterials.add(template.material());
             } else {
                 break;
@@ -356,15 +374,17 @@ public class DemandManager {
         return -1;
     }
 
-    private int insertTraderOffer(Material material, int amount, String displayName, long price, boolean cosmetic, long refreshAt) {
-        String sql = "INSERT INTO economy_trader_offers (material, display_name, amount, price, cosmetic, refresh_at) VALUES (?, ?, ?, ?, ?, ?)";
+    private int insertTraderOffer(Material material, int amount, String displayName, long price, boolean cosmetic, String theme, String rarity, long refreshAt) {
+        String sql = "INSERT INTO economy_trader_offers (material, display_name, amount, price, cosmetic, theme, rarity, refresh_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = this.plugin.getDataManager().getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, material.name());
             statement.setString(2, displayName);
             statement.setInt(3, amount);
             statement.setLong(4, price);
             statement.setInt(5, cosmetic ? 1 : 0);
-            statement.setLong(6, refreshAt);
+            statement.setString(6, theme);
+            statement.setString(7, rarity);
+            statement.setLong(8, refreshAt);
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -450,25 +470,29 @@ public class DemandManager {
                 Object amountValue = map.containsKey("amount") ? map.get("amount") : 1;
                 Object priceValue = map.containsKey("price") ? map.get("price") : 250L;
                 Object cosmeticValue = map.containsKey("cosmetic") ? map.get("cosmetic") : false;
+                Object themeValue = map.containsKey("theme") ? map.get("theme") : "utility";
+                Object rarityValue = map.containsKey("rarity") ? map.get("rarity") : "standard";
                 String displayName = String.valueOf(displayValue);
                 int amount = ((Number) amountValue).intValue();
                 long price = ((Number) priceValue).longValue();
                 boolean cosmetic = Boolean.parseBoolean(String.valueOf(cosmeticValue));
-                templates.add(new OfferTemplate(material, Math.max(1, amount), displayName, Math.max(1L, price), cosmetic));
+                String theme = String.valueOf(themeValue);
+                String rarity = String.valueOf(rarityValue);
+                templates.add(new OfferTemplate(material, Math.max(1, amount), displayName, Math.max(1L, price), cosmetic, theme, rarity));
             }
         }
         if (!templates.isEmpty()) {
             return templates;
         }
-        templates.add(new OfferTemplate(Material.GOLDEN_CARROT, 16, "Trail Snack Bundle", 240L, false));
-        templates.add(new OfferTemplate(Material.ENDER_PEARL, 4, "Pearl Pouch", 320L, false));
-        templates.add(new OfferTemplate(Material.EXPERIENCE_BOTTLE, 8, "Scholar's Vials", 280L, false));
-        templates.add(new OfferTemplate(Material.FIREWORK_ROCKET, 12, "Travel Rocket Pack", 340L, false));
-        templates.add(new OfferTemplate(Material.SHULKER_BOX, 1, "Portable Storage Crate", 780L, false));
-        templates.add(new OfferTemplate(Material.ARMOR_STAND, 2, "Display Stand Set", 360L, true));
-        templates.add(new OfferTemplate(Material.ITEM_FRAME, 6, "Gallery Frame Pack", 260L, true));
-        templates.add(new OfferTemplate(Material.CYAN_BANNER, 1, "Crowns Market Banner", 450L, true));
-        templates.add(new OfferTemplate(Material.GLOW_INK_SAC, 6, "Signmaker Bundle", 300L, false));
+        templates.add(new OfferTemplate(Material.GOLDEN_CARROT, 16, "Builder's Snack Bundle", 240L, false, "builder", "common"));
+        templates.add(new OfferTemplate(Material.SCAFFOLDING, 24, "Scaffold Crate", 360L, false, "builder", "standard"));
+        templates.add(new OfferTemplate(Material.ENDER_PEARL, 4, "Traveler Pearl Pouch", 320L, false, "traveler", "standard"));
+        templates.add(new OfferTemplate(Material.FIREWORK_ROCKET, 18, "Skytrail Rocket Pack", 340L, false, "traveler", "standard"));
+        templates.add(new OfferTemplate(Material.EXPERIENCE_BOTTLE, 8, "Scholar's Vials", 280L, false, "utility", "common"));
+        templates.add(new OfferTemplate(Material.SHULKER_BOX, 1, "Portable Storage Crate", 780L, false, "utility", "rare"));
+        templates.add(new OfferTemplate(Material.GLOW_ITEM_FRAME, 4, "Showcase Frame Set", 300L, true, "prestige", "rare"));
+        templates.add(new OfferTemplate(Material.CYAN_BANNER, 1, "Crowns Showcase Banner", 450L, true, "prestige", "rare"));
+        templates.add(new OfferTemplate(Material.ARMOR_STAND, 2, "Display Stand Pair", 360L, true, "prestige", "standard"));
         return templates;
     }
 
@@ -547,6 +571,33 @@ public class DemandManager {
     private record OrderTemplate(Material material, String displayName, int amount, long payout, int claims) {
     }
 
-    private record OfferTemplate(Material material, int amount, String displayName, long price, boolean cosmetic) {
+    private NamedTextColor rarityColor(String rarity) {
+        return switch (rarity == null ? "" : rarity.toLowerCase(java.util.Locale.ROOT)) {
+            case "rare" -> NamedTextColor.LIGHT_PURPLE;
+            case "epic" -> NamedTextColor.DARK_PURPLE;
+            case "common" -> NamedTextColor.WHITE;
+            default -> NamedTextColor.GOLD;
+        };
+    }
+
+    private String prettyKey(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "General";
+        }
+        String[] parts = raw.toLowerCase(java.util.Locale.ROOT).replace('_', ' ').replace('-', ' ').split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        return builder.toString();
+    }
+
+    private record OfferTemplate(Material material, int amount, String displayName, long price, boolean cosmetic, String theme, String rarity) {
     }
 }

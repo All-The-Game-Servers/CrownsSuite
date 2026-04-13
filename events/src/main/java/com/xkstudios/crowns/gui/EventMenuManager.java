@@ -70,6 +70,7 @@ public class EventMenuManager {
         )));
         inventory.setItem(32, CrownsAPI.getSuiteGui().info(Material.DRAGON_HEAD, "Top Collectors", NamedTextColor.WHITE, this.collectorLore(manager.getTopCollectors(eventKey, 3))));
         inventory.setItem(34, CrownsAPI.getSuiteGui().info(Material.NETHER_STAR, "Milestones", NamedTextColor.WHITE, this.milestoneLore(manager.getMilestones(eventKey))));
+        inventory.setItem(40, CrownsAPI.getSuiteGui().info(Material.BELL, "Live Moments", NamedTextColor.YELLOW, this.liveMomentLore(manager)));
         inventory.setItem(49, CrownsAPI.getSuiteGui().button(Material.ARROW, "Back", NamedTextColor.GRAY, List.of(
                 Component.text("Return to event selection.", NamedTextColor.GRAY)
         ), "events:selector", "lowlight/suite/nav_back"));
@@ -104,7 +105,7 @@ public class EventMenuManager {
         EventManager manager = this.plugin.getEventManager();
         Inventory inventory = CrownsMenuHolder.create("events-guide-" + eventKey, 54, Component.text(manager.getGuideTitle(eventKey), NamedTextColor.GREEN));
         inventory.setItem(11, CrownsAPI.getSuiteGui().info(Material.BOOK, "Quick Start", NamedTextColor.AQUA, List.of(
-                Component.text(manager.isEndEvent(eventKey) ? "1. Explore the End and claim survey caches." : "1. Hunt relics across the Nether.", NamedTextColor.GRAY),
+                Component.text(manager.isEndEvent(eventKey) ? "1. Join the opening dragon ceremony and push into the outer islands." : "1. Hunt relics across the Nether.", NamedTextColor.GRAY),
                 Component.text("2. Turn relics in if this event is live.", NamedTextColor.GRAY),
                 Component.text("3. Claim rewards once you unlock them.", NamedTextColor.GRAY)
         ), "lowlight/suite/event_guide"));
@@ -115,6 +116,21 @@ public class EventMenuManager {
         inventory.setItem(15, CrownsAPI.getSuiteGui().info(Material.COMPASS, "Progress", NamedTextColor.LIGHT_PURPLE, List.of(
                 Component.text("Your turn-ins push both personal rewards and server milestones.", NamedTextColor.GRAY)
         )));
+        inventory.setItem(20, CrownsAPI.getSuiteGui().info(Material.DRAGON_HEAD, "Dragon Ceremony", NamedTextColor.LIGHT_PURPLE, List.of(
+                Component.text(manager.isEndEvent(eventKey)
+                        ? "Endfall begins with a dragon takedown and a push toward the outer islands."
+                        : "Nether Week opens with the realm-wide rush into the Nether.", NamedTextColor.GRAY)
+        ), "lowlight/suite/event_live"));
+        inventory.setItem(24, CrownsAPI.getSuiteGui().info(Material.ENDER_CHEST, "Exploration Loop", NamedTextColor.YELLOW, List.of(
+                Component.text(manager.isEndEvent(eventKey)
+                        ? "Focus on survey caches, End city routes, and landmark recovery for the best long-tail progress."
+                        : "Focus on fortress, bastion, and portal routes for the best cache progress.", NamedTextColor.GRAY)
+        ), "lowlight/suite/event_guide"));
+        inventory.setItem(33, CrownsAPI.getSuiteGui().info(Material.IRON_SWORD, "Combat Pressure", NamedTextColor.RED, List.of(
+                Component.text(manager.isEndEvent(eventKey)
+                        ? "Voidbound elites push the combat layer while exploration stays the main loop."
+                        : "Blazes and Nether threats keep the combat pressure up.", NamedTextColor.GRAY)
+        ), "lowlight/suite/event_guide"));
         inventory.setItem(29, CrownsAPI.getSuiteGui().info(Material.EMERALD, "Rewards", NamedTextColor.GREEN, List.of(
                 Component.text("Open the rewards page to see what is ready to claim.", NamedTextColor.GRAY)
         )));
@@ -178,5 +194,16 @@ public class EventMenuManager {
                 .findFirst()
                 .map(discovery -> "Earliest highlight: " + discovery.label() + " by " + discovery.playerName())
                 .orElse("First-discovery records appear here once players make progress.");
+    }
+
+    private List<Component> liveMomentLore(EventManager manager) {
+        List<Component> lore = new ArrayList<>();
+        for (String summary : manager.getLiveMomentSummaries()) {
+            lore.add(Component.text(summary, NamedTextColor.GRAY));
+        }
+        if (lore.isEmpty()) {
+            lore.add(Component.text("No admin-run live moments are active right now.", NamedTextColor.GRAY));
+        }
+        return lore;
     }
 }

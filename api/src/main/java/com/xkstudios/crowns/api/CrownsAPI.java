@@ -2,10 +2,13 @@ package com.xkstudios.crowns.api;
 
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.gui.SuiteGuiManager;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.entity.Player;
 
 public final class CrownsAPI {
@@ -16,7 +19,10 @@ public final class CrownsAPI {
     private static EventsProvider eventsProvider;
     private static DataManager dataManager;
     private static SuiteGuiManager suiteGuiManager;
+    private static ResourcePackService resourcePackService;
     private static final Map<String, SuiteSection> sections = new LinkedHashMap<>();
+    private static final List<SuiteAlert> alerts = new CopyOnWriteArrayList<>();
+    private static final List<SuiteAlertListener> alertListeners = new CopyOnWriteArrayList<>();
 
     private CrownsAPI() {
     }
@@ -77,6 +83,14 @@ public final class CrownsAPI {
         return suiteGuiManager;
     }
 
+    public static void setResourcePackService(ResourcePackService service) {
+        resourcePackService = service;
+    }
+
+    public static ResourcePackService getResourcePackService() {
+        return resourcePackService;
+    }
+
     public static void registerSection(SuiteSection section) {
         if (section != null) {
             sections.put(section.key(), section);
@@ -97,6 +111,39 @@ public final class CrownsAPI {
 
     public static void clearSections() {
         sections.clear();
+    }
+
+    public static void registerAlertListener(SuiteAlertListener listener) {
+        if (listener != null && !alertListeners.contains(listener)) {
+            alertListeners.add(listener);
+        }
+    }
+
+    public static void unregisterAlertListener(SuiteAlertListener listener) {
+        alertListeners.remove(listener);
+    }
+
+    public static List<SuiteAlert> getRecentAlerts(int limit) {
+        int safeLimit = Math.max(0, limit);
+        if (safeLimit == 0 || alerts.isEmpty()) {
+            return List.of();
+        }
+        int start = Math.max(0, alerts.size() - safeLimit);
+        return new ArrayList<>(alerts.subList(start, alerts.size()));
+    }
+
+    public static void publishAlert(String source, String title, String body, UUID targetPlayer, boolean inboxBacked) {
+        SuiteAlert alert = new SuiteAlert(source, title, body, targetPlayer, System.currentTimeMillis());
+        alerts.add(alert);
+        while (alerts.size() > 50) {
+            alerts.remove(0);
+        }
+        for (SuiteAlertListener listener : alertListeners) {
+            listener.onAlert(alert);
+        }
+        if (inboxBacked && inboxProvider != null && targetPlayer != null) {
+            inboxProvider.sendNotification(targetPlayer, title, body == null ? "" : body);
+        }
     }
 
     public static void openSuiteHome(Player player) {

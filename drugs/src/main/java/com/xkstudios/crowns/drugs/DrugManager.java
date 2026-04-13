@@ -116,6 +116,9 @@ public class DrugManager {
 
     public String grow(Player player, DrugProduct product) {
         DrugBusiness business = this.getBusiness(player.getUniqueId());
+        if (!this.isUnlocked(business, product)) {
+            return this.lockedMessage(product);
+        }
         if (business.seeds() <= 0) {
             return "You need more seeds before you can grow " + product.display() + ".";
         }
@@ -131,6 +134,9 @@ public class DrugManager {
 
     public String process(Player player, DrugProduct product) {
         DrugBusiness business = this.getBusiness(player.getUniqueId());
+        if (!this.isUnlocked(business, product)) {
+            return this.lockedMessage(product);
+        }
         if (business.supplies() <= 0) {
             return "You need more supplies before you can process stock.";
         }
@@ -163,6 +169,10 @@ public class DrugManager {
         EconomyProvider economy = CrownsAPI.getEconomy();
         if (economy == null) {
             return "CrownsEconomy is required for buying, selling, and upgrades.";
+        }
+        DrugBusiness business = this.getBusiness(player.getUniqueId());
+        if (!this.isUnlocked(business, product)) {
+            return this.lockedMessage(product);
         }
         int packaged = this.countItems(player, product, "packaged");
         if (packaged <= 0) {
@@ -226,6 +236,22 @@ public class DrugManager {
             case "processor" -> this.upgradeProcessor(player, business);
             default -> "Unknown upgrade.";
         };
+    }
+
+    public boolean isUnlocked(DrugBusiness business, DrugProduct product) {
+        return business.labTier() >= product.requiredLabTier()
+                && business.processorTier() >= product.requiredProcessorTier();
+    }
+
+    public String lockedMessage(DrugProduct product) {
+        return product.display() + " requires grow tier " + product.requiredLabTier()
+                + " and processor tier " + product.requiredProcessorTier() + ".";
+    }
+
+    public String recipeSummary(DrugProduct product) {
+        return "Grow tier " + product.requiredLabTier()
+                + " + processor tier " + product.requiredProcessorTier()
+                + " unlocks " + product.display() + ".";
     }
 
     private String upgradeLab(Player player, DrugBusiness business) {
@@ -311,6 +337,7 @@ public class DrugManager {
         if ("packaged".equalsIgnoreCase(form)) {
             lore.add(Component.text("Right-click to use.", NamedTextColor.AQUA));
             lore.add(Component.text("Base sell value: " + Currency.format(product.baseSellPrice()), NamedTextColor.YELLOW));
+            lore.add(Component.text("Buyer mood: " + this.prettyKey(product.buyerMood()), NamedTextColor.GRAY));
         } else {
             lore.add(Component.text("Process this into a usable package.", NamedTextColor.GRAY));
         }
@@ -350,6 +377,13 @@ public class DrugManager {
         }
         item.setAmount(item.getAmount() - 1);
         return "You used " + product.display() + " and felt it kick in.";
+    }
+
+    public String equipmentSummary(Player player) {
+        DrugBusiness business = this.getBusiness(player.getUniqueId());
+        return "Grow tier " + business.labTier()
+                + ", processor tier " + business.processorTier()
+                + ", storage tier " + business.storageTier() + ".";
     }
 
     public int countItems(Player player, DrugProduct product, String form) {
@@ -413,5 +447,20 @@ public class DrugManager {
     private boolean withdrawCrowns(Player player, long amount) {
         EconomyProvider economy = CrownsAPI.getEconomy();
         return economy != null && economy.withdraw(player.getUniqueId(), amount);
+    }
+
+    private String prettyKey(String raw) {
+        String[] parts = raw.toLowerCase().replace('-', ' ').replace('_', ' ').split(" ");
+        StringBuilder builder = new StringBuilder();
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        return builder.toString();
     }
 }

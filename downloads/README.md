@@ -4,16 +4,16 @@ This folder mirrors the current public artifacts for the suite so a GitHub repos
 
 ## Plugin JARs
 
-- `CrownsAPI-1.1.0.jar`
-- `CrownsEconomy-1.1.0.jar`
-- `CrownsAdmin-1.1.0.jar`
-- `CrownsEvents-1.1.0.jar`
-- `CrownsDrugs-1.1.0.jar`
+- `CrownsAPI-1.2.0.jar`
+- `CrownsEconomy-1.2.0.jar`
+- `CrownsAdmin-1.2.0.jar`
+- `CrownsEvents-1.2.0.jar`
+- `CrownsDrugs-1.2.0.jar`
 
 ## Resource Pack
 
-- `CrownsSuite-ResourcePack-1.1.0.zip`
-- `CrownsSuite-ResourcePack-1.1.0.sha1`
+- `CrownsSuite-ResourcePack-1.2.0.zip`
+- `CrownsSuite-ResourcePack-1.2.0.sha1`
 - `CHECKSUMS.txt`
 
 ## Recommended Repo Publishing Layout
