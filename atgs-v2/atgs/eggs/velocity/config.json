@@ -1,0 +1,37 @@
+{
+  "id": "velocity",
+  "name": "Velocity Proxy",
+  "category": "Proxies",
+  "description": "High-performance Minecraft proxy. Connect multiple backend servers into one network.",
+  "icon": "🌐",
+  "image": "atgs-runner:latest",
+
+  "variants": [
+    {
+      "id": "default",
+      "name": "Velocity",
+      "versionSource": {
+        "url": "https://api.papermc.io/v2/projects/velocity",
+        "type": "json",
+        "parser": "paper"
+      }
+    }
+  ],
+
+  "ports": {
+    "primary": { "port": 25577, "protocol": "tcp", "label": "Proxy" }
+  },
+
+  "environment": {},
+
+  "rcon": null,
+
+  "configTemplate": {
+    "filename": "velocity.toml",
+    "content": "# Velocity Configuration\nconfig-version = \"2.7\"\nbind = \"0.0.0.0:{{PORT}}\"\nmotd = \"{{NAME}}\"\nshow-max-players = 100\nonline-mode = true\nforce-key-authentication = true\nplayer-info-forwarding-mode = \"modern\"\n\n[servers]\n# Backend servers are managed by ATGS Network Manager\ntry = []\n\n[forced-hosts]\n\n[advanced]\ncompression-threshold = 256\ncompression-level = -1\nlogin-ratelimit = 3000\nconnection-timeout = 5000\nread-timeout = 30000\nhaproxy-protocol = false\ntcp-fast-open = false\nbungee-plugin-message-channel = true\nshow-ping-requests = false\nfailover-on-unexpected-server-disconnect = true\nannounce-proxy-commands = true\nlog-command-executions = false\nlog-player-connections = true\naccepts-transfers = false\n\n[query]\nenabled = false\nport = {{PORT}}\n"
+  },
+
+  "detection": {
+    "readyPattern": "Done \\("
+  }
+}

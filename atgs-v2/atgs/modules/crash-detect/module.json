@@ -1,0 +1,14 @@
+{
+  "id": "crash-detect",
+  "name": "Crash Detection",
+  "description": "Detects server crashes, parses crash reports, prevents boot loops, and provides human-readable diagnostics.",
+  "version": "1.0.0",
+  "scope": "instance",
+  "sidecar": false,
+  "defaultEnabled": true,
+  "config": {
+    "bootLoopThreshold": { "type": "number", "default": 3, "label": "Restarts before boot-loop stop" },
+    "bootLoopWindow": { "type": "number", "default": 5, "label": "Window for boot-loop detection (minutes)" },
+    "autoStopOnBootLoop": { "type": "boolean", "default": true, "label": "Auto-stop on boot loop" }
+  }
+}

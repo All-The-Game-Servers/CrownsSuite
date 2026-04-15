@@ -48,6 +48,11 @@ public class CrownsAPIPlugin extends JavaPlugin {
         });
         CrownsAPI.setInboxProvider(this.inboxManager);
         Bukkit.getPluginManager().registerEvents(new SuiteMenuListener(), this);
+        CapiCommand command = new CapiCommand(this);
+        if (this.getCommand("capi") != null) {
+            this.getCommand("capi").setExecutor(command);
+            this.getCommand("capi").setTabCompleter(command);
+        }
     }
 
     @Override
@@ -55,6 +60,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setEconomyProvider(null);
         CrownsAPI.setEconomyLedgerProvider(null);
         CrownsAPI.setEventsProvider(null);
+        CrownsAPI.setMmoProvider(null);
         CrownsAPI.setInboxProvider(null);
         CrownsAPI.setPlayerDataProvider(null);
         CrownsAPI.setDataManager(null);

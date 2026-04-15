@@ -1,0 +1,101 @@
+{
+  "id": "minecraft-java",
+  "name": "Minecraft: Java Edition",
+  "category": "Game Servers",
+  "description": "Minecraft Java server with Purpur-first performance profiles, Paper compatibility, and optional modded variants.",
+  "icon": "🟩",
+  "image": "atgs-runner:latest",
+
+  "variants": [
+    {
+      "id": "purpur",
+      "name": "Purpur",
+      "versionSource": {
+        "url": "https://api.purpurmc.org/v2/purpur",
+        "type": "json",
+        "parser": "paper"
+      },
+      "addons": { "directory": "plugins", "sources": ["modrinth:paper", "modrinth:bukkit"] }
+    },
+    {
+      "id": "vanilla",
+      "name": "Vanilla",
+      "versionSource": {
+        "url": "https://launchermeta.mojang.com/mc/game/version_manifest.json",
+        "type": "json",
+        "parser": "mojang"
+      }
+    },
+    {
+      "id": "paper",
+      "name": "Paper",
+      "versionSource": {
+        "url": "https://api.papermc.io/v2/projects/paper",
+        "type": "json",
+        "parser": "paper"
+      },
+      "addons": { "directory": "plugins", "sources": ["modrinth:paper", "modrinth:bukkit"] }
+    },
+    {
+      "id": "fabric",
+      "name": "Fabric",
+      "versionSource": {
+        "url": "https://meta.fabricmc.net/v2/versions/game",
+        "type": "json",
+        "parser": "fabric"
+      },
+      "addons": { "directory": "mods", "sources": ["modrinth:fabric"] }
+    },
+    {
+      "id": "forge",
+      "name": "Forge",
+      "versionSource": {
+        "url": "https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json",
+        "type": "json",
+        "parser": "forge"
+      },
+      "addons": { "directory": "mods", "sources": ["modrinth:forge"] }
+    }
+  ],
+
+  "ports": {
+    "primary": { "port": 25565, "protocol": "tcp", "label": "Game" },
+    "optional": [
+      { "id": "bedrock", "port": 19132, "protocol": "udp", "label": "Bedrock (Geyser)" },
+      { "id": "voicechat", "port": 24454, "protocol": "udp", "label": "Voice Chat" }
+    ]
+  },
+
+  "environment": {
+    "EULA": { "default": "true", "description": "Accept the Minecraft EULA", "required": true }
+  },
+
+  "rcon": {
+    "enabled": true,
+    "portOffset": 10000,
+    "commands": {
+      "list": "list",
+      "tps": "tps",
+      "kick": "kick {{player}} {{reason}}",
+      "ban": "ban {{player}} {{reason}}",
+      "pardon": "pardon {{player}}",
+      "whitelist_add": "whitelist add {{player}}",
+      "whitelist_remove": "whitelist remove {{player}}",
+      "whitelist_list": "whitelist list",
+      "whitelist_on": "whitelist on",
+      "whitelist_off": "whitelist off",
+      "stop": "stop",
+      "say": "say {{message}}"
+    }
+  },
+
+  "configTemplate": {
+    "filename": "server.properties",
+    "content": "server-name={{NAME}}\nserver-port={{PORT}}\nenable-rcon=true\nrcon.port={{RCON_PORT}}\nrcon.password={{RCON_PASSWORD}}\nmax-players=50\nonline-mode=true\ndifficulty=normal\ngamemode=survival\nspawn-protection=0\nview-distance=8\nsimulation-distance=6\nmotd={{NAME}}\n"
+  },
+
+  "detection": {
+    "readyPattern": "Done \\(",
+    "crashPattern": "FAILED TO BIND|Failed to start"
+  }
+}

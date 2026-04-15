@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ATGS Worldwide</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#080a12;--s1:#0d1020;--card:#141828;--input:#1a1f34;--hover:#1f2540;--bdr:#242a48;--glow:#303868;--txt:#949cc0;--dim:#3e4568;--br:#e0e4f0;--a1:#00c8ff;--a2:#7860ff;--gr:#30d898;--rd:#f06060;--am:#f0b020;--r:10px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);overflow:hidden;height:100dvh}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+input,textarea,select{font-family:inherit;background:var(--input);border:1px solid var(--bdr);border-radius:var(--r);color:var(--br);padding:11px 14px;font-size:15px;outline:none;width:100%;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--a1)}input::placeholder{color:var(--dim)}select{appearance:none}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
+.lw{display:flex;align-items:center;justify-content:center;height:100dvh;background:radial-gradient(ellipse at 30% 20%,#101840,var(--bg) 70%);padding:20px}
+.lb{background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:44px 36px;width:100%;max-width:400px;text-align:center}
+.lb h1{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--a1);letter-spacing:.08em;margin-bottom:2px}
+.lb .sub{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:3px;margin-bottom:32px}
+.lb input{margin-bottom:10px}
+.btn{padding:9px 18px;border:1px solid var(--bdr);border-radius:var(--r);font-size:13px;font-weight:700;background:var(--card);color:var(--txt);transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--glow);color:var(--br)}.btn:active{transform:scale(.97)}
+.bp{background:linear-gradient(135deg,var(--a1),var(--a2));border:none;color:#fff;padding:11px 22px}.bp:hover{opacity:.88}
+.bd{color:var(--rd);border-color:rgba(240,96,96,.2)}.bg{color:var(--gr);border-color:rgba(48,216,152,.2)}
+.ba{color:var(--am);border-color:rgba(240,176,32,.2)}.bs{padding:6px 12px;font-size:12px}
+.shell{display:flex;height:100dvh}
+.side{width:260px;min-width:260px;background:var(--s1);border-right:1px solid var(--bdr);display:flex;flex-direction:column;z-index:100}
+.side .brand{padding:22px 20px;border-bottom:1px solid var(--bdr)}
+.side .brand h1{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--a1);letter-spacing:.06em}
+.side .brand span{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:2.5px}
+.nsec{padding:20px 16px 6px;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--dim);font-weight:700}
+.side .navs{flex:1;overflow-y:auto;padding:0 10px}
+.nb{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--r);color:var(--dim);font-size:14px;font-weight:600;width:100%;text-align:left;margin-bottom:2px;transition:all .12s;border:1px solid transparent}
+.nb:hover{background:var(--hover);color:var(--txt)}.nb.on{background:rgba(0,200,255,.06);color:var(--a1);border-color:rgba(0,200,255,.12)}
+.ii{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:var(--r);cursor:pointer;margin-bottom:2px;font-size:14px;color:var(--txt);transition:all .12s}
+.ii:hover{background:var(--hover)}.ii.on{background:var(--hover);color:var(--a1)}
+.dt{width:7px;height:7px;border-radius:50%;flex-shrink:0}.dt.run{background:var(--gr);box-shadow:0 0 8px var(--gr)}.dt.off{background:var(--dim)}.dt.err{background:var(--rd);box-shadow:0 0 8px var(--rd)}
+.side .bot{padding:14px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--dim)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.ph{padding:18px 28px;border-bottom:1px solid var(--bdr);background:var(--s1);flex-shrink:0}
+.ph h2{font-size:18px;font-weight:700;color:var(--br)}.ph p{font-size:12px;color:var(--dim);margin-top:3px}
+.pb{flex:1;overflow-y:auto;padding:24px 28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px}
+.card .l{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:6px;font-weight:700}
+.card .v{font-size:22px;font-weight:800;color:var(--br)}.card .v.g{color:var(--gr)}.card .v.r{color:var(--rd)}.card .v.a{color:var(--am)}.card .v.c{color:var(--a1)}
+.sec{margin-bottom:28px}.sec-t{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+.sec-g{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.box{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:20px;margin-bottom:16px}
+.box h3{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:16px;font-weight:700}
+.fr{display:flex;gap:10px;margin-bottom:12px;align-items:center}.fr label{font-size:13px;color:var(--dim);min-width:70px;flex-shrink:0}.fr input{width:auto;flex:1}
+.result{font-size:12px;color:var(--dim);margin-top:10px;min-height:16px;font-family:'JetBrains Mono',monospace;word-break:break-all}
+.cw{display:flex;flex-direction:column;flex:1;min-height:0}
+#co{flex:1;overflow-y:auto;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r)}
+.ll{white-space:pre-wrap;word-break:break-all}.lw{color:var(--am)}.le{color:var(--rd)}.lj{color:var(--gr)}.lc{color:var(--a1)}
+.cmdb{display:flex;gap:10px;padding-top:12px;flex-shrink:0}.cmdb input{font-family:'JetBrains Mono',monospace;font-size:13px}
+.fe{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .1s;min-height:44px}
+.fe:hover{background:var(--hover)}.fi{font-size:18px;width:28px;text-align:center;flex-shrink:0}.fn{flex:1;font-size:14px;color:var(--br);overflow:hidden;text-overflow:ellipsis}.fm{font-size:12px;color:var(--dim);flex-shrink:0}
+.mc{background:var(--card);border:1px solid var(--bdr);border-radius:12px;padding:16px;margin-bottom:10px}
+.mc h4{font-size:15px;color:var(--br);margin-bottom:4px}.mc p{font-size:12px;color:var(--dim);line-height:1.5}.mc .st{font-size:11px;color:var(--dim);margin-top:6px}
+.mc .act{display:flex;justify-content:flex-end;margin-top:10px;gap:6px}
+.wiz{max-width:560px}.wiz .step{margin-bottom:24px}.wiz .sl{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:10px;font-weight:700}
+.plog{background:var(--bg);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;max-height:300px;overflow-y:auto}
+.plog .ps{padding:5px 0;display:flex;gap:10px;align-items:center}.plog .pd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.plog .pd.ok{background:var(--gr)}.plog .pd.run{background:var(--a1);animation:pulse 1s infinite}.plog .pd.err{background:var(--rd)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.bk-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr);font-size:13px;flex-wrap:wrap}
+.bk-row .bk-name{flex:1;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--br);min-width:150px;word-break:break-all}
+.bk-row .bk-meta{color:var(--dim);font-size:11px}
+.ur{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--bdr);flex-wrap:wrap}
+.ur .nm{flex:1;font-size:14px;color:var(--br);min-width:100px}.ur .rl{font-size:11px;padding:4px 12px;border-radius:12px;font-weight:600}
+.rl-owner{background:rgba(0,200,255,.1);color:var(--a1)}.rl-admin{background:rgba(120,96,255,.1);color:var(--a2)}
+.rl-moderator{background:rgba(240,176,32,.1);color:var(--am)}.rl-viewer{background:rgba(148,156,192,.1);color:var(--txt)}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--a1);border-radius:12px;padding:14px 24px;font-size:13px;font-weight:600;color:var(--a1);z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}.empty h3{font-size:17px;color:var(--txt);margin-bottom:10px}
+@media(max-width:768px){.side{position:fixed;left:-270px;top:0;bottom:0;width:270px;transition:left .25s ease;box-shadow:4px 0 20px rgba(0,0,0,.5)}.side.open{left:0}.mob-toggle{display:flex !important}.sec-g{grid-template-columns:1fr}.cards{grid-template-columns:repeat(3,1fr)}.pb{padding:18px 16px}.ph{padding:14px 16px}}
+@media(min-width:769px){.mob-toggle{display:none !important}.overlay{display:none !important}}
+.mob-toggle{position:fixed;top:12px;left:12px;z-index:99;width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--bdr);align-items:center;justify-content:center;font-size:20px;color:var(--txt)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+</style></head>
+<body><div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef,useCallback}=React;
+const api={async get(u){const r=await fetch(u);if(!r.ok)throw new Error(r.statusText);return r.json()},
+async post(u,b){const r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()},
+async put(u,b){const r=await fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json()},
+async del(u){return(await fetch(u,{method:'DELETE'})).json()}};
+let tt;function Toast({m}){return m?<div className="toast">{m}</div>:null}
+function fS(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
+function fD(d){if(!d)return'';try{return new Date(d).toLocaleString()}catch{return d}}
+
+function Login({onOk}){const[u,sU]=useState('');const[p,sP]=useState('');const[e,sE]=useState('');
+const go=async()=>{const d=await api.post('/api/auth/login',{username:u,password:p});if(d.ok)onOk(d.user);else sE('Invalid credentials')};
+return<div className="lw"><div className="lb"><h1>ATGS WORLDWIDE</h1><div className="sub">XKStudios</div>
+<input placeholder="Username" value={u} onChange={e=>sU(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()}/>
+<input type="password" placeholder="Password" value={p} onChange={e=>sP(e.target.value)} onKeyDown={e=>e.key==='Enter'&&go()}/>
+<button className="bp" style={{width:'100%',marginTop:8}} onClick={go}>Sign In</button>
+{e&&<p style={{color:'var(--rd)',fontSize:'13px',marginTop:12}}>{e}</p>}</div></div>}
+
+function Dash({inst,toast,user}){const[info,sI]=useState(null);const[mp,sMp]=useState('');const[mr,sMr]=useState('');const[mres,sMres]=useState('');const[wp,sWp]=useState('');const[wres,sWres]=useState('');
+const[bk,sBk]=useState([]);const[crashes,sCr]=useState({history:[]});const[alerts,sAl]=useState([]);
+useEffect(()=>{if(!inst)return;const p=()=>api.get('/api/instances/'+inst.id).then(sI).catch(()=>{});p();const i=setInterval(p,10000);return()=>clearInterval(i)},[inst?.id]);
+useEffect(()=>{if(!inst)return;api.get('/api/backups/'+inst.id).then(sBk).catch(()=>sBk([]));
+api.get('/api/crashes/'+inst.id).then(sCr).catch(()=>sCr({history:[]}));
+api.get('/api/resource-alerts/'+inst.id).then(sAl).catch(()=>sAl([]))},[inst?.id]);
+if(!inst)return<div className="empty"><h3>No Instance Selected</h3><p>Create or select an instance from the sidebar</p></div>;
+if(!info)return<div className="pb"><p style={{color:'var(--dim)'}}>Loading...</p></div>;
+const r=info.container?.running;const tv=info.tps?.match?.(/([\d.]+)/)?.[1]||'-';const tn=parseFloat(tv);
+const canMod=user&&['owner','admin','moderator'].includes(user.role);
+return<div className="pb">
+<div className="cards">
+<div className="card"><div className="l">Status</div><div className={'v '+(r?'g':'r')}>{r?'Online':inst.status==='crashed'?'Crashed':'Offline'}</div></div>
+<div className="card"><div className="l">Players</div><div className="v">{info.online?info.players+'/'+info.maxPlayers:'-'}</div></div>
+<div className="card"><div className="l">TPS</div><div className={'v '+(tn>=18?'g':tn>=15?'a':'r')}>{tv}</div></div>
+<div className="card"><div className="l">CPU</div><div className="v c">{info.stats?.cpu||'0'}%</div></div>
+<div className="card"><div className="l">RAM</div><div className="v c">{info.stats?.memUsed?Math.round(info.stats.memUsed/1048576)+'M':'-'}</div></div>
+</div>
+{info.ports?.length>1&&<p style={{fontSize:'11px',color:'var(--dim)',marginTop:-16,marginBottom:20}}>Ports: {info.ports.map(p=>p.port+'/'+(p.protocol||'tcp')).join(', ')}</p>}
+
+{info.status==='crashed'&&<div style={{background:'rgba(240,96,96,.08)',border:'1px solid rgba(240,96,96,.25)',borderRadius:12,padding:18,marginBottom:24}}>
+<div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}><span style={{fontSize:'18px'}}>&#9888;</span><span style={{color:'var(--rd)',fontWeight:700}}>Server Crashed</span></div>
+<p style={{fontSize:'13px',color:'var(--br)',marginBottom:12}}>{info.crashReason||'Unknown cause'}</p>
+<div style={{display:'flex',gap:8}}><button className="btn bs bg" onClick={async()=>{await api.post('/api/crashes/'+inst.id+'/acknowledge');toast('Acknowledged');api.get('/api/instances/'+inst.id).then(sI)}}>Acknowledge</button>
+<button className="btn bs" onClick={async()=>{await api.post('/api/instances/'+inst.id+'/start');toast('Starting...')}}>Restart</button></div></div>}
+
+{alerts.length>0&&<div style={{background:'rgba(240,176,32,.06)',border:'1px solid rgba(240,176,32,.2)',borderRadius:12,padding:16,marginBottom:24}}>
+<p style={{fontSize:'12px',fontWeight:700,color:'var(--am)',marginBottom:8}}>RESOURCE ALERTS</p>
+{alerts.map((a,i)=><div key={i} style={{fontSize:'13px',color:'var(--br)',padding:'3px 0'}}>{a.metric.toUpperCase()} at {a.value}% ({a.level})</div>)}</div>}
+
+{canMod&&<div className="sec"><div className="sec-t">Controls</div>
+<div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+<button className="btn bg" onClick={async()=>{await api.post('/api/instances/'+inst.id+'/start');toast('Starting...')}}>Start</button>
+<button className="btn bd" onClick={async()=>{if(confirm('Stop?')){await api.post('/api/instances/'+inst.id+'/stop');toast('Stopping...')}}}>Stop</button>
+<button className="btn ba" onClick={async()=>{if(confirm('Restart?')){await api.post('/api/instances/'+inst.id+'/restart');toast('Restarting...')}}}>Restart</button>
+</div></div>}
+
+{info.playerNames?.length>0&&<div className="sec"><div className="sec-t">Online ({info.players})</div>
+{info.playerNames.map(n=><div key={n} style={{display:'flex',alignItems:'center',gap:12,padding:'8px 0'}}>
+<img src={'https://mc-heads.net/avatar/'+n+'/32'} style={{width:32,height:32,borderRadius:6,imageRendering:'pixelated'}}/>
+<span style={{flex:1,fontSize:'14px',color:'var(--br)'}}>{n}</span>
+{canMod&&<button className="btn bs ba" onClick={async()=>{await api.post('/api/instances/'+inst.id+'/kick',{player:n});toast('Kicked '+n)}}>Kick</button>}
+</div>)}</div>}
+
+{canMod&&<div className="sec"><div className="sec-t">Moderation</div><div className="sec-g">
+<div className="box"><h3>Kick / Ban / Pardon</h3>
+<div className="fr"><input placeholder="Player name" value={mp} onChange={e=>sMp(e.target.value)}/></div>
+<div className="fr"><input placeholder="Reason" value={mr} onChange={e=>sMr(e.target.value)}/></div>
+<div style={{display:'flex',gap:8,flexWrap:'wrap'}}><button className="btn bs ba" onClick={()=>{if(!mp)return;api.post('/api/instances/'+inst.id+'/kick',{player:mp,reason:mr}).then(d=>sMres(d.response||d.error||'Done'))}}>Kick</button><button className="btn bs bd" onClick={()=>{if(!mp)return;api.post('/api/instances/'+inst.id+'/ban',{player:mp,reason:mr}).then(d=>sMres(d.response||d.error||'Done'))}}>Ban</button><button className="btn bs bg" onClick={()=>{if(!mp)return;api.post('/api/instances/'+inst.id+'/pardon',{player:mp}).then(d=>sMres(d.response||d.error||'Done'))}}>Pardon</button></div>
+<div className="result">{mres}</div></div>
+<div className="box"><h3>Whitelist</h3>
+<div className="fr"><input placeholder="Player name" value={wp} onChange={e=>sWp(e.target.value)}/></div>
+<div style={{display:'flex',gap:8}}><button className="btn bs" style={{color:'var(--a1)'}} onClick={()=>api.post('/api/instances/'+inst.id+'/whitelist',{action:'add',player:wp}).then(d=>sWres(d.response||d.error||'Done'))}>Add</button><button className="btn bs" onClick={()=>api.post('/api/instances/'+inst.id+'/whitelist',{action:'remove',player:wp}).then(d=>sWres(d.response||d.error||'Done'))}>Remove</button><button className="btn bs" onClick={()=>api.post('/api/instances/'+inst.id+'/whitelist',{action:'list'}).then(d=>sWres(d.response||d.error||'Done'))}>List</button></div>
+<div className="result">{wres}</div></div>
+</div></div>}
+
+{canMod&&<div className="sec"><div className="sec-t">Backups</div>
+<button className="btn bg bs" style={{marginBottom:14}} onClick={async()=>{toast('Creating...');await api.post('/api/backups/'+inst.id,{label:'manual'});api.get('/api/backups/'+inst.id).then(sBk);toast('Backup created!')}}>+ Create Backup</button>
+{bk.map(b=><div key={b.name} className="bk-row"><div className="bk-name">{b.name}</div><div className="bk-meta">{fS(b.size)} &middot; {fD(b.created)}</div>
+<button className="btn bs" onClick={async()=>{if(confirm('Restore?')){await api.post('/api/backups/'+inst.id+'/restore',{name:b.name});toast('Restored!')}}}>Restore</button>
+<button className="btn bs bd" onClick={async()=>{if(confirm('Delete?')){await api.del('/api/backups/'+inst.id+'/'+b.name);sBk(bk.filter(x=>x.name!==b.name))}}}>Del</button></div>)}
+{!bk.length&&<p style={{fontSize:'12px',color:'var(--dim)'}}>No backups yet.</p>}</div>}
+</div>}
+
+function Console({inst}){const ref=useRef();const[cmd,sC]=useState('');
+useEffect(()=>{if(!inst)return;const p=location.protocol==='https:'?'wss':'ws';const w=new WebSocket(p+'://'+location.host+'/ws');
+w.onopen=()=>w.send(JSON.stringify({type:'subscribe',instanceId:inst.id}));
+w.onmessage=e=>{const d=JSON.parse(e.data);if(d.lines||d.type==='history'){const ls=d.lines;const el=ref.current;if(!el||!ls)return;for(const l of ls){if(!l.trim())continue;const div=document.createElement('div');div.className='ll '+(/WARN/i.test(l)?'lw':/ERROR|SEVERE/i.test(l)?'le':/joined|left the game/i.test(l)?'lj':'');div.textContent=l;el.appendChild(div)}while(el.children.length>2000)el.removeChild(el.firstChild);el.scrollTop=el.scrollHeight}};return()=>w.close()},[inst?.id]);
+async function send(){if(!cmd.trim()||!inst)return;const c=cmd;sC('');if(ref.current){const d=document.createElement('div');d.className='ll lc';d.textContent='> '+c;ref.current.appendChild(d);ref.current.scrollTop=ref.current.scrollHeight}
+const d=await api.post('/api/instances/'+inst.id+'/command',{command:c});if(d.response&&ref.current){const div=document.createElement('div');div.className='ll lc';div.textContent=d.response;ref.current.appendChild(div);ref.current.scrollTop=ref.current.scrollHeight}}
+if(!inst)return<div className="empty"><h3>Select an instance</h3></div>;
+return<div className="pb" style={{display:'flex',flexDirection:'column',overflow:'hidden'}}><div className="cw"><div id="co" ref={ref}></div><div className="cmdb"><input value={cmd} onChange={e=>sC(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Enter command..."/><button className="bp bs" onClick={send}>Send</button></div></div></div>}
+
+function Files({inst,toast}){const[dir,sD]=useState('/');const[ent,sE]=useState([]);const[ed,sEd]=useState(null);const[ct,sCt]=useState('');const uR=useRef();
+const load=useCallback(async(p='/')=>{if(!inst)return;sD(p);sEd(null);const d=await api.get('/api/files/'+inst.id+'?path='+encodeURIComponent(p==='/'?'':p));if(d.entries)sE(d.entries)},[inst?.id]);
+useEffect(()=>{load('/')},[load]);
+if(!inst)return<div className="empty"><h3>Select an instance</h3></div>;
+if(ed)return<div className="pb"><div style={{display:'flex',justifyContent:'space-between',marginBottom:12,flexWrap:'wrap',gap:8}}>
+<span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'13px',color:'var(--a1)',wordBreak:'break-all'}}>{ed}</span>
+<div style={{display:'flex',gap:8}}><button className="btn bs" onClick={()=>sEd(null)}>Back</button><button className="bp bs" onClick={async()=>{await api.post('/api/files/'+inst.id+'/write',{path:ed,content:ct});toast('Saved!')}}>Save</button></div></div>
+<textarea style={{width:'100%',minHeight:'50vh',padding:14,background:'var(--bg)',border:'1px solid var(--bdr)',borderRadius:'var(--r)',color:'var(--br)',fontFamily:"'JetBrains Mono',monospace",fontSize:'13px',lineHeight:1.7,resize:'vertical',outline:'none'}} value={ct} onChange={e=>sCt(e.target.value)} spellCheck={false}/></div>;
+return<div className="pb"><div style={{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}}>
+<span style={{flex:1,fontFamily:"'JetBrains Mono',monospace",fontSize:'13px',color:'var(--dim)',padding:'8px 0',wordBreak:'break-all'}}>/{dir==='/'?'':dir}</span>
+<button className="btn bs" onClick={()=>uR.current?.click()}>Upload</button><button className="btn bs" onClick={()=>{const n=prompt('File name:');if(n)api.post('/api/files/'+inst.id+'/write',{path:dir==='/'?n:dir+'/'+n,content:''}).then(()=>load(dir))}}>New File</button><button className="btn bs" onClick={()=>{const n=prompt('Folder name:');if(n)api.post('/api/files/'+inst.id+'/mkdir',{path:dir==='/'?n:dir+'/'+n}).then(()=>load(dir))}}>New Folder</button>
+<input type="file" ref={uR} style={{display:'none'}} multiple onChange={async e=>{const f=e.target.files;if(!f.length)return;const fd=new FormData();fd.append('path',dir==='/'?'':dir);for(const x of f)fd.append('files',x);const r=await(await fetch('/api/files/'+inst.id+'/upload',{method:'POST',body:fd})).json();if(r.ok){toast('Uploaded');load(dir)}e.target.value=''}}/></div>
+{dir!=='/'&&<div className="fe" onClick={()=>{const p=dir.split('/');p.pop();load(p.join('/')||'/')}}><div className="fi">&#8593;</div><div className="fn" style={{color:'var(--dim)'}}>..</div></div>}
+{ent.map(e=><div key={e.name} className="fe" onClick={()=>e.type==='dir'?load(dir==='/'?e.name:dir+'/'+e.name):(async()=>{const fp=dir==='/'?e.name:dir+'/'+e.name;const d=await api.get('/api/files/'+inst.id+'/read?path='+encodeURIComponent(fp));if(d.binary){toast('Binary file');return}sEd(fp);sCt(d.content)})()}>
+<div className="fi">{e.type==='dir'?'\uD83D\uDCC1':'\uD83D\uDCC4'}</div><div className="fn">{e.name}</div><div className="fm">{e.type==='file'?fS(e.size):''}</div>
+<button className="btn bs bd" style={{flexShrink:0}} onClick={ev=>{ev.stopPropagation();if(confirm('Delete '+e.name+'?'))api.post('/api/files/'+inst.id+'/delete',{path:dir==='/'?e.name:dir+'/'+e.name}).then(()=>load(dir))}}>Del</button></div>)}</div>}
+
+function Addons({inst,toast}){const[q,sQ]=useState('');const[res,sR]=useState([]);const[loading,sL]=useState(false);const[err,sE]=useState('');
+const[installed,sInst]=useState([]);const[tab,sTab]=useState('search');
+useEffect(()=>{if(inst)api.get('/api/mods/installed/'+inst.id).then(sInst).catch(()=>sInst([]))},[inst?.id]);
+async function search(){if(!q.trim()||!inst)return;sL(true);sE('');sR([]);try{
+const params=new URLSearchParams({q:q.trim()});
+if(inst.variantId)params.set('loader',inst.variantId);
+if(inst.version)params.set('version',inst.version);
+const d=await api.get('/api/mods/search?'+params.toString());
+sR(d.hits||[]);if(!d.hits?.length)sE('No results found. Try a different search term or check your server version.')}catch(e){sE('Search failed: '+e.message)}sL(false)}
+async function install(slug){toast('Installing with dependencies...');try{const d=await api.post('/api/mods/install',{slug,instanceId:inst.id,loader:inst.variantId,gameVersion:inst.version,withDeps:true});
+if(d.conflicts){toast('Conflict: '+d.conflicts.map(c=>c.reason).join(', '));return}
+if(d.ok!==false){const names=(d.installed||[]).map(i=>i.name||i.filename).join(', ');toast('Installed: '+(names||slug)+(d.skipped?.length?' ('+d.skipped.length+' already installed)':''))}
+else toast((d.errors||[]).map(e=>e.error).join(', ')||'Error');api.get('/api/mods/installed/'+inst.id).then(sInst)}catch(e){toast(e.message)}}
+if(!inst)return<div className="empty"><h3>Select an instance</h3></div>;
+return<div className="pb">
+<div style={{display:'flex',gap:8,marginBottom:20}}><button className={'btn '+(tab==='search'?'bp':'')} onClick={()=>sTab('search')}>Search Modrinth</button><button className={'btn '+(tab==='installed'?'bp':'')} onClick={()=>sTab('installed')}>Installed ({installed.length})</button></div>
+{tab==='search'&&<><div style={{display:'flex',gap:10,marginBottom:16}}><input style={{flex:1}} value={q} onChange={e=>sQ(e.target.value)} placeholder={"Search mods for "+(inst.variantId||'server')+" "+inst.version+"..."} onKeyDown={e=>e.key==='Enter'&&search()}/><button className="bp" onClick={search} disabled={loading}>{loading?'Searching...':'Search'}</button></div>
+{err&&<p style={{color:'var(--am)',fontSize:'13px',marginBottom:14}}>{err}</p>}
+{res.map(r=><div key={r.project_id} className="mc"><h4>{r.title}</h4><p>{r.description?.slice(0,200)}</p>
+<div className="st">{r.downloads?.toLocaleString()} downloads &middot; {r.project_type} &middot; {(r.categories||[]).slice(0,4).join(', ')}</div>
+<div className="act"><a className="btn bs" href={'https://modrinth.com/'+r.project_type+'/'+r.slug} target="_blank" rel="noopener" style={{textDecoration:'none',color:'var(--dim)'}}>View</a><button className="btn bs bg" onClick={()=>install(r.slug)}>Install</button></div></div>)}
+{!res.length&&!err&&!loading&&<div className="empty"><p>Search Modrinth for mods, plugins, datapacks, and shaders</p></div>}</>}
+{tab==='installed'&&<>{installed.map(m=><div key={m.filename} className="fe">
+<div className="fi">{'\uD83E\uDDE9'}</div><div className="fn">{m.filename}</div><div className="fm">{fS(m.size)}</div>
+<button className="btn bs bd" onClick={async()=>{if(confirm('Remove '+m.filename+'?')){await api.del('/api/mods/installed/'+inst.id+'/'+m.filename);toast('Removed');api.get('/api/mods/installed/'+inst.id).then(sInst)}}}>Remove</button></div>)}
+{!installed.length&&<div className="empty"><p>No mods installed yet. Search and install from the Search tab.</p></div>}</>}
+</div>}
+
+function Create({onDone,toast}){const[eggs,sEggs]=useState([]);const[egg,sEgg]=useState(null);const[variant,sVar]=useState(null);
+const[eggPorts,sEP]=useState(null);const[optPorts,sOP]=useState([]);
+const[nm,sN]=useState('');const[ver,sV]=useState('');const[vers,sVs]=useState([]);const[mn,sMn]=useState('2G');const[mx,sMx]=useState('4G');const[pt,sPt]=useState('25565');
+const[busy,sB]=useState(false);const[progress,sProg]=useState([]);
+useEffect(()=>{api.get('/api/instances/eggs').then(sEggs)},[]);
+useEffect(()=>{if(egg){api.get('/api/instances/eggs/'+egg.id).then(d=>{sEP(d.ports);sOP((d.ports?.optional||[]).map(p=>p.id))}).catch(()=>sEP(null))}},[egg?.id]);
+useEffect(()=>{if(egg&&variant)api.get('/api/instances/eggs/'+egg.id+'/versions/'+variant.id).then(v=>sVs(v)).catch(()=>sVs([]))},[egg?.id,variant?.id]);
+useEffect(()=>{const p=location.protocol==='https:'?'wss':'ws';const w=new WebSocket(p+'://'+location.host+'/ws');
+w.onmessage=e=>{const d=JSON.parse(e.data);if(d.type==='install'){sProg(prev=>[...prev,d]);if(d.step==='complete'||d.step==='error'){sB(false);if(d.step==='complete')setTimeout(()=>onDone(),1500)}}};return()=>w.close()},[]);
+async function go(){if(!nm||!ver||!egg||!variant){toast('Fill all fields');return}sB(true);sProg([]);
+const d=await api.post('/api/instances',{name:nm,eggId:egg.id,variantId:variant.id,version:ver,minRam:mn,maxRam:mx,port:parseInt(pt),optionalPorts:optPorts});if(!d.ok){toast(d.error||'Error');sB(false)}}
+return<div className="pb"><div className="wiz">
+<div className="step"><div className="sl">Name</div><input value={nm} onChange={e=>sN(e.target.value)} placeholder="My Server" disabled={busy}/></div>
+<div className="step"><div className="sl">Application</div><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+{eggs.map(e=><button key={e.id} className={'btn '+(egg?.id===e.id?'bp':'')} onClick={()=>{if(!busy){sEgg(e);sVar(null);sV('')}}}>{e.icon} {e.name}</button>)}</div></div>
+{egg&&<div className="step"><div className="sl">Variant</div><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+{egg.variants?.map(v=><button key={v.id} className={'btn '+(variant?.id===v.id?'bp':'')} onClick={()=>{if(!busy){sVar(v);sV('')}}}>{v.name}</button>)}</div></div>}
+{variant&&<div className="step"><div className="sl">Version</div><select value={ver} onChange={e=>sV(e.target.value)} disabled={busy}>
+<option value="">Select version...</option>{vers.map(v=><option key={v.id} value={v.id}>{v.id}</option>)}</select></div>}
+<div className="step"><div className="sl">Resources</div>
+<div className="fr"><label>Min RAM</label><input value={mn} onChange={e=>sMn(e.target.value)} style={{width:100}} disabled={busy}/><label style={{marginLeft:12}}>Max RAM</label><input value={mx} onChange={e=>sMx(e.target.value)} style={{width:100}} disabled={busy}/></div>
+<div className="fr"><label>Port</label><input value={pt} onChange={e=>sPt(e.target.value)} style={{width:100}} disabled={busy}/></div></div>
+{eggPorts?.optional?.length>0&&<div className="step"><div className="sl">Optional Ports</div>
+{eggPorts.optional.map(p=><label key={p.id} style={{display:'flex',alignItems:'center',gap:12,padding:'8px 0',cursor:'pointer',fontSize:'14px'}}>
+<input type="checkbox" checked={optPorts.includes(p.id)} onChange={e=>{if(e.target.checked)sOP([...optPorts,p.id]);else sOP(optPorts.filter(x=>x!==p.id))}} disabled={busy} style={{width:'auto',accentColor:'var(--a1)'}}/>
+<span style={{color:'var(--br)'}}>{p.label}</span><span style={{color:'var(--dim)',fontSize:'12px'}}>{p.port}/{p.protocol}</span></label>)}</div>}
+{!busy&&<button className="bp" onClick={go}>Create Instance</button>}
+{progress.length>0&&<div style={{marginTop:20}}><div className="sl">Installation</div><div className="plog">{progress.map((p,i)=><div key={i} className="ps"><div className={'pd '+(p.step==='complete'?'ok':p.step==='error'?'err':i===progress.length-1?'run':'ok')}/><span style={{color:p.step==='error'?'var(--rd)':p.step==='complete'?'var(--gr)':'var(--txt)'}}>{p.message}</span></div>)}</div></div>}
+</div></div>}
+
+function Settings({inst,toast,onRefresh}){const[mn,sMn]=useState('');const[mx,sMx]=useState('');const[nm,sN]=useState('');
+const[tab,sTab]=useState('general');const[cfgFields,sCfg]=useState([]);
+const[jarInfo,sJar]=useState(null);const[cloneName,sCN]=useState('');const[clonePort,sCP]=useState('');
+const importRef=useRef();
+useEffect(()=>{if(inst){sMn(inst.minRam||'');sMx(inst.maxRam||'');sN(inst.name||'');sCN(inst.name+' (Copy)');sCP(String((inst.port||25565)+1));
+api.get('/api/instances/'+inst.id+'/config-editor').then(d=>sCfg(d.fields||[])).catch(()=>{});
+api.get('/api/jar-update/'+inst.id+'/check').then(sJar).catch(()=>sJar(null))}},[inst?.id]);
+if(!inst)return<div className="empty"><h3>Select an instance</h3></div>;
+return<div className="pb"><div style={{maxWidth:600}}>
+<div style={{display:'flex',gap:8,marginBottom:20,flexWrap:'wrap'}}>
+{['general','config','tools','danger'].map(t=><button key={t} className={'btn bs '+(tab===t?'bp':'')} onClick={()=>sTab(t)} style={{textTransform:'capitalize'}}>{t}</button>)}</div>
+{tab==='general'&&<><div className="box"><h3>Instance Settings</h3>
+<div className="fr"><label>Name</label><input value={nm} onChange={e=>sN(e.target.value)}/></div>
+<div className="fr"><label>Min RAM</label><input value={mn} onChange={e=>sMn(e.target.value)} style={{width:100}}/><label style={{marginLeft:12}}>Max RAM</label><input value={mx} onChange={e=>sMx(e.target.value)} style={{width:100}}/></div>
+<button className="bp" style={{marginTop:8}} onClick={async()=>{await api.put('/api/instances/'+inst.id,{name:nm,minRam:mn,maxRam:mx});toast('Saved')}}>Save</button></div>
+<div className="box"><h3>Exposed Ports</h3>
+{(inst.ports||[]).map((p,i)=><div key={i} style={{display:'flex',gap:12,alignItems:'center',padding:'6px 0',fontSize:'14px'}}>
+<span style={{color:'var(--gr)',fontFamily:"'JetBrains Mono',monospace"}}>{p.port}/{p.protocol||'tcp'}</span>
+<span style={{color:'var(--br)'}}>{p.label||'Port'}</span></div>)}</div>
+{jarInfo&&<div className="box"><h3>Server Jar</h3>
+{jarInfo.current&&<p style={{fontSize:'13px',color:'var(--dim)',marginBottom:8}}>Current: {jarInfo.current.variant} build {jarInfo.current.build||'unknown'}</p>}
+{jarInfo.updateAvailable?<><p style={{fontSize:'13px',color:'var(--gr)',marginBottom:10}}>Update available!</p>
+<button className="btn bg" onClick={async()=>{if(confirm('Update server jar?')){toast('Updating...');const d=await api.post('/api/jar-update/'+inst.id+'/update');toast(d.ok?'Updated!':d.error)}}}>Update Now</button></>
+:<p style={{fontSize:'13px',color:'var(--dim)'}}>Up to date</p>}</div>}</>}
+{tab==='config'&&<div className="box"><h3>Server Properties</h3>
+{cfgFields.length?<>{Object.entries(cfgFields.reduce((g,f)=>{(g[f.group||'Other']||=[]).push(f);return g},{})).map(([group,fields])=>
+<div key={group} style={{marginBottom:16}}>
+<p style={{fontSize:'11px',color:'var(--dim)',fontWeight:700,marginBottom:8,textTransform:'uppercase',letterSpacing:'1.5px'}}>{group}</p>
+{fields.map(f=><div key={f.key} className="fr"><label style={{minWidth:160}}>{f.label}</label>
+{f.type==='boolean'?<select value={f.value} onChange={e=>{const v=e.target.value;sCfg(prev=>prev.map(x=>x.key===f.key?{...x,value:v}:x))}} style={{width:100}}><option value="true">true</option><option value="false">false</option></select>
+:f.type==='select'?<select value={f.value} onChange={e=>{const v=e.target.value;sCfg(prev=>prev.map(x=>x.key===f.key?{...x,value:v}:x))}}>{f.options?.map(o=><option key={o} value={o}>{o}</option>)}</select>
+:f.type==='number'?<input type="number" value={f.value} onChange={e=>{const v=e.target.value;sCfg(prev=>prev.map(x=>x.key===f.key?{...x,value:v}:x))}} style={{width:100}}/>
+:<input value={f.value} onChange={e=>{const v=e.target.value;sCfg(prev=>prev.map(x=>x.key===f.key?{...x,value:v}:x))}}/>}</div>)}</div>)}
+<button className="bp" style={{marginTop:8}} onClick={async()=>{const changes={};cfgFields.forEach(f=>changes[f.key]=f.value);const d=await api.post('/api/instances/'+inst.id+'/config-editor',{changes});toast(d.ok?'Saved! Restart to apply.':d.error)}}>Save Config</button></>
+:<p style={{fontSize:'13px',color:'var(--dim)'}}>No config file found. Start the server once first.</p>}</div>}
+{tab==='tools'&&<><div className="box"><h3>Clone Instance</h3>
+<p style={{fontSize:'13px',color:'var(--dim)',marginBottom:12}}>Duplicate with all files on a different port.</p>
+<div className="fr"><label>Name</label><input value={cloneName} onChange={e=>sCN(e.target.value)}/></div>
+<div className="fr"><label>Port</label><input value={clonePort} onChange={e=>sCP(e.target.value)} style={{width:100}}/></div>
+<button className="btn bg" onClick={async()=>{toast('Cloning...');const d=await api.post('/api/instances/'+inst.id+'/clone',{name:cloneName,port:parseInt(clonePort)});if(d.ok){toast('Cloned!');if(onRefresh)onRefresh()}else toast(d.error)}}>Clone</button></div>
+<div className="box"><h3>Export / Import</h3>
+<div style={{display:'flex',gap:8,marginBottom:12}}><a className="btn bg" href={'/api/instances/'+inst.id+'/export'} download style={{textDecoration:'none'}}>Export .tar.gz</a>
+<button className="btn" onClick={()=>importRef.current?.click()}>Import</button></div>
+<input type="file" ref={importRef} accept=".tar.gz,.tgz" style={{display:'none'}} onChange={async e=>{const f=e.target.files[0];if(!f)return;toast('Importing...');const fd=new FormData();fd.append('file',f);const d=await(await fetch('/api/instances/import',{method:'POST',body:fd})).json();if(d.ok){toast('Imported!');if(onRefresh)onRefresh()}else toast(d.error);e.target.value=''}}/></div>
+<div className="box"><h3>Rebuild Container</h3><p style={{fontSize:'13px',color:'var(--dim)',marginBottom:12}}>Recreate Docker container. Files preserved.</p>
+<button className="btn ba" onClick={async()=>{if(confirm('Rebuild?')){toast('Rebuilding...');const d=await api.post('/api/instances/'+inst.id+'/rebuild');toast(d.ok?'Rebuilt!':d.error)}}}>Rebuild</button></div></>}
+{tab==='danger'&&<div className="box"><h3>Delete Instance</h3>
+<p style={{fontSize:'13px',color:'var(--rd)',marginBottom:12}}>Permanently delete this instance and all files.</p>
+<button className="btn bd" onClick={async()=>{if(confirm('DELETE '+inst.name+'?')){await api.del('/api/instances/'+inst.id);toast('Deleted');location.reload()}}}>Delete Instance</button></div>}
+</div></div>}
+
+function Network({toast,instances}){const[nets,sNets]=useState([]);const[avail,sAvail]=useState([]);const[selProxy,sSP]=useState('');const[netName,sNN]=useState('');
+useEffect(()=>{api.get('/api/networks').then(sNets).catch(()=>[]);api.get('/api/networks/available-backends').then(sAvail).catch(()=>[])},[]);
+const proxies=instances.filter(i=>i.eggId==='velocity');
+return<div className="pb">
+{nets.map(n=><div key={n.id} className="box" style={{marginBottom:20}}>
+<div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+<div><h3 style={{color:'var(--br)',fontSize:'16px',margin:0}}>{n.name}</h3><p style={{fontSize:'12px',color:'var(--dim)',marginTop:2}}>Proxy: {n.proxyName}</p></div>
+<button className="btn bs bd" onClick={async()=>{if(confirm('Delete?')){await api.del('/api/networks/'+n.id);api.get('/api/networks').then(sNets)}}}>Delete</button></div>
+{n.backends.map(b=><div key={b.instanceId} style={{display:'flex',alignItems:'center',gap:12,padding:'8px 12px',background:'var(--input)',borderRadius:'var(--r)',marginBottom:6}}>
+<div className={'dt '+(b.status==='running'?'run':'off')}/><span style={{flex:1,color:'var(--br)'}}>{ b.name}</span><span style={{fontSize:'12px',color:'var(--dim)'}}>:{b.port}</span>
+<button className="btn bs bd" onClick={async()=>{await api.del('/api/networks/'+n.id+'/backend/'+b.instanceId);api.get('/api/networks').then(sNets)}}>Remove</button></div>)}
+<div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:8}}>
+{avail.filter(a=>!n.backends.find(b=>b.instanceId===a.id)&&a.id!==n.proxyId).map(a=><button key={a.id} className="btn bs bg" onClick={async()=>{await api.post('/api/networks/'+n.id+'/backend',{instanceId:a.id});api.get('/api/networks').then(sNets)}}>+ {a.name}</button>)}</div></div>)}
+{proxies.length?<div className="box" style={{maxWidth:420}}><h3>Create Network</h3>
+<div className="fr"><label>Proxy</label><select value={selProxy} onChange={e=>sSP(e.target.value)}><option value="">Select...</option>{proxies.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+<div className="fr"><label>Name</label><input value={netName} onChange={e=>sNN(e.target.value)} placeholder="My Network"/></div>
+<button className="bp" onClick={async()=>{if(!selProxy)return;const d=await api.post('/api/networks',{proxyId:selProxy,name:netName});if(d.ok){toast('Created');api.get('/api/networks').then(sNets)}}}>Create</button>
+</div>:<div className="box"><p style={{fontSize:'13px',color:'var(--dim)'}}>Create a Velocity proxy instance first.</p></div>}
+</div>}
+
+function Audit({toast}){const[entries,sE]=useState([]);const[total,sT]=useState(0);const[filter,sF]=useState('');const[search,sS]=useState('');const[actions,sA]=useState([]);const[page,sP]=useState(0);
+useEffect(()=>{api.get('/api/audit/actions').then(sA).catch(()=>[])},[]);useEffect(()=>{load()},[filter,page]);
+function load(){let url='/api/audit?limit=40&offset='+(page*40);if(filter)url+='&action='+filter;if(search)url+='&q='+encodeURIComponent(search);api.get(url).then(d=>{sE(d.entries||[]);sT(d.total||0)}).catch(()=>{})}
+const colors={start:'var(--gr)',stop:'var(--rd)',restart:'var(--am)',create:'var(--a1)',delete:'var(--rd)',login:'var(--a2)',kick:'var(--am)',ban:'var(--rd)',install:'var(--gr)',edit:'var(--a1)'};
+function ac(a){for(const[k,c]of Object.entries(colors))if(a?.includes(k))return c;return'var(--dim)'}
+return<div className="pb">
+<div style={{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+<select value={filter} onChange={e=>{sF(e.target.value);sP(0)}} style={{width:200}}><option value="">All actions</option>{actions.map(a=><option key={a} value={a}>{a}</option>)}</select>
+<input style={{flex:1,minWidth:150}} value={search} onChange={e=>sS(e.target.value)} placeholder="Search..." onKeyDown={e=>{if(e.key==='Enter'){sP(0);load()}}}/><button className="btn bs" onClick={()=>{sP(0);load()}}>Search</button></div>
+{entries.map((e,i)=><div key={i} style={{display:'flex',gap:12,padding:'8px 0',borderBottom:'1px solid var(--bdr)',fontSize:'13px',flexWrap:'wrap'}}>
+<span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'11px',color:'var(--dim)',minWidth:140}}>{fD(e.time)}</span>
+<span style={{color:ac(e.action),fontWeight:700,minWidth:120}}>{e.action}</span>
+<span style={{color:'var(--br)'}}>{e.user}</span>
+{e.detail&&<span style={{color:'var(--dim)',fontSize:'11px'}}>{e.detail.slice(0,50)}</span>}</div>)}
+{total>40&&<div style={{display:'flex',gap:8,marginTop:16,justifyContent:'center'}}>
+<button className="btn bs" disabled={page===0} onClick={()=>sP(page-1)}>Prev</button><span style={{fontSize:'13px',color:'var(--dim)',padding:'6px 0'}}>Page {page+1}</span><button className="btn bs" disabled={(page+1)*40>=total} onClick={()=>sP(page+1)}>Next</button></div>}</div>}
+
+function Maintenance({toast,instances}){const[windows,sW]=useState([]);const[selInst,sSI]=useState('');const[mins,sMins]=useState('15');
+useEffect(()=>{api.get('/api/maintenance').then(sW).catch(()=>[])},[]);
+const running=instances.filter(i=>i.status==='running');
+return<div className="pb">
+<div className="box" style={{maxWidth:480}}><h3>Quick Maintenance</h3>
+<p style={{fontSize:'13px',color:'var(--dim)',marginBottom:14}}>Schedule a restart with countdown announcements to players.</p>
+<div className="fr"><label>Instance</label><select value={selInst} onChange={e=>sSI(e.target.value)}><option value="">Select...</option>{running.map(i=><option key={i.id} value={i.id}>{i.name}</option>)}</select></div>
+<div className="fr"><label>Restart in</label><select value={mins} onChange={e=>sMins(e.target.value)} style={{width:120}}><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option></select></div>
+<button className="bp" onClick={async()=>{if(!selInst)return toast('Select an instance');const d=await api.post('/api/maintenance/quick',{instanceId:selInst,minutes:parseInt(mins)});if(d.ok)toast('Scheduled!');else toast(d.error);api.get('/api/maintenance').then(sW)}}>Schedule</button></div>
+{windows.length>0&&<div className="sec"><div className="sec-t">Scheduled</div>
+{windows.map(w=><div key={w.id} style={{display:'flex',alignItems:'center',gap:14,padding:'12px 0',borderBottom:'1px solid var(--bdr)',flexWrap:'wrap'}}>
+<div style={{flex:1}}><div style={{fontSize:'14px',color:'var(--br)',fontWeight:600}}>{w.instanceName}</div><div style={{fontSize:'12px',color:'var(--dim)'}}>{w.reason} — {fD(w.scheduledAt)}</div></div>
+<span style={{fontSize:'12px',padding:'3px 10px',borderRadius:10,background:w.status==='completed'?'rgba(48,216,152,.1)':'rgba(0,200,255,.1)',color:w.status==='completed'?'var(--gr)':'var(--a1)',fontWeight:600}}>{w.status}</span>
+{w.status==='scheduled'&&<button className="btn bs bd" onClick={async()=>{await api.del('/api/maintenance/'+w.id);api.get('/api/maintenance').then(sW)}}>Cancel</button>}
+</div>)}</div>}
+</div>}
+
+function Nodes({toast}){const[nodes,sN]=useState([]);
+useEffect(()=>{api.get('/api/nodes').then(sN).catch(()=>[])},[]);
+function fMem(b){if(!b)return'-';return(b/1073741824).toFixed(1)+'GB'}
+return<div className="pb"><div className="sec"><div className="sec-t">Nodes</div>
+<div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
+{nodes.map(n=><div key={n.name} className="box" style={{margin:0}}>
+<div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+<div className={'dt '+(n.connected?'run':'off')}/><h3 style={{color:'var(--br)',fontSize:'15px',margin:0,flex:1}}>{n.name}{n.isLocal?' (local)':''}</h3></div>
+{n.stats&&<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+<div><span style={{fontSize:'10px',color:'var(--dim)',textTransform:'uppercase'}}>CPU</span><div style={{fontSize:'16px',fontWeight:700,color:'var(--a1)'}}>{n.stats.cpuPercent||'-'}%</div></div>
+<div><span style={{fontSize:'10px',color:'var(--dim)',textTransform:'uppercase'}}>RAM</span><div style={{fontSize:'16px',fontWeight:700,color:'var(--a1)'}}>{n.stats.memPercent||'-'}%</div><div style={{fontSize:'11px',color:'var(--dim)'}}>{fMem(n.stats.memUsed)} / {fMem(n.stats.memTotal)}</div></div>
+</div>}
+</div>)}</div></div></div>}
+
+function Users({toast}){const[users,sU]=useState([]);const[nm,sN]=useState('');const[pw,sPw]=useState('');const[role,sR]=useState('viewer');
+useEffect(()=>{api.get('/api/auth/users').then(sU).catch(()=>{})},[]);
+return<div className="pb"><div className="sec"><div className="sec-t">Users</div>
+{users.map(u=><div key={u.id} className="ur"><div className="nm">{u.username}</div><span className={'rl rl-'+u.role}>{u.role}</span>
+{u.id!=='owner'&&<button className="btn bs bd" onClick={async()=>{if(confirm('Remove?')){await api.del('/api/auth/users/'+u.id);api.get('/api/auth/users').then(sU)}}}>Remove</button>}</div>)}</div>
+<div className="sec"><div className="sec-t">Add User</div><div className="box" style={{maxWidth:420}}>
+<div className="fr"><label>Username</label><input value={nm} onChange={e=>sN(e.target.value)}/></div>
+<div className="fr"><label>Password</label><input type="password" value={pw} onChange={e=>sPw(e.target.value)}/></div>
+<div className="fr"><label>Role</label><select value={role} onChange={e=>sR(e.target.value)}><option value="viewer">Viewer</option><option value="moderator">Moderator</option><option value="admin">Admin</option></select></div>
+<button className="bp" style={{marginTop:6}} onClick={async()=>{if(!nm||!pw)return;const d=await api.post('/api/auth/users',{username:nm,password:pw,role,instances:['*']});if(d.ok){toast('Created');sN('');sPw('');api.get('/api/auth/users').then(sU)}else toast(d.error||'Error')}}>Create</button></div></div></div>}
+
+function App(){const[auth,sA]=useState(null);const[user,sUser]=useState(null);const[insts,sI]=useState([]);const[act,sAct]=useState(null);const[pg,sPg]=useState('dashboard');const[tm,sTm]=useState('');
+const[sideOpen,setSide]=useState(false);
+function toast(m){sTm(m);clearTimeout(tt);tt=setTimeout(()=>sTm(''),3000)}
+function nav(p){sPg(p);setSide(false)}
+useEffect(()=>{api.get('/api/auth/check').then(d=>{if(d.authenticated){sA(true);sUser(d.user)}else sA(false)})},[]);
+useEffect(()=>{if(auth)refresh()},[auth]);
+function refresh(){api.get('/api/instances').then(s=>{sI(s);if(!act&&s.length)sAct(s[0])})}
+if(auth===null)return null;if(!auth)return<Login onOk={u=>{sA(true);sUser(u)}}/>;
+const inst=act;const isAdmin=user&&['owner','admin'].includes(user.role);
+const titles={dashboard:['Dashboard','Overview'],console:['Console','Live output'],files:['Files','Instance files'],addons:['Addons','Modrinth browser'],create:['New Instance','Create'],settings:['Settings','Configuration'],network:['Network','Proxy topology'],nodes:['Nodes','Multi-node'],users:['Users','Accounts'],audit:['Activity','Audit log'],maintenance:['Maintenance','Scheduled restarts']};
+const t=titles[pg]||['',''];
+return<><button className="mob-toggle" onClick={()=>setSide(!sideOpen)}>&#9776;</button>
+{sideOpen&&<div className="overlay" onClick={()=>setSide(false)}/>}
+<div className="shell"><div className={'side '+(sideOpen?'open':'')}>
+<div className="brand"><h1>ATGS WORLDWIDE</h1><span>XKStudios</span></div>
+<div className="navs"><div className="nsec">Instances</div>
+{insts.map(x=><div key={x.id} className={'ii '+(act?.id===x.id?'on':'')} onClick={()=>{sAct(x);nav('dashboard')}}><div className={'dt '+(x.status==='running'?'run':x.status==='crashed'?'err':'off')}/><span>{x.name}</span></div>)}
+{isAdmin&&<button className="nb" onClick={()=>nav('create')}>+ New Instance</button>}
+<div className="nsec" style={{marginTop:16}}>Instance</div>
+{['dashboard','console','files','addons'].map(id=><button key={id} className={'nb '+(pg===id?'on':'')} onClick={()=>nav(id)}>{titles[id][0]}</button>)}
+<div className="nsec" style={{marginTop:16}}>System</div>
+<button className={'nb '+(pg==='network'?'on':'')} onClick={()=>nav('network')}>Network</button>
+<a href="/status" target="_blank" className="nb" style={{textDecoration:'none',color:'var(--dim)'}}>Status Page &#8599;</a>
+<a href="/players" target="_blank" className="nb" style={{textDecoration:'none',color:'var(--dim)'}}>Players Page &#8599;</a>
+<a href="/rules" target="_blank" className="nb" style={{textDecoration:'none',color:'var(--dim)'}}>Rules Page &#8599;</a>
+{isAdmin&&<>{['maintenance','audit','nodes','settings','users'].map(id=><button key={id} className={'nb '+(pg===id?'on':'')} onClick={()=>nav(id)}>{titles[id][0]}</button>)}</>}
+</div>
+<div className="bot"><span>{user?.username} ({user?.role})</span><button className="btn bs" onClick={async()=>{await api.post('/api/auth/logout');sA(false)}}>Logout</button></div></div>
+<div className="main"><div className="ph"><h2>{t[0]}</h2><p>{t[1]}</p></div>
+{pg==='dashboard'&&<Dash inst={inst} toast={toast} user={user}/>}
+{pg==='console'&&<Console inst={inst}/>}
+{pg==='files'&&<Files inst={inst} toast={toast}/>}
+{pg==='addons'&&<Addons inst={inst} toast={toast}/>}
+{pg==='create'&&<Create onDone={()=>{refresh();nav('dashboard')}} toast={toast}/>}
+{pg==='settings'&&<Settings inst={inst} toast={toast} onRefresh={refresh}/>}
+{pg==='network'&&<Network toast={toast} instances={insts}/>}
+{pg==='audit'&&<Audit toast={toast}/>}
+{pg==='maintenance'&&<Maintenance toast={toast} instances={insts}/>}
+{pg==='nodes'&&<Nodes toast={toast}/>}
+{pg==='users'&&<Users toast={toast}/>}
+</div></div><Toast m={tm}/></>}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script></body></html>

@@ -5,5 +5,6 @@
 - [CrownsAdmin](CrownsAdmin)
 - [CrownsEvents](CrownsEvents)
 - [CrownsDrugs](CrownsDrugs)
+- [CrownsMMO](CrownsMMO)
 - [Resource Pack](Resource-Pack)
 - [Installation](Installation)

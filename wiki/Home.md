@@ -51,6 +51,14 @@ The arcade-style criminal business plugin.
 - CrownsEconomy-backed payouts, costs, and upgrades
 - Black-market style business gameplay
 
+### CrownsMMO
+The Season 2 SAO-inspired MMO layer.
+
+- Per-skill perk trees instead of one giant atlas
+- Gathering, professions, combat, and world progression together
+- Light active skills like `Battle Surge`, `Ranger Focus`, `Bulwark`, and `Pathfinder`
+- Boss journal and chapter-style world progression
+
 ## CrownsEconomy Overview
 
 CrownsEconomy was rebuilt around one simple goal: give players a reason to trade with each other instead of just hoarding money.

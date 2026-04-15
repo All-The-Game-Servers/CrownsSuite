@@ -5,3 +5,12 @@ api-version: "1.21"
 load: STARTUP
 authors: [XKStudios]
 description: Shared API, data, and service registry for Crowns Suite.
+commands:
+  capi:
+    description: CrownsAPI utility and resource-pack command.
+    usage: /capi [pack|gui|help]
+    aliases: [crownsapi]
+permissions:
+  crowns.api.admin:
+    description: Allows sharing and broadcasting the Crowns Suite resource pack.
+    default: op

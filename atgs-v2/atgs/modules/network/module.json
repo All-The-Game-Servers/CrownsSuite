@@ -1,0 +1,10 @@
+{
+  "id": "network",
+  "name": "Network Manager",
+  "description": "Manage Velocity proxy networks. Connect backend servers, auto-configure forwarding, and view network topology.",
+  "version": "1.0.0",
+  "scope": "global",
+  "sidecar": false,
+  "defaultEnabled": true,
+  "config": {}
+}

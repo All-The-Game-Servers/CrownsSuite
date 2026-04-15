@@ -29,7 +29,7 @@ public class SuiteGuiManager {
     private static final DateTimeFormatter ALERT_TIME = DateTimeFormatter.ofPattern("MMM d h:mm a");
     private final JavaPlugin plugin;
     private final NamespacedKey actionKey;
-    private final int[] homeSlots = {10, 12, 14, 16};
+    private final int[] homeSlots = {10, 12, 14, 16, 22};
 
     public SuiteGuiManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -55,7 +55,7 @@ public class SuiteGuiManager {
         inventory.setItem(4, this.button(Material.PLAYER_HEAD, "Suite Profile", NamedTextColor.YELLOW, List.of(
                 Component.text("See your cross-suite highlights.", NamedTextColor.GRAY)
         ), "suite:profile", "lowlight/suite/profile"));
-        inventory.setItem(22, this.button(Material.BOOK, "Resource Pack", NamedTextColor.LIGHT_PURPLE, List.of(
+        inventory.setItem(20, this.button(Material.BOOK, "Resource Pack", NamedTextColor.LIGHT_PURPLE, List.of(
                 Component.text(CrownsAPI.getResourcePackService() == null
                         ? "Resource-pack service offline."
                         : CrownsAPI.getResourcePackService().getStatusSummary(), NamedTextColor.GRAY)
@@ -99,6 +99,13 @@ public class SuiteGuiManager {
         inventory.setItem(14, this.info(Material.DRAGON_HEAD, "Events", NamedTextColor.LIGHT_PURPLE, eventLore, "lowlight/suite/events"));
         inventory.setItem(16, this.info(Material.PAPER, "Recent Alerts", NamedTextColor.AQUA, this.alertLore(), "lowlight/suite/alerts"));
         inventory.setItem(28, this.info(Material.BOOK, "Recent Inbox", NamedTextColor.WHITE, this.inboxLore(player), "lowlight/suite/inbox"));
+        if (CrownsAPI.getMmo() != null) {
+            inventory.setItem(30, this.info(Material.ENCHANTED_BOOK, "CrownsMMO", NamedTextColor.AQUA, List.of(
+                    Component.text(CrownsAPI.getMmo().getProfileSummary(player.getUniqueId(), player.getName()), NamedTextColor.GRAY),
+                    Component.text(CrownsAPI.getMmo().getTopSkillSummary(player.getUniqueId()), NamedTextColor.YELLOW),
+                    Component.text(CrownsAPI.getMmo().getWorldProgressSummary(player.getUniqueId()), NamedTextColor.GRAY)
+            )));
+        }
         inventory.setItem(49, this.backToHomeButton());
         this.fillBorder(inventory);
         player.openInventory(inventory);

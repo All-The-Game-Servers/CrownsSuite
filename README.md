@@ -11,6 +11,7 @@ It currently includes:
 - `CrownsAdmin` for moderation, vanish, staff tools, analytics, and inspection
 - `CrownsEvents` for Nether Week, Endfall Week, and future seasonal content
 - `CrownsDrugs` for grow, process, use, and sell contraband items through the Crowns economy
+- `CrownsMMO` for Season 2 MMO progression, professions, combat identity, and world progression
 
 ## Downloads
 
@@ -21,6 +22,7 @@ The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDriv
 - `CrownsAdmin-1.2.0.jar`
 - `CrownsEvents-1.2.0.jar`
 - `CrownsDrugs-1.2.0.jar`
+- `CrownsMMO-1.2.0.jar`
 - `CrownsSuite-ResourcePack-1.2.0.zip`
 - `CrownsSuite-ResourcePack-1.2.0.sha1`
 
@@ -35,6 +37,7 @@ Suggested GitHub wiki structure:
 - `CrownsAdmin`
 - `CrownsEvents`
 - `CrownsDrugs`
+- `CrownsMMO`
 - `Installation`
 
 ## Resource Pack
@@ -48,6 +51,7 @@ The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirg
 - [admin](C:\Users\sirgi\OneDrive\Documents\New project\admin)
 - [events](C:\Users\sirgi\OneDrive\Documents\New project\events)
 - [drugs](C:\Users\sirgi\OneDrive\Documents\New project\drugs)
+- [mmo](C:\Users\sirgi\OneDrive\Documents\New project\mmo)
 - [wiki](C:\Users\sirgi\OneDrive\Documents\New project\wiki)
 - [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack)
 
@@ -58,6 +62,7 @@ The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirg
 - `CrownsAdmin`: stronger operations dashboard, case-file style player summaries, cleaner vanish/staff-mode separation
 - `CrownsEvents`: richer selector/archive flow, Endfall live-moment support, admin-triggered ceremony moments
 - `CrownsDrugs`: stronger equipment and recipe progression with Crowns-backed buying and selling
+- `CrownsMMO`: SAO-inspired skill trees, professions, combat actives, and world progression for Season 2
 
 ## Notes
 

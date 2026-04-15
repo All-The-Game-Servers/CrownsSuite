@@ -1,0 +1,37 @@
+{
+  "id": "minecraft-bedrock",
+  "name": "Minecraft: Bedrock Edition",
+  "category": "Game Servers",
+  "description": "Official Bedrock Dedicated Server from Mojang.",
+  "icon": "🪨",
+  "image": "atgs-runner:latest",
+
+  "variants": [
+    {
+      "id": "default",
+      "name": "Bedrock Dedicated Server",
+      "versionSource": {
+        "type": "static",
+        "versions": ["LATEST"]
+      }
+    }
+  ],
+
+  "ports": {
+    "primary": { "port": 19132, "protocol": "udp", "label": "Game" },
+    "optional": [
+      { "id": "ipv6", "port": 19133, "protocol": "udp", "label": "Game (IPv6)" }
+    ]
+  },
+
+  "environment": {
+    "EULA": { "default": "true", "description": "Accept EULA", "required": true }
+  },
+
+  "rcon": null,
+
+  "configTemplate": {
+    "filename": "server.properties",
+    "content": "server-name={{NAME}}\nserver-port={{PORT}}\nserver-portv6={{PORT_IPV6}}\ngamemode=survival\ndifficulty=normal\nmax-players=20\nonline-mode=true\nwhite-list=false\n"
+  }
+}

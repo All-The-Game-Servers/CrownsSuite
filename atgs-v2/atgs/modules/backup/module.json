@@ -1,0 +1,14 @@
+{
+  "id": "backup",
+  "name": "Backup System",
+  "description": "Automatic and manual backups with compression and rotation.",
+  "version": "1.0.0",
+  "scope": "instance",
+  "sidecar": false,
+  "defaultEnabled": true,
+  "config": {
+    "intervalMinutes": { "type": "number", "default": 60, "label": "Auto-backup interval (minutes)", "min": 5 },
+    "maxBackups": { "type": "number", "default": 24, "label": "Maximum backups to keep" },
+    "excludePatterns": { "type": "string", "default": "logs,crash-reports", "label": "Exclude directories (comma-separated)" }
+  }
+}

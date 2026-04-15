@@ -1,0 +1,12 @@
+{
+  "id": "audit-log",
+  "name": "Audit Log",
+  "description": "Records every action: instance control, user management, file changes, moderation. Searchable activity feed.",
+  "version": "1.0.0",
+  "scope": "global",
+  "sidecar": false,
+  "defaultEnabled": true,
+  "config": {
+    "maxEntries": { "type": "number", "default": 10000, "label": "Maximum log entries to keep" }
+  }
+}

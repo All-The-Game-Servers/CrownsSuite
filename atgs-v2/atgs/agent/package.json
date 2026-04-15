@@ -1,0 +1,13 @@
+{
+  "name": "atgs-agent",
+  "version": "2.0.0",
+  "description": "ATGS Remote Node Agent — connects back to the panel for multi-node management",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "rcon-client": "^4.2.4"
+  }
+}

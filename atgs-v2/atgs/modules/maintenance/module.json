@@ -1,0 +1,14 @@
+{
+  "id": "maintenance",
+  "name": "Maintenance Windows",
+  "description": "Schedule maintenance with countdown announcements, automatic backup, and restart.",
+  "version": "1.0.0",
+  "scope": "instance",
+  "sidecar": false,
+  "defaultEnabled": false,
+  "config": {
+    "announceMinutes": { "type": "string", "default": "10,5,2,1", "label": "Announce at (minutes before, comma-separated)" },
+    "announceMessage": { "type": "string", "default": "Server restarting for maintenance in {minutes} minute(s)!", "label": "Announcement message template" },
+    "backupBefore": { "type": "boolean", "default": true, "label": "Create backup before maintenance" }
+  }
+}

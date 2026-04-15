@@ -1,0 +1,49 @@
+mmo:
+  xp-multiplier: 1.0
+  repeat-window-seconds: 45
+  min-repeat-multiplier: 0.25
+  level-curve:
+    base: 100
+    growth: 35
+  active-skills:
+    battle-surge:
+      cooldown-seconds: 120
+      duration-seconds: 10
+    ranger-focus:
+      cooldown-seconds: 90
+      duration-seconds: 12
+    bulwark:
+      cooldown-seconds: 150
+      duration-seconds: 8
+    pathfinder:
+      cooldown-seconds: 120
+      duration-seconds: 15
+  skills:
+    mining:
+      block-xp: 12
+      ore-bonus-xp: 8
+    woodcutting:
+      block-xp: 10
+    farming:
+      harvest-xp: 10
+    fishing:
+      catch-xp: 18
+    smithing:
+      craft-xp: 22
+    enchanting:
+      use-xp: 26
+    brewing:
+      brew-xp: 20
+    trading:
+      trade-xp: 18
+    swordsmanship:
+      hit-xp: 5
+      kill-xp: 18
+    archery:
+      hit-xp: 6
+      kill-xp: 20
+    defense:
+      damage-xp: 6
+    exploration:
+      biome-xp: 28
+      boss-xp: 50

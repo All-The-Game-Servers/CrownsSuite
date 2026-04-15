@@ -1,0 +1,24 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: atgs-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - panel
+    networks:
+      - atgs-network
+
+volumes:
+  caddy-data:
+  caddy-config:
+
+networks:
+  atgs-network:
+    name: atgs-network
