@@ -1,0 +1,83 @@
+terrain:
+  enabled: true
+  affect-all-floors: true
+  showcase-floor: 2
+  floor-1-world: world
+  generated-world-prefix: crowns_floor_
+  persist-layout-points: true
+  floor-1-livable: true
+  defaults:
+    floor-1-world-size: 16000
+    generated-floor-world-size: 8000
+    village-radius: 56
+    arena-radius: 72
+    spawn-safe-radius: 192
+    structure-density: 1.0
+    placement-mode: seeded-random
+  floors:
+    1:
+      theme: First Haven
+      palette: haven
+      terrain-profile: living_haven
+      world-size: 16000
+      structure-density: 1.25
+      enabled-structures: [village, camp, landmark, waystone, road_marker, shrine]
+      villages:
+        first-haven:
+          name: First Haven
+          profile: haven
+          radius: 72
+        meadow-farms:
+          name: Meadow Farms
+          profile: farming
+          radius: 58
+        south-watch:
+          name: South Watch
+          profile: watchpost
+          radius: 46
+      camps:
+        river-camp:
+          name: River Camp
+        pine-rest:
+          name: Pine Rest
+      waystones:
+        first-waystone:
+          name: First Haven Waystone
+      road-markers:
+        north-road:
+          name: North Road Marker
+        farm-road:
+          name: Farm Road Marker
+      shrines:
+        starter-shrine:
+          name: Starter Shrine
+      arena:
+        key: first-gate-arena
+        name: First Gate Arena
+    2:
+      theme: Ironwood Rise
+      palette: ironwood
+      terrain-profile: ironwood_adventure
+      world-size: 8000
+      showcase: true
+      enabled-structures: [village, landmark, arena]
+      villages:
+        ironwood-outpost:
+          name: Ironwood Outpost
+        ridge-market:
+          name: Ridge Market
+      arena:
+        key: second-gate-arena
+        name: Second Gate Arena
+    3:
+      theme: Veilglass Expanse
+      palette: veilglass
+      terrain-profile: veilglass_highlands
+      world-size: 8000
+      enabled-structures: [village, landmark, arena]
+      villages:
+        veilwatch:
+          name: Veilwatch
+      arena:
+        key: third-gate-arena
+        name: Third Gate Arena

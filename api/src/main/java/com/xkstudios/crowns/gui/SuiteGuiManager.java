@@ -6,6 +6,7 @@ import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.data.PlayerData;
 import com.xkstudios.crowns.inbox.InboxEntry;
 import com.xkstudios.crowns.pack.PackModelHelper;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -16,12 +17,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SuiteGuiManager {
@@ -60,6 +63,9 @@ public class SuiteGuiManager {
                         ? "Resource-pack service offline."
                         : CrownsAPI.getResourcePackService().getStatusSummary(), NamedTextColor.GRAY)
         ), "suite:pack", "lowlight/suite/resource_pack"));
+        inventory.setItem(24, this.button(Material.COMPARATOR, "Suite Status", NamedTextColor.GREEN, List.of(
+                Component.text("Module health, versions, providers, and warnings.", NamedTextColor.GRAY)
+        ), "suite:status", "lowlight/suite/status"));
         inventory.setItem(26, this.button(Material.BARRIER, "Close", NamedTextColor.RED, List.of(), "suite:close", "lowlight/suite/nav_close"));
         player.openInventory(inventory);
     }
@@ -111,6 +117,34 @@ public class SuiteGuiManager {
         player.openInventory(inventory);
     }
 
+    public void openStatus(Player player) {
+        Inventory inventory = CrownsMenuHolder.create("suite-status", 54, Component.text("Crowns Suite Status", NamedTextColor.GREEN));
+        inventory.setItem(4, this.info(Material.BEACON, "Suite Health", NamedTextColor.GREEN, List.of(
+                Component.text("Installed sections: " + CrownsAPI.getSections().size(), NamedTextColor.GRAY),
+                Component.text("Database: " + this.databaseStatus(), this.databaseStatus().equals("online") ? NamedTextColor.GREEN : NamedTextColor.RED),
+                Component.text("Resource pack: " + (CrownsAPI.getResourcePackService() == null ? "offline" : CrownsAPI.getResourcePackService().getStatusSummary()), NamedTextColor.GRAY)
+        ), "lowlight/suite/status"));
+        String[] pluginNames = {"CrownsAPI", "CrownsEconomy", "CrownsAdmin", "CrownsEvents", "CrownsDrugs", "CrownsMMO", "CrownsTerrain"};
+        Material[] icons = {Material.NETHER_STAR, Material.GOLD_INGOT, Material.SHIELD, Material.DRAGON_HEAD, Material.BREWING_STAND, Material.ENCHANTED_BOOK, Material.GRASS_BLOCK};
+        String[] models = {"lowlight/suite/api", "lowlight/suite/economy", "lowlight/suite/admin", "lowlight/suite/events", "lowlight/suite/drugs", "lowlight/suite/mmo", "lowlight/suite/terrain"};
+        int[] slots = {10, 12, 14, 16, 28, 30, 32};
+        for (int i = 0; i < pluginNames.length; i++) {
+            Plugin installed = Bukkit.getPluginManager().getPlugin(pluginNames[i]);
+            List<Component> lore = new ArrayList<>();
+            lore.add(Component.text(installed == null ? "Not installed or not loaded." : "Version: " + installed.getDescription().getVersion(), installed == null ? NamedTextColor.RED : NamedTextColor.GRAY));
+            lore.add(Component.text(installed == null ? "Provider: unavailable" : "Enabled: " + installed.isEnabled(), installed != null && installed.isEnabled() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+            lore.add(Component.text(this.providerLine(pluginNames[i]), NamedTextColor.DARK_GRAY));
+            inventory.setItem(slots[i], this.info(icons[i], pluginNames[i], installed != null && installed.isEnabled() ? NamedTextColor.AQUA : NamedTextColor.DARK_GRAY, lore, models[i]));
+        }
+        inventory.setItem(48, this.button(Material.BOOK, "Resource Pack", NamedTextColor.LIGHT_PURPLE, List.of(
+                Component.text("Open the manual pack page.", NamedTextColor.GRAY)
+        ), "suite:pack", "lowlight/suite/resource_pack"));
+        inventory.setItem(49, this.backToHomeButton());
+        inventory.setItem(50, this.button(Material.BARRIER, "Close", NamedTextColor.RED, List.of(), "suite:close", "lowlight/suite/nav_close"));
+        this.fillBorder(inventory);
+        player.openInventory(inventory);
+    }
+
     public void openResourcePack(Player player) {
         ResourcePackService service = CrownsAPI.getResourcePackService();
         Inventory inventory = CrownsMenuHolder.create("suite-resource-pack", 54, Component.text("Crowns Resource Pack", NamedTextColor.LIGHT_PURPLE));
@@ -120,7 +154,7 @@ public class SuiteGuiManager {
         ), "lowlight/suite/resource_pack"));
         inventory.setItem(13, this.info(Material.NAME_TAG, "Install", NamedTextColor.AQUA, List.of(
                 Component.text("Click Share to receive the pack link in chat.", NamedTextColor.GRAY),
-                Component.text("This suite uses manual pack delivery in 1.2.0.", NamedTextColor.GRAY)
+                Component.text("This suite uses manual pack delivery in 1.3.0.", NamedTextColor.GRAY)
         ), "lowlight/suite/resource_pack"));
         inventory.setItem(15, this.info(Material.PAPER, "Hash", NamedTextColor.WHITE, List.of(
                 Component.text(service == null || service.getSha1().isBlank() ? "No SHA1 configured." : service.getSha1(), NamedTextColor.DARK_GRAY)
@@ -244,5 +278,28 @@ public class SuiteGuiManager {
             lore.add(Component.text("No inbox entries yet.", NamedTextColor.GRAY));
         }
         return lore;
+    }
+
+    private String databaseStatus() {
+        try {
+            return CrownsAPI.getDataManager() != null
+                    && CrownsAPI.getDataManager().getConnection() != null
+                    && !CrownsAPI.getDataManager().getConnection().isClosed()
+                    ? "online"
+                    : "offline";
+        } catch (SQLException exception) {
+            return "error";
+        }
+    }
+
+    private String providerLine(String pluginName) {
+        return switch (pluginName) {
+            case "CrownsEconomy" -> CrownsAPI.getEconomy() == null ? "Economy provider missing" : "Economy provider online";
+            case "CrownsEvents" -> CrownsAPI.getEvents() == null ? "Events provider missing" : "Events provider online";
+            case "CrownsMMO" -> CrownsAPI.getMmo() == null ? "MMO provider missing" : "MMO provider online";
+            case "CrownsTerrain" -> CrownsAPI.getTerrain() == null ? "Terrain provider missing" : "Terrain provider online";
+            case "CrownsAPI" -> CrownsAPI.getDataManager() == null ? "Data manager missing" : "API services online";
+            default -> "Optional module section";
+        };
     }
 }

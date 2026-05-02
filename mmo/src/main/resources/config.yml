@@ -2,6 +2,334 @@ mmo:
   xp-multiplier: 1.0
   repeat-window-seconds: 45
   min-repeat-multiplier: 0.25
+  parties:
+    max-size: 5
+    invite-timeout-seconds: 60
+    boss-credit-radius-extra: 0.0
+  guilds:
+    enabled: true
+    max-members: 25
+    tag-min-length: 2
+    tag-max-length: 5
+    name-min-length: 3
+    name-max-length: 24
+  quests:
+    enabled: true
+    explore-radius: 28.0
+    definitions:
+      fhp-01-first-haven:
+        title: "First Haven Path I: First Haven Scout"
+        description: "Find a Floor 1 settlement and learn where the safe roads begin."
+        line: first_haven_path
+        hint: "Look for the closest generated village or haven settlement. If CrownsTerrain is installed, the quest detail page will show a nearby point."
+        floor: 1
+        objective:
+          type: explore
+          subject: village
+          amount: 1
+        rewards:
+          currency: 250
+          xp: 40
+          skill: exploration
+      fhp-02-road-markers:
+        title: "First Haven Path II: Road Marker Run"
+        description: "Trace three Floor 1 road markers so you can navigate without being carried by coordinates."
+        line: first_haven_path
+        hint: "Follow roads and marker stones outside the haven."
+        floor: 1
+        objective:
+          type: explore
+          subject: road_marker
+          amount: 3
+        rewards:
+          currency: 350
+          xp: 55
+          skill: exploration
+      fhp-03-starter-stores:
+        title: "First Haven Path III: Starter Stores"
+        description: "Collect five Copperleaf from Floor 1 mining drops."
+        line: first_haven_path
+        hint: "Mine copper or iron ores on Floor 1 until Copperleaf drops."
+        floor: 1
+        objective:
+          type: gather
+          subject: f1_copperleaf
+          amount: 5
+        rewards:
+          currency: 400
+          xp: 60
+          skill: mining
+      fhp-04-camp-sweep:
+        title: "First Haven Path IV: Camp Sweep"
+        description: "Find a Floor 1 camp and make sure the route is safe."
+        line: first_haven_path
+        hint: "Travel outward from a village and look for a small camp."
+        floor: 1
+        objective:
+          type: explore
+          subject: camp
+          amount: 1
+        rewards:
+          currency: 300
+          xp: 45
+          skill: exploration
+      fhp-05-undead-pressure:
+        title: "First Haven Path V: Undead Pressure"
+        description: "Defeat ten Floor 1 zombies before they overrun the road camps."
+        line: first_haven_path
+        hint: "Hunt low-risk zombies on Floor 1."
+        floor: 1
+        objective:
+          type: kill
+          subject: zombie
+          amount: 10
+        rewards:
+          currency: 450
+          xp: 70
+          skill: swordsmanship
+      fhp-06-gatekeeper-prep:
+        title: "First Haven Path VI: Gatekeeper Preparations"
+        description: "Turn in three Floor 1 Gate Splinters before challenging the First Gatekeeper."
+        line: first_haven_path
+        hint: "Gate Splinters drop from rare Floor 1 mining, combat, and boss loot."
+        floor: 1
+        objective:
+          type: turnin
+          subject: f1_gate_splinter
+          amount: 3
+        rewards:
+          currency: 500
+          xp: 75
+          skill: exploration
+      fhp-07-first-gate:
+        title: "First Haven Path VII: The First Gate"
+        description: "Defeat the Floor 1 Gatekeeper and prove you are ready for the next floor."
+        line: first_haven_path
+        hint: "Use /cmmo boss at the arena, then /cmmo boss start when ready."
+        floor: 1
+        objective:
+          type: boss
+          subject: floor_1_boss
+          amount: 1
+        rewards:
+          currency: 900
+          xp: 120
+          skill: swordsmanship
+      second-floor-survey:
+        title: "Second Floor Survey"
+        description: "Discover two Floor 2 landmarks and begin mapping the first true adventure floor."
+        line: floor_2
+        hint: "Search for large landmarks after entering Floor 2."
+        floor: 2
+        objective:
+          type: explore
+          subject: landmark
+          amount: 2
+        rewards:
+          currency: 900
+          xp: 100
+          skill: exploration
+  items:
+    # Items can override the Java defaults. Keep keys stable for recipes, drops, and resource-pack models.
+    # Example:
+    # custom_floor_drop:
+    #   category: floor_material
+    #   material: AMETHYST_SHARD
+    #   display-name: "Custom Floor Drop"
+    #   color: aqua
+    #   floor: 1
+    #   model-path: lowlight/mmo/custom_floor_drop
+    #   lore:
+    #     - "A server-custom MMO material."
+  floors:
+    default-border-size: 16000
+    generated-border-size: 8000
+    floor-1-world: world
+    generated-world-prefix: crowns_floor_
+    boss-clear-combat-xp: 80
+    mob-scaling:
+      show-nameplates: true
+    resource-tiers:
+      enabled: true
+      note: "Foundation hook for later CrownsMMO smithing/resource progression."
+    list:
+      1:
+        world: world
+        environment: NORMAL
+        border-size: 16000
+        required-floor: 1
+        difficulty: 1.0
+        resource-tier: 1
+        boss:
+          type: ZOMBIE
+          name: "The First Gatekeeper"
+          health: 160.0
+          damage: 8.0
+          arena-radius: 72.0
+          loot:
+            f1_gatekeeper_trophy:
+              item: f1_gatekeeper_trophy
+              chance: 1.0
+              min: 1
+              max: 1
+            f1_gatekeeper_eye:
+              item: f1_gatekeeper_eye
+              chance: 1.0
+              min: 1
+              max: 1
+            f1_gate_splinter:
+              item: f1_gate_splinter
+              chance: 1.0
+              min: 2
+              max: 4
+        resource-drops:
+          copperleaf:
+            source: mining
+            item: f1_copperleaf
+            chance: 0.08
+            min: 1
+            max: 1
+            triggers: [COPPER_ORE, DEEPSLATE_COPPER_ORE, IRON_ORE, DEEPSLATE_IRON_ORE]
+          gate_splinter_mining:
+            source: mining
+            item: f1_gate_splinter
+            chance: 0.04
+            min: 1
+            max: 1
+            triggers: [AMETHYST_CLUSTER, DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE, EMERALD_ORE, DEEPSLATE_EMERALD_ORE]
+          skyroot_fiber:
+            source: farming
+            item: f1_skyroot_fiber
+            chance: 0.04
+            min: 1
+            max: 2
+          skyroot_fiber_fishing:
+            source: fishing
+            item: f1_skyroot_fiber
+            chance: 0.05
+            min: 1
+            max: 1
+          gate_splinter_combat:
+            source: combat
+            item: f1_gate_splinter
+            chance: 0.03
+            min: 1
+            max: 1
+            triggers: [ZOMBIE, SKELETON, SPIDER, CREEPER]
+      2:
+        world: crowns_floor_2
+        environment: NORMAL
+        border-size: 8000
+        required-floor: 1
+        difficulty: 1.75
+        resource-tier: 2
+        boss:
+          type: WARDEN
+          name: "The Second Gatekeeper"
+          health: 280.0
+          damage: 14.0
+          arena-radius: 80.0
+          loot:
+            f2_gatekeeper_trophy:
+              item: f2_gatekeeper_trophy
+              chance: 1.0
+              min: 1
+              max: 1
+            f2_gatekeeper_heart:
+              item: f2_gatekeeper_heart
+              chance: 1.0
+              min: 1
+              max: 1
+            f2_ironbark_plate:
+              item: f2_ironbark_plate
+              chance: 1.0
+              min: 3
+              max: 6
+        resource-drops:
+          deep_crystal:
+            source: mining
+            item: f2_deep_crystal
+            chance: 0.07
+            min: 1
+            max: 1
+            triggers: [DEEPSLATE_DIAMOND_ORE, DEEPSLATE_EMERALD_ORE, DEEPSLATE_LAPIS_ORE, DEEPSLATE_REDSTONE_ORE]
+          deep_crystal_fishing:
+            source: fishing
+            item: f2_deep_crystal
+            chance: 0.03
+            min: 1
+            max: 1
+          ironbark_plate:
+            source: combat
+            item: f2_ironbark_plate
+            chance: 0.06
+            min: 1
+            max: 2
+            triggers: [ZOMBIE, SKELETON, WITHER_SKELETON, WARDEN]
+          warden_thread:
+            source: combat
+            item: f2_warden_thread
+            chance: 0.03
+            min: 1
+            max: 1
+            triggers: [WARDEN, PHANTOM, ENDERMAN]
+      3:
+        world: crowns_floor_3
+        environment: NORMAL
+        border-size: 8000
+        required-floor: 2
+        difficulty: 3.0
+        resource-tier: 3
+        boss:
+          type: WARDEN
+          name: "The Third Gatekeeper"
+          health: 480.0
+          damage: 22.0
+          arena-radius: 88.0
+          loot:
+            f3_gatekeeper_trophy:
+              item: f3_gatekeeper_trophy
+              chance: 1.0
+              min: 1
+              max: 1
+            f3_gatekeeper_core:
+              item: f3_gatekeeper_core
+              chance: 1.0
+              min: 1
+              max: 1
+            f3_void_silk:
+              item: f3_void_silk
+              chance: 1.0
+              min: 3
+              max: 6
+        resource-drops:
+          starmetal_flake:
+            source: mining
+            item: f3_starmetal_flake
+            chance: 0.06
+            min: 1
+            max: 1
+            triggers: [DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE, EMERALD_ORE, DEEPSLATE_EMERALD_ORE, ANCIENT_DEBRIS]
+          void_silk:
+            source: combat
+            item: f3_void_silk
+            chance: 0.05
+            min: 1
+            max: 2
+            triggers: [ENDERMAN, SHULKER, WARDEN]
+          ancient_lumen:
+            source: combat
+            item: f3_ancient_lumen
+            chance: 0.03
+            min: 1
+            max: 1
+            triggers: [ENDERMAN, SHULKER, BLAZE]
+          ancient_lumen_fishing:
+            source: fishing
+            item: f3_ancient_lumen
+            chance: 0.02
+            min: 1
+            max: 1
   level-curve:
     base: 100
     growth: 35

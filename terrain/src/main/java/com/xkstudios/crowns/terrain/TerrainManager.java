@@ -1,0 +1,280 @@
+package com.xkstudios.crowns.terrain;
+
+import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.TerrainPoint;
+import com.xkstudios.crowns.api.TerrainProvider;
+import com.xkstudios.crowns.data.DataManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.generator.ChunkGenerator;
+
+public class TerrainManager implements TerrainProvider {
+    private final CrownsTerrainPlugin plugin;
+    private final DataManager dataManager;
+    private final Map<String, TerrainPoint> pointCache = new ConcurrentHashMap<>();
+
+    public TerrainManager(CrownsTerrainPlugin plugin) {
+        this.plugin = plugin;
+        this.dataManager = CrownsAPI.getDataManager();
+    }
+
+    public void initialize() {
+        this.ensureTables();
+    }
+
+    @Override
+    public ChunkGenerator getGeneratorForFloor(int floorNumber, String worldName, World.Environment environment, long resourceTier) {
+        if (!this.plugin.getConfig().getBoolean("terrain.enabled", true)) {
+            return null;
+        }
+        boolean affectAll = this.plugin.getConfig().getBoolean("terrain.affect-all-floors", true);
+        int showcase = this.plugin.getConfig().getInt("terrain.showcase-floor", 2);
+        if (!affectAll && floorNumber != showcase) {
+            return null;
+        }
+        TerrainTheme theme = this.theme(floorNumber);
+        return new FloorTerrainGenerator(
+                floorNumber,
+                worldName,
+                theme,
+                this.getVillages(floorNumber, worldName),
+                this.getBossArena(floorNumber, worldName),
+                this.getLandmarks(floorNumber, worldName),
+                this.getLivingPoints(floorNumber, worldName)
+        );
+    }
+
+    @Override
+    public TerrainPoint getBossArena(int floorNumber, String worldName) {
+        return this.getOrCreatePoint(TerrainLayout.defaultArena(floorNumber, worldName, this.floorSection(floorNumber)));
+    }
+
+    @Override
+    public List<TerrainPoint> getVillages(int floorNumber, String worldName) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (TerrainPoint point : TerrainLayout.defaultVillages(floorNumber, worldName, this.floorSection(floorNumber))) {
+            points.add(this.getOrCreatePoint(point));
+        }
+        return points;
+    }
+
+    @Override
+    public List<TerrainPoint> getLandmarks(int floorNumber, String worldName) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (TerrainPoint point : TerrainLayout.defaultLandmarks(floorNumber, worldName, this.floorSection(floorNumber))) {
+            points.add(this.getOrCreatePoint(point));
+        }
+        return points;
+    }
+
+    public List<TerrainPoint> getLivingPoints(int floorNumber, String worldName) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (String type : List.of("camp", "waystone", "road_marker", "shrine")) {
+            points.addAll(this.getPoints(floorNumber, worldName, type));
+        }
+        return points;
+    }
+
+    @Override
+    public List<TerrainPoint> getPoints(int floorNumber, String worldName, String type) {
+        if (type == null || type.isBlank()) {
+            return List.of();
+        }
+        String normalized = normalizeType(type);
+        if (!this.isStructureEnabled(floorNumber, normalized)) {
+            return List.of();
+        }
+        List<TerrainPoint> points = new ArrayList<>();
+        if (normalized.equals("village")) {
+            return this.getVillages(floorNumber, worldName);
+        }
+        if (normalized.equals("landmark")) {
+            return this.getLandmarks(floorNumber, worldName);
+        }
+        if (normalized.equals("arena")) {
+            TerrainPoint arena = this.getBossArena(floorNumber, worldName);
+            return arena == null ? List.of() : List.of(arena);
+        }
+        for (TerrainPoint point : TerrainLayout.defaultTypedPoints(floorNumber, worldName, this.floorSection(floorNumber), normalized)) {
+            points.add(this.getOrCreatePoint(point));
+        }
+        return points;
+    }
+
+    @Override
+    public List<TerrainPoint> getAllPoints(int floorNumber, String worldName) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (String type : List.of("village", "camp", "landmark", "waystone", "road_marker", "shrine", "arena")) {
+            points.addAll(this.getPoints(floorNumber, worldName, type));
+        }
+        return points;
+    }
+
+    @Override
+    public String getFloorTheme(int floorNumber) {
+        return this.theme(floorNumber).name();
+    }
+
+    public int getWorldSize(int floorNumber) {
+        ConfigurationSection section = this.floorSection(floorNumber);
+        if (section != null && section.isSet("world-size")) {
+            return section.getInt("world-size", floorNumber == 1 ? 16000 : 8000);
+        }
+        return floorNumber == 1
+                ? this.plugin.getConfig().getInt("terrain.defaults.floor-1-world-size", 16000)
+                : this.plugin.getConfig().getInt("terrain.defaults.generated-floor-world-size", 8000);
+    }
+
+    public String getTerrainProfile(int floorNumber) {
+        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".terrain-profile", floorNumber == 1 ? "living_haven" : "procedural_adventure");
+    }
+
+    public double getStructureDensity(int floorNumber) {
+        return this.plugin.getConfig().getDouble("terrain.floors." + floorNumber + ".structure-density",
+                this.plugin.getConfig().getDouble("terrain.defaults.structure-density", 1.0D));
+    }
+
+    public int countPersistedPoints(int floorNumber, String worldName) {
+        if (this.dataManager == null) {
+            return 0;
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement(
+                "SELECT COUNT(*) FROM terrain_points WHERE floor_number = ? AND world_name = ?")) {
+            statement.setInt(1, floorNumber);
+            statement.setString(2, worldName);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? result.getInt(1) : 0;
+            }
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not count terrain points: " + exception.getMessage());
+            return 0;
+        }
+    }
+
+    public void reload() {
+        this.plugin.reloadConfig();
+        this.pointCache.clear();
+    }
+
+    public TerrainTheme theme(int floorNumber) {
+        ConfigurationSection section = this.floorSection(floorNumber);
+        String configuredName = section == null ? null : section.getString("theme");
+        return TerrainTheme.forFloor(floorNumber, configuredName);
+    }
+
+    private TerrainPoint getOrCreatePoint(TerrainPoint fallback) {
+        if (fallback == null) {
+            return null;
+        }
+        String cacheKey = this.cacheKey(fallback.floor(), fallback.worldName(), fallback.type(), fallback.key());
+        TerrainPoint cached = this.pointCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+        TerrainPoint loaded = this.loadPoint(fallback);
+        TerrainPoint resolved = loaded == null ? fallback : loaded;
+        if (loaded == null && this.plugin.getConfig().getBoolean("terrain.persist-layout-points", true)) {
+            this.savePoint(fallback);
+        }
+        this.pointCache.put(cacheKey, resolved);
+        return resolved;
+    }
+
+    private TerrainPoint loadPoint(TerrainPoint fallback) {
+        if (this.dataManager == null) {
+            return null;
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                SELECT display_name, x, y, z FROM terrain_points
+                WHERE floor_number = ? AND world_name = ? AND point_type = ? AND point_key = ?
+                """)) {
+            statement.setInt(1, fallback.floor());
+            statement.setString(2, fallback.worldName());
+            statement.setString(3, fallback.type());
+            statement.setString(4, fallback.key());
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return new TerrainPoint(fallback.floor(), fallback.worldName(), fallback.type(), fallback.key(),
+                            result.getString("display_name"), result.getInt("x"), result.getInt("y"), result.getInt("z"));
+                }
+            }
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not load terrain point: " + exception.getMessage());
+        }
+        return null;
+    }
+
+    private void savePoint(TerrainPoint point) {
+        if (this.dataManager == null) {
+            return;
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                INSERT OR REPLACE INTO terrain_points
+                (floor_number, world_name, point_type, point_key, display_name, x, y, z, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """)) {
+            statement.setInt(1, point.floor());
+            statement.setString(2, point.worldName());
+            statement.setString(3, point.type());
+            statement.setString(4, point.key());
+            statement.setString(5, point.displayName());
+            statement.setInt(6, point.x());
+            statement.setInt(7, point.y());
+            statement.setInt(8, point.z());
+            statement.setLong(9, System.currentTimeMillis());
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not save terrain point: " + exception.getMessage());
+        }
+    }
+
+    private void ensureTables() {
+        if (this.dataManager == null) {
+            return;
+        }
+        try (Statement statement = this.dataManager.getConnection().createStatement()) {
+            statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS terrain_points (
+                        floor_number INTEGER NOT NULL,
+                        world_name TEXT NOT NULL,
+                        point_type TEXT NOT NULL,
+                        point_key TEXT NOT NULL,
+                        display_name TEXT,
+                        x INTEGER NOT NULL,
+                        y INTEGER NOT NULL,
+                        z INTEGER NOT NULL,
+                        created_at INTEGER NOT NULL,
+                        PRIMARY KEY (floor_number, world_name, point_type, point_key)
+                    )
+                    """);
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Terrain table setup failed: " + exception.getMessage());
+        }
+    }
+
+    private ConfigurationSection floorSection(int floorNumber) {
+        return this.plugin.getConfig().getConfigurationSection("terrain.floors." + floorNumber);
+    }
+
+    private boolean isStructureEnabled(int floorNumber, String type) {
+        List<String> enabled = this.plugin.getConfig().getStringList("terrain.floors." + floorNumber + ".enabled-structures");
+        return enabled.isEmpty() || enabled.stream().map(TerrainManager::normalizeType).anyMatch(type::equals);
+    }
+
+    private static String normalizeType(String type) {
+        return type == null ? "" : type.toLowerCase(Locale.ROOT).replace('-', '_');
+    }
+
+    private String cacheKey(int floor, String worldName, String type, String key) {
+        return floor + ":" + (worldName == null ? "" : worldName.toLowerCase(Locale.ROOT)) + ":" + type + ":" + key;
+    }
+}

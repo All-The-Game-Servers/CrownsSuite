@@ -2,7 +2,7 @@
 
 Crowns Suite is the Lowlight SMP management toolkit by XKStudios. It is split into focused plugins so the server can grow without one giant jar doing everything.
 
-`1.2.0` focuses on live identity, stronger progression loops, and cleaner suite cohesion.
+`1.3.0` focuses on suite cohesion, health visibility, and the first CrownsMMO quest foundations.
 
 ## Plugins
 
@@ -15,6 +15,7 @@ The shared backbone for the suite.
 - Shared inbox, menu, and provider contracts
 - Manual resource-pack distribution and install info
 - Suite profile and recent alert surfaces
+- Suite status page for module versions, provider health, database state, and resource-pack state
 
 ### CrownsEconomy
 The player trade and money loop.
@@ -58,6 +59,16 @@ The Season 2 SAO-inspired MMO layer.
 - Gathering, professions, combat, and world progression together
 - Light active skills like `Battle Surge`, `Ranger Focus`, `Bulwark`, and `Pathfinder`
 - Boss journal and chapter-style world progression
+- Floor quests connected to terrain POIs, kills, turn-ins, XP, and Crowns rewards
+
+### CrownsTerrain
+The terrain identity layer for CrownsMMO floor worlds.
+
+- Hybrid floor generation for livable but authored worlds
+- Floor-themed custom villages, landmarks, and boss arena locations
+- Safe/useful settlement design for future NPCs, shops, and quests
+- Optional provider layer so CrownsMMO can still run without it
+- Stable generated point metadata for CrownsMMO quest objectives
 
 ## CrownsEconomy Overview
 

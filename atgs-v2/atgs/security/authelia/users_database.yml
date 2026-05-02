@@ -1,8 +1,0 @@
-users:
-  bootstrap-admin:
-    disabled: false
-    displayname: Bootstrap Admin
-    password: 'Apm032007!'
-    email: allthegameservers@gmail.com
-    groups:
-      - admins

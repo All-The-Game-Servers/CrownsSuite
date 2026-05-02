@@ -18,6 +18,7 @@ public final class CrownsAPI {
     private static EconomyLedgerProvider ledgerProvider;
     private static EventsProvider eventsProvider;
     private static MmoProvider mmoProvider;
+    private static TerrainProvider terrainProvider;
     private static DataManager dataManager;
     private static SuiteGuiManager suiteGuiManager;
     private static ResourcePackService resourcePackService;
@@ -74,6 +75,14 @@ public final class CrownsAPI {
 
     public static MmoProvider getMmo() {
         return mmoProvider;
+    }
+
+    public static void setTerrainProvider(TerrainProvider provider) {
+        terrainProvider = provider;
+    }
+
+    public static TerrainProvider getTerrain() {
+        return terrainProvider;
     }
 
     public static void setDataManager(DataManager manager) {

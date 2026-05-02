@@ -15,10 +15,10 @@ inbox:
 
 resource-pack:
   enabled: true
-  version: 1.2.0
-  url: "https://raw.githubusercontent.com/All-The-Game-Servers/CrownsSuite/master/downloads/CrownsSuite-ResourcePack-1.2.0.zip"
-  download-url: "https://raw.githubusercontent.com/All-The-Game-Servers/CrownsSuite/master/downloads/CrownsSuite-ResourcePack-1.2.0.zip"
+  version: 1.5.0
+  url: "https://raw.githubusercontent.com/All-The-Game-Servers/CrownsSuite/master/downloads/CrownsSuite-ResourcePack-1.5.0.zip"
+  download-url: "https://raw.githubusercontent.com/All-The-Game-Servers/CrownsSuite/master/downloads/CrownsSuite-ResourcePack-1.5.0.zip"
   github-page-url: "https://github.com/All-The-Game-Servers/CrownsSuite/tree/master/downloads"
-  sha1: "8939f46d7d8fcfacefe0bacfa47776a2f9aad645"
+  sha1: "38ea1def8cf48afa624711276f39f7d023f1134b"
   allow-client-prompt-with-valhalla: false
   prompt: Lowlight SMP uses the Crowns Suite resource pack for custom items and menus.

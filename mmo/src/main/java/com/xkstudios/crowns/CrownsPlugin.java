@@ -6,7 +6,12 @@ import com.xkstudios.crowns.command.MmoCommand;
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.listener.MmoListener;
 import com.xkstudios.crowns.mmo.MmoManager;
+import com.xkstudios.crowns.mmo.floor.MmoFloorManager;
 import com.xkstudios.crowns.mmo.gui.MmoMenuManager;
+import com.xkstudios.crowns.mmo.item.MmoItemFactory;
+import com.xkstudios.crowns.mmo.quest.MmoQuestManager;
+import com.xkstudios.crowns.mmo.social.MmoGuildManager;
+import com.xkstudios.crowns.mmo.social.MmoPartyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +19,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CrownsPlugin extends JavaPlugin {
     private DataManager dataManager;
     private MmoManager mmoManager;
+    private MmoFloorManager floorManager;
+    private MmoItemFactory itemFactory;
+    private MmoQuestManager questManager;
+    private MmoPartyManager partyManager;
+    private MmoGuildManager guildManager;
     private MmoMenuManager menuManager;
 
     @Override
@@ -26,8 +36,17 @@ public class CrownsPlugin extends JavaPlugin {
             return;
         }
         this.mmoManager = new MmoManager(this);
+        this.floorManager = new MmoFloorManager(this);
+        this.itemFactory = new MmoItemFactory(this);
+        this.questManager = new MmoQuestManager(this);
+        this.partyManager = new MmoPartyManager(this);
+        this.guildManager = new MmoGuildManager(this);
         this.menuManager = new MmoMenuManager(this);
         this.mmoManager.initialize();
+        this.floorManager.initialize();
+        this.itemFactory.initialize();
+        this.questManager.initialize();
+        this.guildManager.initialize();
         CrownsAPI.setMmoProvider(this.mmoManager);
         CrownsAPI.registerSection(new SuiteSection(
                 "mmo",
@@ -59,6 +78,26 @@ public class CrownsPlugin extends JavaPlugin {
 
     public MmoManager getMmoManager() {
         return this.mmoManager;
+    }
+
+    public MmoFloorManager getFloorManager() {
+        return this.floorManager;
+    }
+
+    public MmoItemFactory getItemFactory() {
+        return this.itemFactory;
+    }
+
+    public MmoQuestManager getQuestManager() {
+        return this.questManager;
+    }
+
+    public MmoPartyManager getPartyManager() {
+        return this.partyManager;
+    }
+
+    public MmoGuildManager getGuildManager() {
+        return this.guildManager;
     }
 
     public MmoMenuManager getMenuManager() {

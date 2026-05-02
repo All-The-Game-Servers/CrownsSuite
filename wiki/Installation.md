@@ -7,6 +7,8 @@
 3. CrownsAdmin
 4. CrownsEvents
 5. CrownsDrugs
+6. CrownsMMO
+7. CrownsTerrain
 
 ## Data
 
@@ -16,8 +18,10 @@
 
 ## Resource Pack
 
-- CrownsAPI provides manual resource-pack sharing in `1.2.0`
+- CrownsAPI provides manual resource-pack sharing and server-side pack download support
 - Configure the pack URL, version, and SHA1 in the CrownsAPI config
-- Players can open the suite pack page in-game to receive the download link
-- Current pack file: `CrownsSuite-ResourcePack-1.2.0.zip`
-- Current pack SHA1: `8939f46d7d8fcfacefe0bacfa47776a2f9aad645`
+- Run `/capi pack download` to download the configured resource pack onto the server
+- Players can open the suite pack page in-game to receive the download link when manual delivery is used
+- Current pack file: `CrownsSuite-ResourcePack-1.5.0.zip`
+- Current pack SHA1: `38ea1def8cf48afa624711276f39f7d023f1134b`
+- The default resource-pack config keeps ValhallaMMO-safe manual delivery enabled and does not force client prompts

@@ -2,18 +2,22 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import struct
 import zlib
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "1.2.0"
+VERSION = "1.5.0"
 PACK_NAME = f"CrownsSuite-ResourcePack-{VERSION}"
 PACK_DIR = ROOT / "resource-pack" / PACK_NAME
 BUILD_DIR = ROOT / "build" / "resource-pack"
+DOWNLOADS_DIR = ROOT / "downloads"
 ZIP_PATH = BUILD_DIR / f"{PACK_NAME}.zip"
 SHA1_PATH = BUILD_DIR / f"{PACK_NAME}.sha1"
+DOWNLOAD_ZIP_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.zip"
+DOWNLOAD_SHA1_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.sha1"
 INDEX_PATH = ROOT / "resource-pack" / "ASSET_INDEX.md"
 TRANSPARENT = (0, 0, 0, 0)
 
@@ -24,12 +28,17 @@ def rgba(hex_value: str, alpha: int = 255):
 
 
 PALETTES = {
-    "suite": {"trim": rgba("#A67CFF"), "glow": rgba("#6DE4FF", 170), "gold": rgba("#D0A85E"), "paper": rgba("#D9D0BD"), "shade": rgba("#0B0911"), "accent": rgba("#7A56D9")},
-    "economy": {"trim": rgba("#7C5C2D"), "glow": rgba("#87C59B", 170), "gold": rgba("#D8B15E"), "paper": rgba("#DAD0BF"), "shade": rgba("#090806"), "accent": rgba("#4C8F5A")},
-    "admin": {"trim": rgba("#5E6678"), "glow": rgba("#B4485E", 170), "gold": rgba("#A8B0BE"), "paper": rgba("#CCD3DF"), "shade": rgba("#09090C"), "accent": rgba("#7E8CA3")},
-    "nether": {"trim": rgba("#6F2B1A"), "glow": rgba("#FF7C38", 175), "gold": rgba("#D9A454"), "paper": rgba("#B19A88"), "shade": rgba("#0A0505"), "accent": rgba("#C9462B")},
-    "end": {"trim": rgba("#43356B"), "glow": rgba("#7BE8FF", 175), "gold": rgba("#DFC86B"), "paper": rgba("#E2D6C4"), "shade": rgba("#06060C"), "accent": rgba("#7F60FF")},
-    "drugs": {"trim": rgba("#45364D"), "glow": rgba("#5CF7C8", 170), "gold": rgba("#D7AD65"), "paper": rgba("#D8E4E8"), "shade": rgba("#060507"), "accent": rgba("#58A66B")},
+    "suite": {"trim": rgba("#5B3E95"), "glow": rgba("#76E9FF", 180), "gold": rgba("#D8B060"), "paper": rgba("#D7CDBA"), "shade": rgba("#07050D"), "accent": rgba("#9A6DFF")},
+    "economy": {"trim": rgba("#755526"), "glow": rgba("#79D89A", 170), "gold": rgba("#E1B85C"), "paper": rgba("#D8CFB9"), "shade": rgba("#070604"), "accent": rgba("#3E8E5A")},
+    "admin": {"trim": rgba("#586273"), "glow": rgba("#D24D63", 175), "gold": rgba("#B9C2CC"), "paper": rgba("#D6DCE4"), "shade": rgba("#07080C"), "accent": rgba("#8B97A8")},
+    "nether": {"trim": rgba("#5B2117"), "glow": rgba("#FF7B2F", 185), "gold": rgba("#DFA454"), "paper": rgba("#B99D84"), "shade": rgba("#080302"), "accent": rgba("#D24424")},
+    "end": {"trim": rgba("#372A62"), "glow": rgba("#7CEBFF", 185), "gold": rgba("#E2CD6F"), "paper": rgba("#E4DAC6"), "shade": rgba("#04050B"), "accent": rgba("#835DFF")},
+    "drugs": {"trim": rgba("#3F3448"), "glow": rgba("#5AF7C5", 175), "gold": rgba("#D6AD62"), "paper": rgba("#DAE7E6"), "shade": rgba("#050507"), "accent": rgba("#54AA68")},
+    "mmo": {"trim": rgba("#2E3C74"), "glow": rgba("#8CD7FF", 180), "gold": rgba("#D9B35C"), "paper": rgba("#DCD3BF"), "shade": rgba("#05070D"), "accent": rgba("#6E8CFF")},
+    "mmo_f1": {"trim": rgba("#4B6F43"), "glow": rgba("#9DF09A", 170), "gold": rgba("#CFA05A"), "paper": rgba("#C9D7B8"), "shade": rgba("#040805"), "accent": rgba("#67B66C")},
+    "mmo_f2": {"trim": rgba("#435063"), "glow": rgba("#7FCFFF", 175), "gold": rgba("#BFC6CD"), "paper": rgba("#CBD8E2"), "shade": rgba("#04070B"), "accent": rgba("#567AA9")},
+    "mmo_f3": {"trim": rgba("#33264F"), "glow": rgba("#B985FF", 185), "gold": rgba("#E4CB75"), "paper": rgba("#DAD0E6"), "shade": rgba("#03030A"), "accent": rgba("#7D58DF")},
+    "terrain": {"trim": rgba("#345C42"), "glow": rgba("#9AF2B0", 175), "gold": rgba("#D5B06A"), "paper": rgba("#D7D1B8"), "shade": rgba("#040806"), "accent": rgba("#5FA36D")},
 }
 
 
@@ -39,6 +48,8 @@ def suite_assets():
         ("lowlight/suite/admin", "suite_admin", "suite"),
         ("lowlight/suite/events", "suite_events", "suite"),
         ("lowlight/suite/drugs", "suite_drugs", "suite"),
+        ("lowlight/suite/mmo", "suite_mmo", "mmo"),
+        ("lowlight/suite/terrain", "suite_terrain", "terrain"),
         ("lowlight/suite/nav_back", "nav_back", "suite"),
         ("lowlight/suite/nav_close", "nav_close", "suite"),
         ("lowlight/suite/event_live", "event_live", "suite"),
@@ -83,6 +94,25 @@ ASSETS = (
         "starchart_compass", "voidwalker_boots", "gateway_lantern", "chorus_satchel", "crown_beyond_stars", "endfall_trophy"
     ]]
     + [(f"lowlight/end/material/{name}", name, "end") for name in ["void_filament", "chorus_weave", "gateway_residue"]]
+    + group_assets("mmo", "mmo", [
+        "floors", "resources", "gear", "recipes", "party", "guild", "skills", "professions", "combat", "actives", "guide",
+    ])
+    + group_assets("mmo/floor1", "mmo_f1", [
+        "skyroot_fiber", "gate_splinter", "copperleaf", "gatekeeper_eye", "gatekeeper_trophy",
+    ])
+    + group_assets("mmo/floor2", "mmo_f2", [
+        "ironbark_plate", "deep_crystal", "warden_thread", "gatekeeper_heart", "gatekeeper_trophy",
+    ])
+    + group_assets("mmo/floor3", "mmo_f3", [
+        "void_silk", "ancient_lumen", "starmetal_flake", "gatekeeper_core", "gatekeeper_trophy",
+    ])
+    + [(f"lowlight/mmo/gear/{name}", name, "mmo") for name in [
+        "pathfinder_boots", "deep_miner_charm", "gatebreaker_compass", "forager_satchel", "wardenhide_cloak", "veilwalkers_lantern",
+    ]]
+    + group_assets("terrain", "terrain", [
+        "hub", "village", "arena", "landmark", "camp", "road_marker", "waystone", "shrine", "market", "watchtower",
+        "floor_1", "floor_2", "floor_3",
+    ])
 )
 
 
@@ -143,6 +173,18 @@ class Canvas:
             for dx in range(-span, span + 1):
                 self.blend(cx + dx, cy + dy, color)
 
+    def ellipse(self, cx, cy, rx, ry, color):
+        for y in range(cy - ry, cy + ry + 1):
+            for x in range(cx - rx, cx + rx + 1):
+                if ((x - cx) * (x - cx) * ry * ry) + ((y - cy) * (y - cy) * rx * rx) <= rx * rx * ry * ry:
+                    self.blend(x, y, color)
+
+    def frame(self, color, inset=3):
+        self.line(inset, inset, self.w - inset - 1, inset, color)
+        self.line(inset, self.h - inset - 1, self.w - inset - 1, self.h - inset - 1, color)
+        self.line(inset, inset, inset, self.h - inset - 1, color)
+        self.line(self.w - inset - 1, inset, self.w - inset - 1, self.h - inset - 1, color)
+
 
 def chunk(tag: bytes, data: bytes):
     return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
@@ -184,11 +226,15 @@ def write_model_files(model_path: str):
 def base_canvas(palette_name: str):
     palette = PALETTES[palette_name]
     canvas = Canvas()
-    for radius, alpha in ((13, 18), (10, 24), (7, 32)):
+    for radius, alpha in ((14, 16), (11, 24), (7, 36)):
         glow = palette["glow"]
         canvas.circle(16, 16, radius, (glow[0], glow[1], glow[2], alpha))
+    canvas.frame((palette["trim"][0], palette["trim"][1], palette["trim"][2], 82), 2)
+    canvas.frame((palette["shade"][0], palette["shade"][1], palette["shade"][2], 170), 4)
+    canvas.line(6, 25, 25, 6, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 34))
+    canvas.line(7, 26, 26, 7, (palette["glow"][0], palette["glow"][1], palette["glow"][2], 28))
     for ox, oy in ((4, 4), (27, 4), (4, 27), (27, 27)):
-        canvas.rect(ox - 1, oy - 1, ox + 1, oy + 1, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 90))
+        canvas.rect(ox - 1, oy - 1, ox + 1, oy + 1, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 125))
     return canvas, palette
 
 
@@ -240,6 +286,67 @@ def draw_scroll(c, p):
     c.rect(10, 9, 21, 22, p["paper"]); c.rect(9, 10, 10, 21, p["gold"]); c.rect(21, 10, 22, 21, p["gold"]); c.line(13, 13, 19, 13, p["trim"]); c.line(13, 16, 18, 16, p["trim"]); c.line(13, 19, 17, 19, p["trim"])
 
 
+def draw_gate(c, p, floor=1):
+    c.line(8, 24, 8, 13, p["gold"]); c.line(24, 24, 24, 13, p["gold"])
+    c.line(8, 13, 16, 6, p["gold"]); c.line(24, 13, 16, 6, p["gold"])
+    c.rect(12, 15, 20, 24, (p["shade"][0], p["shade"][1], p["shade"][2], 220))
+    c.diamond(16, 15, 3 + min(floor, 3), p["glow"])
+
+
+def draw_banner(c, p):
+    c.line(9, 6, 9, 25, p["gold"]); c.rect(10, 8, 23, 19, p["accent"])
+    c.line(10, 19, 16, 24, p["accent"]); c.line(23, 19, 16, 24, p["accent"])
+    draw_crown(c, p, 10)
+
+
+def draw_party(c, p):
+    for x, y in ((10, 17), (16, 12), (22, 17)):
+        c.circle(x, y, 3, p["paper"])
+        c.rect(x - 3, y + 4, x + 3, y + 8, p["accent"])
+    c.line(13, 18, 16, 15, p["gold"]); c.line(19, 18, 16, 15, p["gold"])
+
+
+def draw_resource(c, p, kind):
+    if "fiber" in kind or "thread" in kind or "silk" in kind:
+        for i in range(5):
+            c.line(9, 10 + i * 3, 23, 8 + i * 3, p["glow"] if i % 2 else p["paper"])
+    elif "leaf" in kind:
+        c.ellipse(15, 16, 5, 9, p["accent"]); c.line(15, 8, 17, 25, p["gold"]); c.ellipse(20, 17, 4, 7, p["glow"])
+    elif "plate" in kind:
+        c.rect(9, 10, 23, 22, p["trim"]); c.rect(11, 12, 21, 20, p["paper"]); c.line(10, 16, 22, 16, p["gold"])
+    elif "crystal" in kind or "lumen" in kind or "flake" in kind:
+        draw_shard(c, p, p["glow"])
+    elif "splinter" in kind:
+        c.line(18, 7, 11, 25, p["gold"]); c.line(19, 8, 15, 25, p["accent"]); c.line(14, 14, 22, 18, p["glow"])
+    else:
+        draw_shard(c, p, p["accent"])
+
+
+def draw_trophy(c, p, floor=1):
+    c.rect(11, 20, 21, 23, p["gold"]); c.rect(14, 16, 18, 20, p["gold"])
+    c.rect(10, 9, 22, 16, p["trim"]); c.line(10, 9, 16, 5, p["trim"]); c.line(22, 9, 16, 5, p["trim"])
+    c.diamond(16, 12, 2 + floor, p["glow"])
+
+
+def draw_eye(c, p):
+    c.ellipse(16, 16, 10, 6, p["paper"]); c.circle(16, 16, 4, p["glow"]); c.circle(16, 16, 2, p["shade"])
+
+
+def draw_heart(c, p):
+    c.circle(13, 13, 4, p["accent"]); c.circle(19, 13, 4, p["accent"])
+    c.line(9, 15, 16, 24, p["accent"]); c.line(23, 15, 16, 24, p["accent"]); c.diamond(16, 16, 4, p["glow"])
+
+
+def draw_cloak(c, p):
+    c.line(12, 7, 20, 7, p["gold"]); c.line(12, 7, 8, 24, p["accent"]); c.line(20, 7, 24, 24, p["accent"])
+    c.line(8, 24, 16, 20, p["accent"]); c.line(24, 24, 16, 20, p["accent"]); c.diamond(16, 10, 2, p["glow"])
+
+
+def draw_charm(c, p):
+    c.line(11, 8, 21, 8, p["gold"]); c.line(11, 8, 16, 13, p["gold"]); c.line(21, 8, 16, 13, p["gold"])
+    c.diamond(16, 18, 6, p["glow"]); c.diamond(16, 18, 3, p["accent"])
+
+
 def draw_icon(kind: str, palette_name: str):
     c, p = base_canvas(palette_name)
     if kind.endswith("_week"):
@@ -252,6 +359,10 @@ def draw_icon(kind: str, palette_name: str):
         draw_crown(c, PALETTES["suite"], 11); draw_shard(c, PALETTES["end"], PALETTES["end"]["glow"])
     elif kind in {"suite_drugs", "process", "use"}:
         draw_flask(c, PALETTES["drugs"], PALETTES["drugs"]["accent"] if kind == "process" else PALETTES["end"]["accent"])
+    elif kind in {"suite_mmo", "floors"}:
+        draw_gate(c, PALETTES["mmo"], 3)
+    elif kind in {"suite_terrain", "hub"}:
+        c.ellipse(16, 20, 11, 5, PALETTES["terrain"]["accent"]); draw_gate(c, PALETTES["terrain"], 1)
     elif kind in {"nav_back"}:
         c.line(22, 10, 10, 16, p["paper"]); c.line(10, 16, 22, 22, p["paper"]); c.line(10, 16, 24, 16, p["glow"])
     elif kind in {"nav_close"}:
@@ -278,6 +389,65 @@ def draw_icon(kind: str, palette_name: str):
         c.circle(10, 17, 3, p["accent"]); c.circle(16, 15, 3, p["gold"]); c.circle(22, 17, 3, p["glow"])
     elif kind in {"player_inspection", "playtime", "analytics", "entity_tools", "roles", "puppeteering", "staff_mode", "true_vanish"}:
         draw_compass(c, p)
+    elif kind in {"party"}:
+        draw_party(c, p)
+    elif kind in {"guild"}:
+        draw_banner(c, p)
+    elif kind in {"village"}:
+        c.rect(9, 15, 15, 23, p["wall"] if "wall" in p else p["gold"])
+        c.rect(17, 13, 24, 23, p["accent"])
+        c.line(8, 15, 12, 10, p["gold"]); c.line(16, 15, 12, 10, p["gold"])
+        c.line(16, 13, 20, 8, p["gold"]); c.line(25, 13, 20, 8, p["gold"])
+    elif kind in {"arena"}:
+        c.circle(16, 17, 10, p["trim"]); c.circle(16, 17, 7, p["shade"]); c.diamond(16, 17, 4, p["glow"])
+    elif kind in {"landmark"}:
+        for y in range(8, 24):
+            c.rect(14, y, 18, y, p["wall"] if "wall" in p else p["gold"])
+        c.diamond(16, 8, 5, p["glow"])
+    elif kind in {"camp"}:
+        c.rect(9, 21, 23, 23, p["trim"]); c.line(10, 20, 16, 10, p["gold"]); c.line(22, 20, 16, 10, p["gold"]); c.circle(16, 22, 3, p["glow"])
+    elif kind in {"road_marker"}:
+        c.line(16, 8, 16, 24, p["gold"]); c.rect(12, 10, 22, 15, p["accent"]); c.line(13, 18, 20, 18, p["trim"])
+    elif kind in {"waystone"}:
+        c.rect(13, 10, 19, 24, p["trim"]); c.diamond(16, 13, 4, p["glow"]); c.line(12, 24, 20, 24, p["gold"])
+    elif kind in {"shrine"}:
+        c.rect(10, 22, 22, 24, p["gold"]); c.line(10, 22, 16, 8, p["trim"]); c.line(22, 22, 16, 8, p["trim"]); c.diamond(16, 16, 4, p["glow"])
+    elif kind in {"market"}:
+        c.rect(8, 15, 24, 23, p["accent"]); c.line(8, 15, 16, 9, p["gold"]); c.line(24, 15, 16, 9, p["gold"]); draw_coin(c, PALETTES["economy"])
+    elif kind in {"watchtower"}:
+        c.rect(13, 12, 19, 25, p["trim"]); c.rect(10, 9, 22, 13, p["gold"]); c.diamond(16, 8, 3, p["glow"])
+    elif kind in {"floor_1", "floor_2", "floor_3"}:
+        draw_gate(c, p, int(kind[-1]))
+    elif kind in {"resources"}:
+        draw_resource(c, p, "crystal")
+    elif kind in {"gear"}:
+        draw_shield(c, p); draw_charm(c, p)
+    elif kind in {"recipes", "guide"}:
+        draw_book(c, p)
+    elif kind in {"skills", "professions", "combat", "actives"}:
+        draw_gate(c, p, 2); draw_shard(c, p, p["glow"])
+    elif kind.startswith("gatekeeper_") and "trophy" in kind:
+        draw_trophy(c, p, 3 if palette_name == "mmo_f3" else 2 if palette_name == "mmo_f2" else 1)
+    elif kind.endswith("_eye"):
+        draw_eye(c, p)
+    elif kind.endswith("_heart"):
+        draw_heart(c, p)
+    elif kind.endswith("_core"):
+        draw_shard(c, p, p["glow"]); c.circle(16, 16, 3, p["gold"])
+    elif kind in {"skyroot_fiber", "gate_splinter", "copperleaf", "ironbark_plate", "deep_crystal", "warden_thread", "void_silk", "ancient_lumen", "starmetal_flake"}:
+        draw_resource(c, p, kind)
+    elif kind in {"pathfinder_boots"}:
+        draw_boots(c, p); c.line(9, 24, 23, 24, p["glow"])
+    elif kind in {"deep_miner_charm"}:
+        draw_charm(c, p)
+    elif kind in {"gatebreaker_compass"}:
+        draw_compass(c, p); draw_gate(c, p, 1)
+    elif kind in {"forager_satchel"}:
+        draw_satchel(c, p); c.ellipse(19, 12, 4, 6, PALETTES["mmo_f1"]["accent"])
+    elif kind in {"wardenhide_cloak"}:
+        draw_cloak(c, PALETTES["mmo_f2"])
+    elif kind in {"veilwalkers_lantern"}:
+        c.rect(11, 11, 20, 23, p["gold"]); c.rect(13, 13, 18, 20, PALETTES["mmo_f3"]["glow"]); c.line(13, 9, 18, 9, p["gold"])
     elif kind in {"grow", "restock_seeds", "upgrade_lab", "marijuana_raw"}:
         c.line(11, 20, 16, 9, p["accent"]); c.line(16, 9, 21, 14, p["accent"]); c.line(21, 14, 19, 24, p["accent"]); c.line(19, 24, 11, 20, p["accent"])
     elif kind in {"sell", "restock_supplies", "cocaine_raw"}:
@@ -311,13 +481,13 @@ def draw_icon(kind: str, palette_name: str):
 
 def write_pack_files():
     PACK_DIR.mkdir(parents=True, exist_ok=True)
-    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({"pack": {"pack_format": 46, "supported_formats": {"min_inclusive": 34, "max_inclusive": 46}, "description": "Crowns Suite 1.2.0 - Dark Arcane branding pack."}}, indent=2), encoding="utf-8")
+    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({"pack": {"pack_format": 46, "supported_formats": {"min_inclusive": 34, "max_inclusive": 46}, "description": "Crowns Suite 1.5.0 - Full Dark Arcane redraw."}}, indent=2), encoding="utf-8")
     lowlight = PACK_DIR / "assets" / "lowlight"
     (lowlight / "font").mkdir(parents=True, exist_ok=True)
     (lowlight / "sounds").mkdir(parents=True, exist_ok=True)
     (lowlight / "font" / "default.json").write_text(json.dumps({"providers": []}, indent=2), encoding="utf-8")
     (lowlight / "sounds.json").write_text("{}", encoding="utf-8")
-    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.2.0\nTheme: Dark Arcane\n", encoding="utf-8")
+    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.5.0\nTheme: Full Dark Arcane redraw\n", encoding="utf-8")
 
 
 def write_asset_index():
@@ -332,6 +502,9 @@ def export_zip():
             if file.is_file():
                 zf.write(file, file.relative_to(PACK_DIR))
     SHA1_PATH.write_text(hashlib.sha1(ZIP_PATH.read_bytes()).hexdigest(), encoding="utf-8")
+    DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(ZIP_PATH, DOWNLOAD_ZIP_PATH)
+    shutil.copy2(SHA1_PATH, DOWNLOAD_SHA1_PATH)
 
 
 def main():
@@ -342,6 +515,7 @@ def main():
     write_asset_index()
     export_zip()
     print(f"Built {ZIP_PATH}")
+    print(f"Mirrored {DOWNLOAD_ZIP_PATH}")
 
 
 if __name__ == "__main__":

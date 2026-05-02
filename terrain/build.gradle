@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(':api')
+}
+
+version = '1.2.0'
+
+jar {
+    archiveBaseName = 'CrownsTerrain'
+}

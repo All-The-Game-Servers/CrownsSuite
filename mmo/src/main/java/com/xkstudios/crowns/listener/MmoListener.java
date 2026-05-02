@@ -24,8 +24,11 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.BrewerInventory;
@@ -60,13 +63,55 @@ public class MmoListener implements Listener {
             return;
         }
         if (action.startsWith("mmo:open:")) {
-            switch (action.substring("mmo:open:".length())) {
+            String target = action.substring("mmo:open:".length());
+            if (target.startsWith("floor-quests:")) {
+                try {
+                    this.plugin.getMenuManager().openFloorQuests(player, Integer.parseInt(target.substring("floor-quests:".length())));
+                } catch (NumberFormatException ignored) {
+                    this.plugin.getMenuManager().openQuests(player);
+                }
+                return;
+            }
+            switch (target) {
                 case "skills" -> this.plugin.getMenuManager().openSkills(player);
+                case "party" -> this.plugin.getMenuManager().openParty(player);
+                case "guild" -> this.plugin.getMenuManager().openGuild(player);
                 case "professions" -> this.plugin.getMenuManager().openProfessions(player);
                 case "combat" -> this.plugin.getMenuManager().openCombat(player);
                 case "world" -> this.plugin.getMenuManager().openWorld(player);
+                case "floors" -> this.plugin.getMenuManager().openFloors(player);
+                case "resources" -> this.plugin.getMenuManager().openResources(player);
+                case "gear" -> this.plugin.getMenuManager().openGear(player);
+                case "recipes" -> this.plugin.getMenuManager().openRecipes(player);
                 case "actives" -> this.plugin.getMenuManager().openActives(player);
+                case "quests" -> this.plugin.getMenuManager().openQuests(player);
+                case "available-quests" -> this.plugin.getMenuManager().openAvailableQuests(player);
+                case "active-quests" -> this.plugin.getMenuManager().openActiveQuests(player);
+                case "completed-quests" -> this.plugin.getMenuManager().openCompletedQuests(player);
+                case "first-haven-path" -> this.plugin.getMenuManager().openFirstHavenPath(player);
                 case "guide" -> this.plugin.getMenuManager().openGuide(player);
+            }
+            return;
+        }
+        if (action.startsWith("mmo:quest:turnin:")) {
+            String questKey = action.substring("mmo:quest:turnin:".length());
+            var quest = this.plugin.getQuestManager().getQuest(questKey);
+            if (quest != null && !this.plugin.getQuestManager().tryTurnIn(player, quest)) {
+                player.sendMessage(Component.text("You do not have the required turn-in items yet.", NamedTextColor.RED));
+            }
+            this.plugin.getMenuManager().openQuestDetail(player, questKey);
+            return;
+        }
+        if (action.startsWith("mmo:quest:")) {
+            this.plugin.getMenuManager().openQuestDetail(player, action.substring("mmo:quest:".length()));
+            return;
+        }
+        if (action.startsWith("mmo:floor:")) {
+            try {
+                int floor = Integer.parseInt(action.substring("mmo:floor:".length()));
+                this.plugin.getFloorManager().teleportToFloor(player, floor);
+            } catch (NumberFormatException ignored) {
+                player.sendMessage(Component.text("That floor gate is invalid.", NamedTextColor.RED));
             }
             return;
         }
@@ -104,6 +149,8 @@ public class MmoListener implements Listener {
         MmoManager manager = this.plugin.getMmoManager();
         if (this.isOre(type)) {
             manager.addXp(player, MmoSkill.MINING, this.plugin.getConfig().getLong("mmo.skills.mining.block-xp", 12L) + this.plugin.getConfig().getLong("mmo.skills.mining.ore-bonus-xp", 8L), "mine:" + type.name().toLowerCase());
+            this.plugin.getQuestManager().increment(player, "gather", type.name(), 1);
+            this.plugin.getItemFactory().rollResourceDrops(player, "mining", type.name(), block.getLocation());
             if (manager.maybeGrantExtraOre(player, type)) {
                 block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(type == Material.ANCIENT_DEBRIS ? Material.ANCIENT_DEBRIS : this.oreDrop(type)));
             }
@@ -111,6 +158,7 @@ public class MmoListener implements Listener {
         }
         if (type.name().endsWith("_LOG") || type.name().endsWith("_STEM")) {
             manager.addXp(player, MmoSkill.WOODCUTTING, this.plugin.getConfig().getLong("mmo.skills.woodcutting.block-xp", 10L), "wood:" + type.name().toLowerCase());
+            this.plugin.getQuestManager().increment(player, "gather", type.name(), 1);
             if (manager.maybeGrantExtraLog(player)) {
                 block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(type));
             }
@@ -118,6 +166,8 @@ public class MmoListener implements Listener {
         }
         if (this.isHarvestReady(block)) {
             manager.addXp(player, MmoSkill.FARMING, this.plugin.getConfig().getLong("mmo.skills.farming.harvest-xp", 10L), "farm:" + type.name().toLowerCase());
+            this.plugin.getQuestManager().increment(player, "gather", type.name(), 1);
+            this.plugin.getItemFactory().rollResourceDrops(player, "farming", type.name(), block.getLocation());
             if (manager.maybeGrantExtraCrop(player)) {
                 block.getWorld().dropItemNaturally(block.getLocation(), new ItemStack(this.cropDrop(type)));
             }
@@ -131,9 +181,21 @@ public class MmoListener implements Listener {
         }
         Player player = event.getPlayer();
         this.plugin.getMmoManager().addXp(player, MmoSkill.FISHING, this.plugin.getConfig().getLong("mmo.skills.fishing.catch-xp", 18L), "fish:catch");
+        this.plugin.getQuestManager().increment(player, "gather", "fishing", 1);
+        this.plugin.getItemFactory().rollResourceDrops(player, "fishing", "FISHING", player.getLocation());
         if (this.plugin.getMmoManager().maybeGrantExtraFish(player)) {
             player.getInventory().addItem(new ItemStack(Material.COD));
         }
+    }
+
+    @EventHandler
+    public void onPrepareCraft(PrepareItemCraftEvent event) {
+        this.plugin.getItemFactory().validateCrafting(event);
+    }
+
+    @EventHandler
+    public void onPrepareSmithing(PrepareSmithingEvent event) {
+        this.plugin.getItemFactory().prepareSmithing(event);
     }
 
     @EventHandler
@@ -201,20 +263,27 @@ public class MmoListener implements Listener {
             return;
         }
         double reduction = this.plugin.getMmoManager().getDamageReduction(player);
+        reduction += this.plugin.getItemFactory().damageReduction(player);
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            reduction += this.plugin.getItemFactory().fallReduction(player);
+        }
         if (reduction > 0.0D) {
-            event.setDamage(event.getDamage() * (1.0D - reduction));
+            event.setDamage(event.getDamage() * (1.0D - Math.min(0.80D, reduction)));
         }
         this.plugin.getMmoManager().addXp(player, MmoSkill.DEFENSE, this.plugin.getConfig().getLong("mmo.skills.defense.damage-xp", 6L), "defense:damage");
     }
 
     @EventHandler
     public void onDeath(EntityDeathEvent event) {
+        this.plugin.getFloorManager().handleBossDeath(event.getEntity());
         Player killer = event.getEntity().getKiller();
         if (killer != null) {
             Material held = killer.getInventory().getItemInMainHand().getType();
             if (held.name().endsWith("_SWORD") || held.name().endsWith("_AXE")) {
                 this.plugin.getMmoManager().addXp(killer, MmoSkill.SWORDSMANSHIP, this.plugin.getConfig().getLong("mmo.skills.swordsmanship.kill-xp", 18L), "sword:kill:" + event.getEntityType().name().toLowerCase());
             }
+            this.plugin.getQuestManager().increment(killer, "kill", event.getEntityType().name(), 1);
+            this.plugin.getItemFactory().rollResourceDrops(killer, "combat", event.getEntityType().name(), event.getEntity().getLocation());
             if (this.isBoss(event.getEntityType())) {
                 this.plugin.getMmoManager().markBossKill(killer, event.getEntityType().name().toLowerCase(), this.prettyBoss(event.getEntityType()));
             }
@@ -223,11 +292,20 @@ public class MmoListener implements Listener {
                 && damageByEntityEvent.getDamager() instanceof AbstractArrow arrow
                 && arrow.getShooter() instanceof Player player) {
             this.plugin.getMmoManager().addXp(player, MmoSkill.ARCHERY, this.plugin.getConfig().getLong("mmo.skills.archery.kill-xp", 20L), "archery:kill:" + event.getEntityType().name().toLowerCase());
+            this.plugin.getQuestManager().increment(player, "kill", event.getEntityType().name(), 1);
             this.plugin.getMmoManager().maybeRefundArrow(player);
             if (this.isBoss(event.getEntityType())) {
                 this.plugin.getMmoManager().markBossKill(player, event.getEntityType().name().toLowerCase(), this.prettyBoss(event.getEntityType()));
             }
         }
+    }
+
+    @EventHandler
+    public void onCreatureSpawn(CreatureSpawnEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+        this.plugin.getFloorManager().scaleFloorMob(event.getEntity());
     }
 
     @EventHandler
@@ -237,7 +315,9 @@ public class MmoListener implements Listener {
         }
         Player player = event.getPlayer();
         String biome = event.getTo().getBlock().getBiome().name().toLowerCase();
+        this.plugin.getItemFactory().applyMovementGear(player);
         this.plugin.getMmoManager().discoverBiome(player, biome);
+        this.plugin.getQuestManager().handleExplore(player);
     }
 
     private boolean isOre(Material material) {

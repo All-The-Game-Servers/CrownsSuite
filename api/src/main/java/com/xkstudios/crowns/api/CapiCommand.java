@@ -50,6 +50,24 @@ public class CapiCommand implements TabExecutor {
             gui.openHome(player);
             return true;
         }
+        if (root.equals("status")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Crowns Suite Status");
+                sender.sendMessage("Sections registered: " + CrownsAPI.getSections().size());
+                sender.sendMessage("Economy: " + (CrownsAPI.getEconomy() == null ? "offline" : "online"));
+                sender.sendMessage("Events: " + (CrownsAPI.getEvents() == null ? "offline" : "online"));
+                sender.sendMessage("MMO: " + (CrownsAPI.getMmo() == null ? "offline" : "online"));
+                sender.sendMessage("Terrain: " + (CrownsAPI.getTerrain() == null ? "offline" : "online"));
+                return true;
+            }
+            SuiteGuiManager gui = CrownsAPI.getSuiteGui();
+            if (gui == null) {
+                sender.sendMessage("The Crowns Suite GUI is not available right now.");
+                return true;
+            }
+            gui.openStatus(player);
+            return true;
+        }
         if (root.equals("help")) {
             this.sendHelp(sender, label);
             return true;
@@ -177,6 +195,7 @@ public class CapiCommand implements TabExecutor {
         sender.sendMessage("/" + label + " pack link - show the manual install link");
         sender.sendMessage("/" + label + " pack info - show configured pack details");
         sender.sendMessage("/" + label + " gui - open the Crowns Suite home");
+        sender.sendMessage("/" + label + " status - open the suite module status page");
         if (sender.hasPermission("crowns.api.admin")) {
             sender.sendMessage("/" + label + " pack share <player> - send the pack prompt to a player");
             sender.sendMessage("/" + label + " pack broadcast - send the pack prompt to everyone online");
@@ -187,7 +206,7 @@ public class CapiCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], List.of("pack", "gui", "help"), suggestions);
+            return StringUtil.copyPartialMatches(args[0], List.of("pack", "gui", "status", "help"), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("pack")) {
             List<String> base = new ArrayList<>(List.of("download", "prompt", "info", "link"));

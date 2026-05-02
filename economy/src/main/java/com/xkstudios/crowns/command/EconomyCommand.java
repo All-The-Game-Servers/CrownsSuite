@@ -49,6 +49,13 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
             case "commissions", "commission" -> this.cmdCommissions(player, args);
             case "contracts", "contract" -> this.cmdContracts(player, args);
             case "inbox" -> this.plugin.getMenuManager().openInboxMenu(player);
+            case "status" -> {
+                if (CrownsAPI.getSuiteGui() != null) {
+                    CrownsAPI.getSuiteGui().openStatus(player);
+                } else {
+                    this.msg(player, "Crowns Suite status is unavailable.", NamedTextColor.RED);
+                }
+            }
             case "help" -> this.sendHelp(player);
             default -> this.sendHelp(player);
         }
@@ -289,7 +296,8 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
                 "/ce commissions post <amount> <payout> - Post a buy order from your held item",
                 "/ce contracts - Open server contracts",
                 "/ce trader - Open The Server trader",
-                "/ce inbox - Open your stored notifications")) {
+                "/ce inbox - Open your stored notifications",
+                "/ce status - Open Crowns Suite module status")) {
             player.sendMessage(Component.text("  " + line, NamedTextColor.GRAY));
         }
     }
@@ -301,7 +309,7 @@ public class EconomyCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return List.of("menu", "bal", "pay", "top", "auction", "stalls", "jobs", "lottery", "coinflip", "slots", "demand", "commissions", "contracts", "trader", "inbox", "help")
+            return List.of("menu", "bal", "pay", "top", "auction", "stalls", "jobs", "lottery", "coinflip", "slots", "demand", "commissions", "contracts", "trader", "inbox", "status", "help")
                     .stream().filter(s -> s.startsWith(args[0].toLowerCase())).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("pay")) {

@@ -32,6 +32,8 @@ public class SuiteMenuListener implements Listener {
             CrownsAPI.openSuiteHome(player);
         } else if (action.equals("suite:profile")) {
             CrownsAPI.getSuiteGui().openProfile(player);
+        } else if (action.equals("suite:status")) {
+            CrownsAPI.getSuiteGui().openStatus(player);
         } else if (action.equals("suite:pack")) {
             CrownsAPI.getSuiteGui().openResourcePack(player);
         } else if (action.equals("suite:pack:share")) {
