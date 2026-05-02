@@ -18,20 +18,15 @@ It currently includes:
 
 The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads):
 
+Only the latest supported build for each plugin/resource pack is kept in that folder, so the download list is intentionally short.
+
 - `CrownsAPI-1.3.0.jar`
 - `CrownsEconomy-1.3.0.jar`
 - `CrownsAdmin-1.3.0.jar`
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
-- `CrownsMMO-1.2.0.jar`
-- `CrownsMMO-1.3.0.jar` once the floor-world build is exported
-- `CrownsMMO-1.4.0.jar` once the floor resources and adventurer gear build is exported
-- `CrownsMMO-1.5.0.jar` once the parties and guild foundations build is exported
-- `CrownsMMO-1.6.0.jar`
 - `CrownsMMO-1.7.0.jar`
 - `CrownsTerrain-1.3.0.jar`
-- `CrownsSuite-ResourcePack-1.2.0.zip`
-- `CrownsSuite-ResourcePack-1.2.0.sha1`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 

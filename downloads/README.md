@@ -2,6 +2,8 @@
 
 This folder mirrors the current public artifacts for the suite so a GitHub repository can expose direct downloads without waiting on releases.
 
+Only the latest supported build for each plugin is kept here to avoid downloading the wrong version.
+
 ## Plugin JARs
 
 - `CrownsAPI-1.3.0.jar`
@@ -9,11 +11,6 @@ This folder mirrors the current public artifacts for the suite so a GitHub repos
 - `CrownsAdmin-1.3.0.jar`
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
-- `CrownsMMO-1.2.0.jar`
-- `CrownsMMO-1.3.0.jar`
-- `CrownsMMO-1.4.0.jar`
-- `CrownsMMO-1.5.0.jar`
-- `CrownsMMO-1.6.0.jar`
 - `CrownsMMO-1.7.0.jar`
 - `CrownsTerrain-1.3.0.jar`
 

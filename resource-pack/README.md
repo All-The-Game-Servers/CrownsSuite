@@ -22,7 +22,6 @@ python resource-pack\tools\generate_resource_pack.py
 
 That generates:
 
-- source pack at `resource-pack/CrownsSuite-ResourcePack-1.2.0`
 - source pack at `resource-pack/CrownsSuite-ResourcePack-1.5.0`
 - distributable zip at `build/resource-pack/CrownsSuite-ResourcePack-1.5.0.zip`
 - mirrored public zip at `downloads/CrownsSuite-ResourcePack-1.5.0.zip`
