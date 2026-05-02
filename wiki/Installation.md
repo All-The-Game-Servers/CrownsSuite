@@ -7,8 +7,8 @@
 3. CrownsAdmin
 4. CrownsEvents
 5. CrownsDrugs
-6. CrownsMMO
-7. CrownsTerrain
+6. CrownsTerrain
+7. CrownsMMO
 
 ## Data
 
@@ -23,5 +23,13 @@
 - Run `/capi pack download` to download the configured resource pack onto the server
 - Players can open the suite pack page in-game to receive the download link when manual delivery is used
 - Current pack file: `CrownsSuite-ResourcePack-1.5.0.zip`
-- Current pack SHA1: `38ea1def8cf48afa624711276f39f7d023f1134b`
+- Current pack SHA1: `aa3a31780d939471971b0fd63dd3ed216f80e813`
+- Current target: Minecraft `1.21.11` resource-pack format `75`
 - The default resource-pack config keeps ValhallaMMO-safe manual delivery enabled and does not force client prompts
+
+## CrownsMMO / Terrain Relaunch Notes
+
+- Floor 1 now defaults to the dedicated generated world `crowns_floor_1`, not the server's existing `world`.
+- Run `/cterrain admin create 1` if you want to create the Floor 1 world manually before player testing.
+- Run `/cterrain verify floor 1` to confirm First Haven chunks and generated structure blocks exist.
+- New adventurers can run `/cmmo start` to enter First Haven and begin the Floor 1 path.

@@ -36,6 +36,7 @@ public class MmoCommand implements TabExecutor {
             return true;
         }
         switch (args[0].toLowerCase()) {
+            case "start" -> this.plugin.getFloorManager().startPlayer(player);
             case "party" -> this.handleParty(player, args);
             case "guild" -> this.handleGuild(player, args);
             case "skills" -> this.plugin.getMenuManager().openSkills(player);
@@ -226,7 +227,7 @@ public class MmoCommand implements TabExecutor {
             return true;
         }
         if (args.length < 2) {
-            sender.sendMessage("Usage: /cmmo admin <floor|item|resources|quest> ...");
+            sender.sendMessage("Usage: /cmmo admin <floor|item|resources|quest|xpdebug> ...");
             return true;
         }
         return switch (args[1].toLowerCase()) {
@@ -234,11 +235,34 @@ public class MmoCommand implements TabExecutor {
             case "item" -> this.handleAdminItem(sender, args);
             case "resources" -> this.handleAdminResources(sender, args);
             case "quest" -> this.handleAdminQuest(sender, args);
+            case "xpdebug" -> this.handleAdminXpDebug(sender, args);
             default -> {
-                sender.sendMessage("Usage: /cmmo admin <floor|item|resources|quest> ...");
+                sender.sendMessage("Usage: /cmmo admin <floor|item|resources|quest|xpdebug> ...");
                 yield true;
             }
         };
+    }
+
+    private boolean handleAdminXpDebug(CommandSender sender, String[] args) {
+        if (args.length < 3) {
+            sender.sendMessage("Usage: /cmmo admin xpdebug <player>");
+            return true;
+        }
+        Player target = Bukkit.getPlayerExact(args[2]);
+        if (target == null) {
+            sender.sendMessage("That player must be online.");
+            return true;
+        }
+        sender.sendMessage("Recent CrownsMMO XP for " + target.getName() + ":");
+        List<String> entries = this.plugin.getMmoManager().getRecentXp(target.getUniqueId());
+        if (entries.isEmpty()) {
+            sender.sendMessage("- No XP events recorded since the last plugin start.");
+            return true;
+        }
+        for (String entry : entries.stream().limit(12).toList()) {
+            sender.sendMessage("- " + entry);
+        }
+        return true;
     }
 
     private boolean handleAdminFloor(CommandSender sender, String[] args) {
@@ -391,7 +415,7 @@ public class MmoCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], List.of("party", "guild", "skills", "professions", "combat", "world", "floors", "floor", "quests", "quest", "boss", "resources", "gear", "recipes", "actives", "admin"), suggestions);
+            return StringUtil.copyPartialMatches(args[0], List.of("start", "party", "guild", "skills", "professions", "combat", "world", "floors", "floor", "quests", "quest", "boss", "resources", "gear", "recipes", "actives", "admin"), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("quests")) {
             return StringUtil.copyPartialMatches(args[1], List.of("active", "completed", "floor"), suggestions);
@@ -423,7 +447,7 @@ public class MmoCommand implements TabExecutor {
         }
         if (args[0].equalsIgnoreCase("admin") && sender.hasPermission("crowns.mmo.admin")) {
             if (args.length == 2) {
-                return StringUtil.copyPartialMatches(args[1], List.of("floor", "item", "resources", "quest"), suggestions);
+                return StringUtil.copyPartialMatches(args[1], List.of("floor", "item", "resources", "quest", "xpdebug"), suggestions);
             }
             if (args.length == 3 && args[1].equalsIgnoreCase("floor")) {
                 return StringUtil.copyPartialMatches(args[2], List.of("setspawn", "setboss", "unlock"), suggestions);

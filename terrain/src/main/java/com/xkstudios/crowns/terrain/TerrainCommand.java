@@ -34,6 +34,11 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             this.sendPoints(sender, floor, "village");
             return true;
         }
+        if (args[0].equalsIgnoreCase("verify")) {
+            int floor = args.length >= 3 && args[1].equalsIgnoreCase("floor") ? this.parseFloor(args, 2, 1) : this.parseFloor(args, 1, 1);
+            this.sendVerification(sender, floor);
+            return true;
+        }
         if (args[0].equalsIgnoreCase("admin")) {
             return this.handleAdmin(sender, args);
         }
@@ -55,6 +60,20 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("CrownsTerrain config and layout cache reloaded.", NamedTextColor.GREEN));
             return true;
         }
+        if (args.length >= 3 && args[1].equalsIgnoreCase("create")) {
+            int floor = this.parseFloor(args, 2, 1);
+            var world = this.plugin.getTerrainManager().createFloorWorld(floor);
+            sender.sendMessage(Component.text(world == null
+                    ? "CrownsTerrain could not create Floor " + floor + ". Check console for world-generator errors."
+                    : "CrownsTerrain loaded Floor " + floor + " world '" + world.getName() + "'. Existing chunks were not overwritten.",
+                    world == null ? NamedTextColor.RED : NamedTextColor.GREEN));
+            return true;
+        }
+        if (args.length >= 3 && args[1].equalsIgnoreCase("regenerate")) {
+            sender.sendMessage(Component.text("Regeneration is intentionally guarded. CrownsTerrain will not delete or overwrite existing worlds automatically.", NamedTextColor.RED));
+            sender.sendMessage(Component.text("To regenerate, stop the server, back up data, remove the target floor world folder manually, then run /cterrain admin create <floor>.", NamedTextColor.YELLOW));
+            return true;
+        }
         if (args.length >= 4 && args[1].equalsIgnoreCase("locate")) {
             String type = normalizeType(args[2]);
             int floor = this.parseFloor(args, 3, 1);
@@ -66,7 +85,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             this.sendAllPoints(sender, floor);
             return true;
         }
-        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|list <floor>|locate <type> <floor>>", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|create <floor>|regenerate <floor>|list <floor>|locate <type> <floor>>", NamedTextColor.YELLOW));
         return true;
     }
 
@@ -94,6 +113,14 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
                 + " | Waystones: " + this.plugin.getTerrainManager().getPoints(floor, worldName, "waystone").size()
                 + " | Road markers: " + this.plugin.getTerrainManager().getPoints(floor, worldName, "road_marker").size()
                 + " | Shrines: " + this.plugin.getTerrainManager().getPoints(floor, worldName, "shrine").size(), NamedTextColor.GRAY));
+    }
+
+    private void sendVerification(CommandSender sender, int floor) {
+        sender.sendMessage(Component.text("CrownsTerrain Verification: Floor " + floor, NamedTextColor.GOLD));
+        for (String line : this.plugin.getTerrainManager().verifyFloor(floor)) {
+            NamedTextColor color = line.startsWith("PASS") ? NamedTextColor.GREEN : line.startsWith("FAIL") ? NamedTextColor.RED : NamedTextColor.GRAY;
+            sender.sendMessage(Component.text("- " + line, color));
+        }
     }
 
     private void sendPoints(CommandSender sender, int floor, String type) {
@@ -135,19 +162,16 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
     }
 
     private String worldName(int floor) {
-        if (floor == 1) {
-            return this.plugin.getConfig().getString("terrain.floor-1-world", "world");
-        }
-        return this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_") + floor;
+        return this.plugin.getTerrainManager().getWorldName(floor);
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return this.match(args[0], List.of("info", "preview", "villages", "admin"));
+            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
-            return this.match(args[1], List.of("reload", "locate", "list"));
+            return this.match(args[1], List.of("reload", "create", "regenerate", "locate", "list"));
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("locate")) {
             return this.match(args[2], List.of("village", "camp", "landmark", "waystone", "road_marker", "shrine", "arena"));

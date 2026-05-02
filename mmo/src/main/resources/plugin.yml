@@ -4,7 +4,7 @@ main: com.xkstudios.crowns.CrownsPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
-softdepend: [CrownsEconomy, CrownsEvents, CrownsAdmin, CrownsDrugs]
+softdepend: [CrownsTerrain, CrownsEconomy, CrownsEvents, CrownsAdmin, CrownsDrugs]
 description: SAO-inspired MMO progression, professions, combat, and world progression for Crowns Suite.
 commands:
   crownsmmo:

@@ -2,6 +2,13 @@ mmo:
   xp-multiplier: 1.0
   repeat-window-seconds: 45
   min-repeat-multiplier: 0.25
+  xp-debug: false
+  onboarding:
+    start-message-on-join: true
+    teleport-on-first-join: true
+    start-floor: 1
+  exploration:
+    track-biome-discoveries: false
   parties:
     max-size: 5
     invite-timeout-seconds: 60
@@ -144,7 +151,7 @@ mmo:
   floors:
     default-border-size: 16000
     generated-border-size: 8000
-    floor-1-world: world
+    floor-1-world: crowns_floor_1
     generated-world-prefix: crowns_floor_
     boss-clear-combat-xp: 80
     mob-scaling:
@@ -154,7 +161,7 @@ mmo:
       note: "Foundation hook for later CrownsMMO smithing/resource progression."
     list:
       1:
-        world: world
+        world: crowns_floor_1
         environment: NORMAL
         border-size: 16000
         required-floor: 1
@@ -331,8 +338,8 @@ mmo:
             min: 1
             max: 1
   level-curve:
-    base: 100
-    growth: 35
+    base: 300
+    growth: 120
   active-skills:
     battle-surge:
       cooldown-seconds: 120
@@ -373,5 +380,6 @@ mmo:
     defense:
       damage-xp: 6
     exploration:
-      biome-xp: 28
+      biome-xp: 0
+      location-xp: 25
       boss-xp: 50

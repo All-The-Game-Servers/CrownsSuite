@@ -19,12 +19,14 @@ Crowns Suite ships with a Dark Arcane resource pack that gives the suite a share
 - New suite MMO icon plus party, guild, resources, floors, recipes, skills, professions, combat, and guide icons
 - Quest, suite status, module health, and resource-pack status icons for the 1.3.0 integration polish pass
 - CrownsAPI pack metadata updated so `/capi pack download` can fetch the current pack onto the server
+- Rebuilt for Minecraft `1.21.11` resource-pack format `75`
+- Generator validation now fails the build if a plugin-side `lowlight/...` model path is missing from the pack
 - Manual, ValhallaMMO-safe delivery remains the default
 
 ## Current Build
 
 - File: `CrownsSuite-ResourcePack-1.5.0.zip`
-- SHA1: `38ea1def8cf48afa624711276f39f7d023f1134b`
+- SHA1: `aa3a31780d939471971b0fd63dd3ed216f80e813`
 
 ## Server Download Flow
 

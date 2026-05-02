@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "lowlight:item/economy/inbox"
+    "layer0": "lowlight:item/suite/inbox"
   }
 }

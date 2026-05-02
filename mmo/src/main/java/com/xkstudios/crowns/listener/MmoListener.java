@@ -9,6 +9,7 @@ import com.xkstudios.crowns.mmo.MmoSkill;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
@@ -30,6 +31,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
@@ -39,6 +41,28 @@ public class MmoListener implements Listener {
 
     public MmoListener(CrownsPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        if (this.plugin.getConfig().getBoolean("mmo.onboarding.start-message-on-join", true)) {
+            player.sendMessage(Component.text("CrownsMMO has relaunched. Use /cmmo start to begin at First Haven.", NamedTextColor.GOLD));
+        }
+        if (!this.plugin.getConfig().getBoolean("mmo.onboarding.teleport-on-first-join", true)) {
+            return;
+        }
+        if (this.plugin.getMmoManager().hasWorldProgress(player.getUniqueId(), "onboarding:first_haven_start")) {
+            return;
+        }
+        if (this.plugin.getMmoManager().getTotalLevel(player.getUniqueId(), player.getName()) > this.plugin.getMmoManager().getSkills().size()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            if (player.isOnline() && !this.plugin.getMmoManager().hasWorldProgress(player.getUniqueId(), "onboarding:first_haven_start")) {
+                this.plugin.getFloorManager().startPlayer(player);
+            }
+        }, 40L);
     }
 
     @EventHandler

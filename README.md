@@ -49,7 +49,7 @@ Suggested GitHub wiki structure:
 
 The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack), and the distributable build is mirrored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads).
 
-Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `38ea1def8cf48afa624711276f39f7d023f1134b`. CrownsAPI is configured so `/capi pack download` downloads this pack onto the server while keeping ValhallaMMO-safe manual delivery.
+Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3a31780d939471971b0fd63dd3ed216f80e813`. It is rebuilt for Minecraft `1.21.11` resource-pack format `75`. CrownsAPI is configured so `/capi pack download` downloads this pack onto the server while keeping ValhallaMMO-safe manual delivery.
 
 ## Project Layout
 
@@ -94,6 +94,7 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `38e
 ## CrownsMMO 1.7.0
 
 - Adds the playable Floor 1 `First Haven Path` questline.
+- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated `crowns_floor_1` world.
 - Adds quest board pages for available, active, completed, Floor 1, and story-path quests.
 - Adds `/cmmo quests completed`, `/cmmo quests floor <number>`, and `/cmmo admin quest inspect <player>`.
 - Adds clearer quest detail guidance, optional-provider status, reward previews, and progress messages.
@@ -101,8 +102,9 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `38e
 ## CrownsTerrain 1.3.0
 
 - Adds a new terrain provider plugin for CrownsMMO floor worlds.
-- Provides procedural floor terrain, seeded villages/camps/landmarks, Floor 1 at 16k, and Floor 2+ at 8k by default.
+- Provides procedural floor terrain, seeded villages/camps/landmarks, dedicated Floor 1 world `crowns_floor_1` at 16k, and Floor 2+ at 8k by default.
 - Exposes generated POIs through CrownsAPI so CrownsMMO quests can reference villages, road markers, shrines, and landmarks.
+- Adds `/cterrain verify floor <number>` and guarded `/cterrain admin create <floor>` tooling for relaunch checks.
 - CrownsMMO falls back to normal world creation and non-terrain quest behavior when CrownsTerrain is not installed.
 
 ## Resource Pack 1.5.0

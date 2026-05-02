@@ -12,6 +12,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -37,6 +39,7 @@ public class MmoManager implements MmoProvider {
     private final Map<UUID, Map<String, WorldProgressEntry>> worldCache = new ConcurrentHashMap<>();
     private final Map<UUID, Map<MmoSkill, ActionRepeatState>> repeatTracker = new ConcurrentHashMap<>();
     private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Deque<String>> recentXp = new ConcurrentHashMap<>();
     private final Random random = new Random();
     private final Map<MmoSkill, List<MmoPerkNode>> perksBySkill = new EnumMap<>(MmoSkill.class);
     private final Map<String, ActiveSkill> activeSkills = new LinkedHashMap<>();
@@ -169,6 +172,10 @@ public class MmoManager implements MmoProvider {
         SkillState updated = new SkillState(newLevel, totalXp);
         this.skillCache.get(playerId).put(skill, updated);
         this.saveSkillState(playerId, player.getName(), skill, updated);
+        this.recordXp(playerId, skill, awarded, amount, actionKey, oldLevel, newLevel);
+        if (this.plugin.getConfig().getBoolean("mmo.xp-debug", false)) {
+            player.sendMessage(Component.text("[MMO XP] +" + awarded + " " + skill.displayName() + " from " + actionKey + " (" + oldLevel + " -> " + newLevel + ")", NamedTextColor.DARK_AQUA));
+        }
         if (newLevel > oldLevel) {
             player.sendMessage(Component.text(skill.displayName() + " reached level " + newLevel + ".", NamedTextColor.GOLD));
             if (newLevel % 5 == 0) {
@@ -280,8 +287,15 @@ public class MmoManager implements MmoProvider {
     }
 
     public void discoverBiome(Player player, String biomeKey) {
-        this.markWorldProgress(player, "biome:" + biomeKey.toLowerCase(Locale.ROOT), biomeKey);
-        this.addXp(player, MmoSkill.EXPLORATION, this.plugin.getConfig().getLong("mmo.skills.exploration.biome-xp", 28L), "biome:" + biomeKey.toLowerCase(Locale.ROOT));
+        String normalized = biomeKey.toLowerCase(Locale.ROOT);
+        long biomeXp = this.plugin.getConfig().getLong("mmo.skills.exploration.biome-xp", 0L);
+        if (biomeXp <= 0L && !this.plugin.getConfig().getBoolean("mmo.exploration.track-biome-discoveries", false)) {
+            return;
+        }
+        boolean firstDiscovery = this.markWorldProgress(player, "biome:" + normalized, biomeKey);
+        if (firstDiscovery && biomeXp > 0L) {
+            this.addXp(player, MmoSkill.EXPLORATION, biomeXp, "biome:" + normalized);
+        }
     }
 
     public int countWorldProgress(UUID playerId, String prefix) {
@@ -289,6 +303,15 @@ public class MmoManager implements MmoProvider {
         return (int) this.worldCache.getOrDefault(playerId, Map.of()).keySet().stream()
                 .filter(key -> key.startsWith(prefix))
                 .count();
+    }
+
+    public boolean hasWorldProgress(UUID playerId, String key) {
+        this.ensureLoaded(playerId, "");
+        return this.worldCache.getOrDefault(playerId, Map.of()).containsKey(key);
+    }
+
+    public List<String> getRecentXp(UUID playerId) {
+        return List.copyOf(this.recentXp.getOrDefault(playerId, new ConcurrentLinkedDeque<>()));
     }
 
     public String getChapterLabel(UUID playerId, String playerName) {
@@ -446,14 +469,14 @@ public class MmoManager implements MmoProvider {
         }
     }
 
-    private void markWorldProgress(Player player, String key, String detail) {
+    public boolean markWorldProgress(Player player, String key, String detail) {
         if (player == null || key == null) {
-            return;
+            return false;
         }
         UUID playerId = player.getUniqueId();
         this.ensureLoaded(playerId, player.getName());
         if (this.worldCache.get(playerId).containsKey(key)) {
-            return;
+            return false;
         }
         WorldProgressEntry entry = new WorldProgressEntry(key, detail, System.currentTimeMillis());
         this.worldCache.get(playerId).put(key, entry);
@@ -471,6 +494,15 @@ public class MmoManager implements MmoProvider {
             this.plugin.getLogger().warning("[CrownsMMO] Could not save world progress: " + exception.getMessage());
         }
         player.sendMessage(Component.text("World progress unlocked: " + detail, NamedTextColor.LIGHT_PURPLE));
+        return true;
+    }
+
+    private void recordXp(UUID playerId, MmoSkill skill, long awarded, long base, String actionKey, int oldLevel, int newLevel) {
+        Deque<String> entries = this.recentXp.computeIfAbsent(playerId, ignored -> new ConcurrentLinkedDeque<>());
+        entries.addFirst(skill.displayName() + " +" + awarded + " xp (base " + base + ") from " + actionKey + " | level " + oldLevel + " -> " + newLevel);
+        while (entries.size() > 20) {
+            entries.pollLast();
+        }
     }
 
     private double applyRepeatScaling(UUID playerId, MmoSkill skill, String actionKey) {
@@ -684,9 +716,9 @@ public class MmoManager implements MmoProvider {
                 new MmoPerkNode("defense:unbroken", MmoSkill.DEFENSE, "Unbroken", 20, "Gain bonus defense XP from surviving pressure.")
         ));
         this.perksBySkill.put(MmoSkill.EXPLORATION, List.of(
-                new MmoPerkNode("exploration:trailblazer", MmoSkill.EXPLORATION, "Trailblazer", 5, "Bonus exploration XP from discoveries."),
-                new MmoPerkNode("exploration:pathfinder", MmoSkill.EXPLORATION, "Pathfinder", 10, "Unlock the Pathfinder active skill."),
-                new MmoPerkNode("exploration:landmark_memory", MmoSkill.EXPLORATION, "Landmark Memory", 20, "Marks a true front-line explorer.")
+                new MmoPerkNode("exploration:trailblazer", MmoSkill.EXPLORATION, "Trailblazer", 5, "You are learning to read roads, camps, and safe routes."),
+                new MmoPerkNode("exploration:pathfinder", MmoSkill.EXPLORATION, "Pathfinder", 15, "Unlock the Pathfinder active skill for serious expeditions."),
+                new MmoPerkNode("exploration:landmark_memory", MmoSkill.EXPLORATION, "Landmark Memory", 40, "Marks a true front-line explorer who remembers the shape of the floors.")
         ));
     }
 
@@ -694,6 +726,6 @@ public class MmoManager implements MmoProvider {
         this.activeSkills.put("battle-surge", new ActiveSkill("battle-surge", "Battle Surge", MmoSkill.SWORDSMANSHIP, 10, "swordsmanship:battle_surge", "Strength and speed for a short duel spike.", this.plugin.getConfig().getInt("mmo.active-skills.battle-surge.cooldown-seconds", 120), this.plugin.getConfig().getInt("mmo.active-skills.battle-surge.duration-seconds", 10)));
         this.activeSkills.put("ranger-focus", new ActiveSkill("ranger-focus", "Ranger Focus", MmoSkill.ARCHERY, 10, "archery:ranger_focus", "Movement and vision support for ranged fights.", this.plugin.getConfig().getInt("mmo.active-skills.ranger-focus.cooldown-seconds", 90), this.plugin.getConfig().getInt("mmo.active-skills.ranger-focus.duration-seconds", 12)));
         this.activeSkills.put("bulwark", new ActiveSkill("bulwark", "Bulwark", MmoSkill.DEFENSE, 10, "defense:bulwark", "Resistance spike for frontline survival.", this.plugin.getConfig().getInt("mmo.active-skills.bulwark.cooldown-seconds", 150), this.plugin.getConfig().getInt("mmo.active-skills.bulwark.duration-seconds", 8)));
-        this.activeSkills.put("pathfinder", new ActiveSkill("pathfinder", "Pathfinder", MmoSkill.EXPLORATION, 10, "exploration:pathfinder", "Travel burst for expeditions and discovery runs.", this.plugin.getConfig().getInt("mmo.active-skills.pathfinder.cooldown-seconds", 120), this.plugin.getConfig().getInt("mmo.active-skills.pathfinder.duration-seconds", 15)));
+        this.activeSkills.put("pathfinder", new ActiveSkill("pathfinder", "Pathfinder", MmoSkill.EXPLORATION, 15, "exploration:pathfinder", "Travel burst for expeditions and discovery runs.", this.plugin.getConfig().getInt("mmo.active-skills.pathfinder.cooldown-seconds", 120), this.plugin.getConfig().getInt("mmo.active-skills.pathfinder.duration-seconds", 15)));
     }
 }

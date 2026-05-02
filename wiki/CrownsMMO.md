@@ -138,6 +138,8 @@ Staff commands:
 
 CrownsMMO 1.7.0 turns the quest foundation into a playable Floor 1 onboarding path.
 
+Use `/cmmo start` to enter the dedicated Floor 1 world, `crowns_floor_1`, at First Haven. New adventurers are guided there automatically on first MMO onboarding when enabled in config.
+
 The first questline is `First Haven Path`, a board-driven story path for new adventurers:
 
 - `First Haven Scout`: find a Floor 1 village or haven settlement.
@@ -155,9 +157,11 @@ Quest detail pages show the objective, current progress, destination hints, rewa
 - CrownsTerrain helps exploration quests point to villages, camps, road markers, and landmarks.
 - CrownsEconomy pays Crowns rewards when installed.
 - CrownsMMO XP rewards still work without CrownsEconomy.
+- Exploration leveling is intentionally slower after the relaunch: walking through biomes no longer grants XP by default, and discovery XP now comes from meaningful quest/POI discoveries.
 
 Player commands:
 
+- `/cmmo start`
 - `/cmmo quests`
 - `/cmmo quests active`
 - `/cmmo quests completed`

@@ -211,6 +211,10 @@ public class MmoQuestManager {
                 double radius = this.plugin.getConfig().getDouble("mmo.quests.explore-radius", 28.0D);
                 if (player.getLocation().distance(location) <= radius && this.markDiscovered(player, quest.key(), point.key())) {
                     this.addProgress(player, quest, 1);
+                    long locationXp = this.plugin.getConfig().getLong("mmo.skills.exploration.location-xp", 25L);
+                    if (locationXp > 0L) {
+                        this.plugin.getMmoManager().addXp(player, MmoSkill.EXPLORATION, locationXp, "location:" + point.type() + ":" + point.key());
+                    }
                     player.sendMessage(Component.text("Quest location discovered: " + point.displayName(), NamedTextColor.LIGHT_PURPLE));
                 }
             }

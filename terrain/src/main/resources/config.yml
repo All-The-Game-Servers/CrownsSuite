@@ -2,7 +2,7 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: world
+  floor-1-world: crowns_floor_1
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true

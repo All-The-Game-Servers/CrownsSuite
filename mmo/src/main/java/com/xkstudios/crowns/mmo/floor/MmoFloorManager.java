@@ -437,9 +437,10 @@ public class MmoFloorManager {
         if (floor == null) {
             return;
         }
-        World world = Bukkit.getWorld(floor.worldName());
+        World world = this.ensureWorld(floor);
         if (world != null) {
             this.applyBorder(world, floor.borderSize());
+            this.applyFirstHavenSpawn(floor, world);
             this.ensureBossLocation(floor);
         } else {
             this.plugin.getLogger().warning("[CrownsMMO] Floor 1 world '" + floor.worldName() + "' is not loaded yet.");
@@ -461,6 +462,9 @@ public class MmoFloorManager {
         }
         if (world != null) {
             this.applyBorder(world, floor.borderSize());
+            if (floor.number() == 1) {
+                this.applyFirstHavenSpawn(floor, world);
+            }
         }
         return world;
     }
@@ -483,7 +487,51 @@ public class MmoFloorManager {
                     (float) this.plugin.getConfig().getDouble(path + ".pitch", 0.0D)
             );
         }
+        if (floor.number() == 1) {
+            Location firstHaven = this.firstHavenSpawn(floor, world);
+            if (firstHaven != null) {
+                return firstHaven;
+            }
+        }
         return world.getSpawnLocation();
+    }
+
+    public boolean startPlayer(Player player) {
+        MmoFloor floor = this.floors.get(Math.max(1, this.plugin.getConfig().getInt("mmo.onboarding.start-floor", 1)));
+        if (floor == null) {
+            player.sendMessage(Component.text("CrownsMMO has no starting floor configured.", NamedTextColor.RED));
+            return false;
+        }
+        if (!this.teleportToFloor(player, floor.number())) {
+            return false;
+        }
+        this.plugin.getMmoManager().markWorldProgress(player, "onboarding:first_haven_start", "Started at First Haven");
+        player.sendMessage(Component.text("Welcome to First Haven. Open /cmmo quests and begin the First Haven Path.", NamedTextColor.GOLD));
+        return true;
+    }
+
+    private void applyFirstHavenSpawn(MmoFloor floor, World world) {
+        Location spawn = this.firstHavenSpawn(floor, world);
+        if (spawn != null) {
+            world.setSpawnLocation(spawn);
+        }
+    }
+
+    private Location firstHavenSpawn(MmoFloor floor, World world) {
+        TerrainProvider terrain = CrownsAPI.getTerrain();
+        if (terrain == null) {
+            return null;
+        }
+        TerrainPoint point = terrain.getVillages(floor.number(), floor.worldName()).stream()
+                .filter(candidate -> candidate.key().equalsIgnoreCase("first-haven") || candidate.displayName().equalsIgnoreCase("First Haven"))
+                .findFirst()
+                .orElse(null);
+        if (point == null) {
+            return null;
+        }
+        world.getChunkAt(point.x() >> 4, point.z() >> 4).load(true);
+        int y = Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(point.x(), point.z()) + 1);
+        return new Location(world, point.x() + 0.5D, y, point.z() + 0.5D, 0.0F, 0.0F);
     }
 
     private Location ensureBossLocation(MmoFloor floor) {

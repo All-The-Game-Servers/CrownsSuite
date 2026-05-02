@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.WorldCreator;
 
 public class TerrainManager implements TerrainProvider {
     private final CrownsTerrainPlugin plugin;
@@ -132,6 +135,60 @@ public class TerrainManager implements TerrainProvider {
         return floorNumber == 1
                 ? this.plugin.getConfig().getInt("terrain.defaults.floor-1-world-size", 16000)
                 : this.plugin.getConfig().getInt("terrain.defaults.generated-floor-world-size", 8000);
+    }
+
+    public String getWorldName(int floorNumber) {
+        if (floorNumber == 1) {
+            return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1");
+        }
+        return this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_") + floorNumber;
+    }
+
+    public World createFloorWorld(int floorNumber) {
+        String worldName = this.getWorldName(floorNumber);
+        World existing = Bukkit.getWorld(worldName);
+        if (existing != null) {
+            return existing;
+        }
+        WorldCreator creator = new WorldCreator(worldName)
+                .environment(World.Environment.NORMAL)
+                .generator(this.getGeneratorForFloor(floorNumber, worldName, World.Environment.NORMAL, floorNumber));
+        World world = creator.createWorld();
+        if (world != null) {
+            world.getWorldBorder().setCenter(0.0D, 0.0D);
+            world.getWorldBorder().setSize(Math.max(1, this.getWorldSize(floorNumber)));
+            this.getAllPoints(floorNumber, worldName);
+        }
+        return world;
+    }
+
+    public List<String> verifyFloor(int floorNumber) {
+        String worldName = this.getWorldName(floorNumber);
+        List<String> lines = new ArrayList<>();
+        World world = Bukkit.getWorld(worldName);
+        lines.add("World: " + worldName + (world == null ? " (not loaded)" : " (loaded)"));
+        lines.add("Profile: " + this.getTerrainProfile(floorNumber) + " | Size: " + this.getWorldSize(floorNumber));
+        List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
+        TerrainPoint firstHaven = villages.stream()
+                .filter(point -> point.key().equalsIgnoreCase("first-haven") || point.displayName().equalsIgnoreCase("First Haven"))
+                .findFirst()
+                .orElse(villages.isEmpty() ? null : villages.get(0));
+        lines.add("Villages: " + villages.size() + (firstHaven == null ? "" : " | First spawn: " + firstHaven.coordinateSummary()));
+        lines.add("Persisted points: " + this.countPersistedPoints(floorNumber, worldName));
+        if (world == null) {
+            lines.add("FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
+            return lines;
+        }
+        if (firstHaven == null) {
+            lines.add("FAIL: no First Haven village point exists.");
+            return lines;
+        }
+        boolean chunkLoaded = world.getChunkAt(firstHaven.x() >> 4, firstHaven.z() >> 4).load(true);
+        lines.add("First Haven chunk: " + (chunkLoaded ? "loaded" : "could not load"));
+        lines.add(this.hasVillageBlocks(world, firstHaven)
+                ? "PASS: First Haven generated blocks are present."
+                : "FAIL: First Haven point exists, but generated village blocks were not found nearby.");
+        return lines;
     }
 
     public String getTerrainProfile(int floorNumber) {
@@ -263,6 +320,29 @@ public class TerrainManager implements TerrainProvider {
 
     private ConfigurationSection floorSection(int floorNumber) {
         return this.plugin.getConfig().getConfigurationSection("terrain.floors." + floorNumber);
+    }
+
+    private boolean hasVillageBlocks(World world, TerrainPoint point) {
+        TerrainTheme theme = this.theme(point.floor());
+        int matches = 0;
+        for (int dx = -58; dx <= 58; dx += 4) {
+            for (int dz = -58; dz <= 58; dz += 4) {
+                int x = point.x() + dx;
+                int z = point.z() + dz;
+                Material material = world.getBlockAt(x, Math.max(world.getMinHeight(), world.getHighestBlockYAt(x, z)), z).getType();
+                if (material == theme.road()
+                        || material == theme.wall()
+                        || material == theme.roof()
+                        || material == Material.FARMLAND
+                        || material == Material.WATER) {
+                    matches++;
+                    if (matches >= 12) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isStructureEnabled(int floorNumber, String type) {

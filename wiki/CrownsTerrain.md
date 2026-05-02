@@ -40,6 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
+- Relaunch default Floor 1 world is `crowns_floor_1`, so existing survival `world` chunks are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -58,6 +59,8 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain info`
 - `/cterrain preview <floor>`
 - `/cterrain villages <floor>`
+- `/cterrain verify floor <floor>`
+- `/cterrain admin create <floor>`
 - `/cterrain admin locate village <floor>`
 - `/cterrain admin locate camp <floor>`
 - `/cterrain admin locate waystone <floor>`
@@ -66,6 +69,7 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain admin locate arena <floor>`
 - `/cterrain admin list <floor>`
 - `/cterrain admin reload`
+- `/cterrain admin regenerate <floor>` explains the guarded manual reset process and does not delete worlds.
 
 ## First Release Direction
 
@@ -78,3 +82,4 @@ CrownsTerrain `1.3.0` keeps generation ownership separate from MMO progression, 
 - CrownsMMO quests can reference generated villages, camps, landmarks, waystones, road markers, shrines, and arenas.
 - Persisted terrain points remain stable across restart, so quest locations do not reshuffle.
 - If CrownsTerrain is not installed, CrownsMMO continues to run and simply skips terrain-location quest objectives.
+- `/cterrain verify floor 1` checks that the Floor 1 world is loaded and that First Haven contains generated structure blocks.

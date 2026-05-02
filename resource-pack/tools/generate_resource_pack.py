@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import struct
 import zlib
@@ -20,6 +21,7 @@ DOWNLOAD_ZIP_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.zip"
 DOWNLOAD_SHA1_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.sha1"
 INDEX_PATH = ROOT / "resource-pack" / "ASSET_INDEX.md"
 TRANSPARENT = (0, 0, 0, 0)
+RESOURCE_PACK_FORMAT = 75
 
 
 def rgba(hex_value: str, alpha: int = 255):
@@ -45,11 +47,19 @@ PALETTES = {
 def suite_assets():
     return [
         ("lowlight/suite/economy", "suite_economy", "suite"),
+        ("lowlight/suite/api", "suite_api", "suite"),
         ("lowlight/suite/admin", "suite_admin", "suite"),
         ("lowlight/suite/events", "suite_events", "suite"),
         ("lowlight/suite/drugs", "suite_drugs", "suite"),
         ("lowlight/suite/mmo", "suite_mmo", "mmo"),
         ("lowlight/suite/terrain", "suite_terrain", "terrain"),
+        ("lowlight/suite/profile", "suite_profile", "suite"),
+        ("lowlight/suite/inbox", "suite_inbox", "suite"),
+        ("lowlight/suite/alerts", "suite_alerts", "suite"),
+        ("lowlight/suite/status", "suite_status", "suite"),
+        ("lowlight/suite/resource_pack", "resource_pack", "suite"),
+        ("lowlight/suite/resource_pack_share", "resource_pack_share", "suite"),
+        ("lowlight/suite/resource_pack_broadcast", "resource_pack_broadcast", "suite"),
         ("lowlight/suite/nav_back", "nav_back", "suite"),
         ("lowlight/suite/nav_close", "nav_close", "suite"),
         ("lowlight/suite/event_live", "event_live", "suite"),
@@ -72,11 +82,11 @@ ASSETS = (
     suite_assets()
     + group_assets("economy", "economy", [
         "wallet", "auction_house", "market_stalls", "jobs", "demand_board", "server_trader", "gambling",
-        "inbox", "top_balances", "gambling_lottery", "gambling_coinflip", "gambling_slots",
+        "inbox", "top_balances", "commissions", "contracts", "gambling_lottery", "gambling_coinflip", "gambling_slots",
         "slots_small", "slots_standard", "slots_high", "slots_rules", "slots_symbols",
     ])
     + group_assets("admin", "admin", [
-        "moderation", "reports", "player_inspection", "staff_mode", "true_vanish",
+        "operations", "case_file", "moderation", "reports", "player_inspection", "staff_mode", "true_vanish",
         "analytics", "playtime", "entity_tools", "roles", "puppeteering",
     ])
     + group_assets("drugs", "drugs", [
@@ -96,6 +106,7 @@ ASSETS = (
     + [(f"lowlight/end/material/{name}", name, "end") for name in ["void_filament", "chorus_weave", "gateway_residue"]]
     + group_assets("mmo", "mmo", [
         "floors", "resources", "gear", "recipes", "party", "guild", "skills", "professions", "combat", "actives", "guide",
+        "quests", "quest", "quest_active", "quest_complete", "quest_detail", "quest_reward", "quest_turnin", "custom_floor_drop",
     ])
     + group_assets("mmo/floor1", "mmo_f1", [
         "skyroot_fiber", "gate_splinter", "copperleaf", "gatekeeper_eye", "gatekeeper_trophy",
@@ -481,7 +492,13 @@ def draw_icon(kind: str, palette_name: str):
 
 def write_pack_files():
     PACK_DIR.mkdir(parents=True, exist_ok=True)
-    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({"pack": {"pack_format": 46, "supported_formats": {"min_inclusive": 34, "max_inclusive": 46}, "description": "Crowns Suite 1.5.0 - Full Dark Arcane redraw."}}, indent=2), encoding="utf-8")
+    (PACK_DIR / "pack.mcmeta").write_text(json.dumps({
+        "pack": {
+            "min_format": RESOURCE_PACK_FORMAT,
+            "max_format": RESOURCE_PACK_FORMAT,
+            "description": "Crowns Suite 1.5.0 - 1.21.11 Dark Arcane relaunch pack."
+        }
+    }, indent=2), encoding="utf-8")
     lowlight = PACK_DIR / "assets" / "lowlight"
     (lowlight / "font").mkdir(parents=True, exist_ok=True)
     (lowlight / "sounds").mkdir(parents=True, exist_ok=True)
@@ -507,12 +524,48 @@ def export_zip():
     shutil.copy2(SHA1_PATH, DOWNLOAD_SHA1_PATH)
 
 
+def validate_pack():
+    pack_meta = json.loads((PACK_DIR / "pack.mcmeta").read_text(encoding="utf-8"))
+    pack = pack_meta.get("pack", {})
+    if pack.get("min_format") != RESOURCE_PACK_FORMAT or pack.get("max_format") != RESOURCE_PACK_FORMAT:
+        raise RuntimeError("pack.mcmeta must target Minecraft 1.21.11 resource pack format 75.")
+    if "pack_format" in pack or "supported_formats" in pack:
+        raise RuntimeError("1.21.11 pack.mcmeta must not include pack_format or supported_formats.")
+
+    expected = {path for path, _, _ in ASSETS}
+    for model_path in sorted(expected):
+        namespace, key = normalize(model_path)
+        required_files = (
+            PACK_DIR / "assets" / namespace / "items" / f"{key}.json",
+            PACK_DIR / "assets" / namespace / "models" / "item" / f"{key}.json",
+            PACK_DIR / "assets" / namespace / "textures" / "item" / f"{key}.png",
+        )
+        for required in required_files:
+            if not required.exists():
+                raise RuntimeError(f"Missing generated resource-pack asset: {required.relative_to(PACK_DIR)}")
+
+    referenced = set()
+    pattern = re.compile(r"lowlight/[a-z0-9_./-]+")
+    for module in ("api", "economy", "admin", "events", "drugs", "mmo", "terrain"):
+        search_root = ROOT / module / "src" / "main"
+        if not search_root.exists():
+            continue
+        for file in search_root.rglob("*"):
+            if file.suffix.lower() not in {".java", ".yml", ".json"}:
+                continue
+            referenced.update(pattern.findall(file.read_text(encoding="utf-8", errors="ignore")))
+    missing = sorted(path for path in referenced if path not in expected and not path.endswith("/") and not path.endswith("_"))
+    if missing:
+        raise RuntimeError("Missing generated assets for plugin model paths:\n" + "\n".join(missing))
+
+
 def main():
     write_pack_files()
     for model_path, kind, palette_name in ASSETS:
         texture = write_model_files(model_path)
         write_png(texture, draw_icon(kind, palette_name))
     write_asset_index()
+    validate_pack()
     export_zip()
     print(f"Built {ZIP_PATH}")
     print(f"Mirrored {DOWNLOAD_ZIP_PATH}")

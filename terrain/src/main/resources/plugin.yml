@@ -4,7 +4,8 @@ main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
-softdepend: [CrownsMMO, CrownsEvents]
+softdepend: [CrownsEvents]
+loadbefore: [CrownsMMO]
 description: Procedural floor terrain, villages, camps, landmarks, and arena placement for Crowns Suite.
 commands:
   crownsterrain:

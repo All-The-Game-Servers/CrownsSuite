@@ -24,4 +24,4 @@ Only the latest supported build for each plugin is kept here to avoid downloadin
 
 Keep this folder committed so players and staff can fetch the latest suite builds directly from the repository page, and optionally duplicate these files into GitHub Releases later.
 
-Note: `CrownsMMO` and `CrownsTerrain` require the updated `CrownsAPI-1.3.0.jar` from this same folder, because the shared provider surfaces include MMO, terrain, suite status, and quest integration. The current resource pack is `1.5.0` so the MMO, terrain, quest, and suite status visuals resolve in-game. `CrownsMMO-1.7.0.jar` is the playable Floor 1 quest build.
+Note: `CrownsMMO` and `CrownsTerrain` require the updated `CrownsAPI-1.3.0.jar` from this same folder, because the shared provider surfaces include MMO, terrain, suite status, and quest integration. The current resource pack is `1.5.0`, rebuilt for Minecraft `1.21.11`, so the MMO, terrain, quest, and suite status visuals resolve in-game. `CrownsMMO-1.7.0.jar` is the playable Floor 1 quest build.

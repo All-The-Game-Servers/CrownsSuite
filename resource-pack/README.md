@@ -1,6 +1,6 @@
 # Crowns Suite Resource Pack
 
-This folder contains the source and build tooling for the `Crowns Suite 1.5.0` resource pack.
+This folder contains the source and build tooling for the `Crowns Suite 1.5.0` resource pack, rebuilt for Minecraft Java `1.21.11` resource pack format `75`.
 
 ## What It Covers
 
@@ -42,3 +42,4 @@ That generates:
 - Suite, economy, admin, drugs, and MMO menu icons now target stable `lowlight/...` item-model ids.
 - The pack is designed for `32x` readability with a `Dark Arcane` visual direction.
 - `1.5.0` is a full Dark Arcane redraw with complete CrownsMMO Floors 1-3 coverage.
+- The generator validates every discovered plugin-side `lowlight/...` model path before exporting the zip.
