@@ -16,8 +16,9 @@ public class FloorTerrainGenerator extends ChunkGenerator {
     private final TerrainPoint arena;
     private final List<TerrainPoint> landmarks;
     private final List<TerrainPoint> livingPoints;
+    private final List<StructurePlacement> structurePlacements;
 
-    public FloorTerrainGenerator(int floor, String worldName, TerrainTheme theme, List<TerrainPoint> villages, TerrainPoint arena, List<TerrainPoint> landmarks, List<TerrainPoint> livingPoints) {
+    public FloorTerrainGenerator(int floor, String worldName, TerrainTheme theme, List<TerrainPoint> villages, TerrainPoint arena, List<TerrainPoint> landmarks, List<TerrainPoint> livingPoints, List<StructurePlacement> structurePlacements) {
         this.floor = floor;
         this.worldName = worldName;
         this.theme = theme;
@@ -25,6 +26,7 @@ public class FloorTerrainGenerator extends ChunkGenerator {
         this.arena = arena;
         this.landmarks = List.copyOf(landmarks);
         this.livingPoints = List.copyOf(livingPoints);
+        this.structurePlacements = List.copyOf(structurePlacements);
     }
 
     @Override
@@ -39,9 +41,10 @@ public class FloorTerrainGenerator extends ChunkGenerator {
                 this.generateColumn(chunkData, localX, localZ, minY, maxY, surface, worldX, worldZ);
                 this.applyArena(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
                 this.applyRoads(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
-                this.applyVillage(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
                 this.applyLivingPoint(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
                 this.applyLandmark(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
+                this.applyNaturalFeatures(chunkData, localX, localZ, maxY, surface, worldX, worldZ);
+                this.applyStructures(chunkData, localX, localZ, maxY, worldX, worldZ);
             }
         }
     }
@@ -87,9 +90,12 @@ public class FloorTerrainGenerator extends ChunkGenerator {
     }
 
     private void generateColumn(ChunkData chunkData, int localX, int localZ, int minY, int maxY, int surface, int worldX, int worldZ) {
+        TerrainRegion region = TerrainLayout.region(this.floor, this.worldName, worldX, worldZ);
         chunkData.setBlock(localX, minY, localZ, Material.BEDROCK);
         for (int y = minY + 1; y <= surface; y++) {
-            Material material = y == surface ? this.theme.top() : y >= surface - 3 ? this.theme.soil() : this.theme.stone();
+            Material material = this.floor == 1
+                    ? y == surface ? region.top() : y >= surface - 3 ? region.soil() : region.stone()
+                    : y == surface ? this.theme.top() : y >= surface - 3 ? this.theme.soil() : this.theme.stone();
             if (this.floor >= 3 && y < surface - 8) {
                 material = Material.DEEPSLATE;
             }
@@ -99,12 +105,6 @@ public class FloorTerrainGenerator extends ChunkGenerator {
             for (int y = surface + 1; y <= 62 && y < maxY; y++) {
                 chunkData.setBlock(localX, y, localZ, Material.WATER);
             }
-        }
-        if (this.floor == 1 && surface >= 64 && Math.floorMod(worldX * 17 + worldZ * 31, 97) == 0) {
-            chunkData.setBlock(localX, surface + 1, localZ, Material.OAK_SAPLING);
-        }
-        if (this.floor >= 2 && Math.floorMod(worldX * 13 + worldZ * 29 + this.floor, 173) == 0) {
-            chunkData.setBlock(localX, surface + 1, localZ, this.floor == 2 ? Material.SPRUCE_SAPLING : Material.AZALEA);
         }
         if (this.floor >= 3 && Math.floorMod(worldX + worldZ, 41) == 0) {
             chunkData.setBlock(localX, surface + 1, localZ, Material.AMETHYST_CLUSTER);
@@ -355,14 +355,150 @@ public class FloorTerrainGenerator extends ChunkGenerator {
             return;
         }
         int y = Math.min(maxY - 6, surface);
+        TerrainPoint hub = this.villages.stream()
+                .filter(point -> point.key().equalsIgnoreCase("first-haven") || point.displayName().equalsIgnoreCase("First Haven"))
+                .findFirst()
+                .orElse(this.villages.get(0));
+        boolean road = false;
         for (TerrainPoint village : this.villages) {
-            if (Math.abs(worldX - village.x()) <= 3 || Math.abs(worldZ - village.z()) <= 3) {
-                int distance = Math.min(Math.abs(worldX - village.x()), Math.abs(worldZ - village.z()));
-                if (distance <= 4) {
-                    chunkData.setBlock(localX, y, localZ, this.theme.road());
-                    this.clearColumn(chunkData, localX, localZ, y + 1, y + 4, maxY);
+            if (this.distanceToSegment(worldX, worldZ, hub.x(), hub.z(), village.x(), village.z()) <= 4.2D) {
+                road = true;
+            }
+            if (Math.max(Math.abs(worldX - village.x()), Math.abs(worldZ - village.z())) <= 14) {
+                road = true;
+            }
+        }
+        for (TerrainPoint point : this.livingPoints) {
+            if (this.distanceToSegment(worldX, worldZ, hub.x(), hub.z(), point.x(), point.z()) <= 3.4D) {
+                road = true;
+            }
+        }
+        if (this.arena != null && this.distanceToSegment(worldX, worldZ, hub.x(), hub.z(), this.arena.x(), this.arena.z()) <= 4.5D) {
+            road = true;
+        }
+        if (road) {
+            chunkData.setBlock(localX, y, localZ, this.theme.road());
+            this.clearColumn(chunkData, localX, localZ, y + 1, y + 5, maxY);
+            if (Math.floorMod(worldX * 7 + worldZ * 11, 23) == 0) {
+                chunkData.setBlock(localX, y + 1, localZ, Material.LANTERN);
+            }
+        }
+    }
+
+    private void applyNaturalFeatures(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int worldX, int worldZ) {
+        if (this.floor != 1 || this.nearAuthoredArea(worldX, worldZ)) {
+            return;
+        }
+        TerrainRegion region = TerrainLayout.region(this.floor, this.worldName, worldX, worldZ);
+        this.applyClusteredTree(chunkData, localX, localZ, maxY, surface, worldX, worldZ, region);
+        this.applyRockCluster(chunkData, localX, localZ, maxY, surface, worldX, worldZ, region);
+        this.applyPond(chunkData, localX, localZ, maxY, surface, worldX, worldZ, region);
+        this.applyFallenLog(chunkData, localX, localZ, maxY, surface, worldX, worldZ, region);
+    }
+
+    private void applyClusteredTree(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int worldX, int worldZ, TerrainRegion region) {
+        int grid = region == TerrainRegion.STARTER_FOREST ? 15 : 24;
+        int cellX = Math.floorDiv(worldX, grid);
+        int cellZ = Math.floorDiv(worldZ, grid);
+        for (int gx = cellX - 1; gx <= cellX + 1; gx++) {
+            for (int gz = cellZ - 1; gz <= cellZ + 1; gz++) {
+                int chance = this.hash(gx, gz, region.ordinal() + 700);
+                int threshold = switch (region) {
+                    case STARTER_FOREST -> 6200;
+                    case OAK_HIGHLANDS -> 3600;
+                    case MEADOW_BASIN, FARMLAND_FLATS -> 900;
+                    default -> 1500;
+                };
+                if (chance > threshold) {
+                    continue;
+                }
+                int centerX = gx * grid + 4 + Math.floorMod(chance, Math.max(5, grid - 8));
+                int centerZ = gz * grid + 4 + Math.floorMod(chance / 17, Math.max(5, grid - 8));
+                int dx = worldX - centerX;
+                int dz = worldZ - centerZ;
+                int dist = Math.max(Math.abs(dx), Math.abs(dz));
+                if (dist > 4 || surface < 63 || surface > maxY - 12) {
+                    continue;
+                }
+                if (dx == 0 && dz == 0) {
+                    for (int y = surface + 1; y <= surface + 5; y++) {
+                        chunkData.setBlock(localX, y, localZ, Material.OAK_LOG);
+                    }
+                }
+                if (dist <= 3 && surface + 5 < maxY) {
+                    int leafY = surface + 4 + (dist <= 1 ? 1 : 0);
+                    chunkData.setBlock(localX, leafY, localZ, Material.OAK_LEAVES);
+                    if (dist <= 2) {
+                        chunkData.setBlock(localX, leafY + 1, localZ, Material.OAK_LEAVES);
+                    }
                 }
             }
+        }
+    }
+
+    private void applyRockCluster(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int worldX, int worldZ, TerrainRegion region) {
+        if (region == TerrainRegion.FARMLAND_FLATS || region == TerrainRegion.MEADOW_BASIN) {
+            return;
+        }
+        int grid = 31;
+        int gx = Math.floorDiv(worldX, grid);
+        int gz = Math.floorDiv(worldZ, grid);
+        int chance = this.hash(gx, gz, 901);
+        if (chance > 1400) {
+            return;
+        }
+        int centerX = gx * grid + 6 + Math.floorMod(chance, grid - 12);
+        int centerZ = gz * grid + 6 + Math.floorMod(chance / 13, grid - 12);
+        int distance = (int) Math.round(Math.hypot(worldX - centerX, worldZ - centerZ));
+        if (distance <= 2 && surface + 2 < maxY) {
+            chunkData.setBlock(localX, surface + 1, localZ, distance == 0 ? Material.MOSSY_COBBLESTONE : Material.COBBLESTONE);
+            if (distance == 0) {
+                chunkData.setBlock(localX, surface + 2, localZ, Material.MOSSY_COBBLESTONE);
+            }
+        }
+    }
+
+    private void applyPond(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int worldX, int worldZ, TerrainRegion region) {
+        if (region != TerrainRegion.RIVER_VALLEY && region != TerrainRegion.MEADOW_BASIN) {
+            return;
+        }
+        int grid = 58;
+        int gx = Math.floorDiv(worldX, grid);
+        int gz = Math.floorDiv(worldZ, grid);
+        int chance = this.hash(gx, gz, 1103);
+        if (chance > 900) {
+            return;
+        }
+        int centerX = gx * grid + 12 + Math.floorMod(chance, grid - 24);
+        int centerZ = gz * grid + 12 + Math.floorMod(chance / 19, grid - 24);
+        int distance = (int) Math.round(Math.hypot(worldX - centerX, worldZ - centerZ));
+        if (distance <= 5) {
+            chunkData.setBlock(localX, surface, localZ, distance <= 4 ? Material.WATER : Material.MUD);
+            this.clearColumn(chunkData, localX, localZ, surface + 1, surface + 3, maxY);
+        }
+    }
+
+    private void applyFallenLog(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int worldX, int worldZ, TerrainRegion region) {
+        if (region != TerrainRegion.STARTER_FOREST && region != TerrainRegion.OAK_HIGHLANDS) {
+            return;
+        }
+        int grid = 43;
+        int gx = Math.floorDiv(worldX, grid);
+        int gz = Math.floorDiv(worldZ, grid);
+        int chance = this.hash(gx, gz, 1207);
+        if (chance > 900) {
+            return;
+        }
+        int centerX = gx * grid + 8 + Math.floorMod(chance, grid - 16);
+        int centerZ = gz * grid + 8 + Math.floorMod(chance / 23, grid - 16);
+        if (Math.abs(worldZ - centerZ) <= 1 && Math.abs(worldX - centerX) <= 5 && surface + 1 < maxY) {
+            chunkData.setBlock(localX, surface + 1, localZ, Material.OAK_LOG);
+        }
+    }
+
+    private void applyStructures(ChunkData chunkData, int localX, int localZ, int maxY, int worldX, int worldZ) {
+        for (StructurePlacement placement : this.structurePlacements) {
+            placement.applyToColumn(chunkData, localX, localZ, maxY, worldX, worldZ);
         }
     }
 
@@ -370,6 +506,43 @@ public class FloorTerrainGenerator extends ChunkGenerator {
         for (int y = y0; y <= y1 && y < maxY; y++) {
             chunkData.setBlock(localX, y, localZ, Material.AIR);
         }
+    }
+
+    private boolean nearAuthoredArea(int worldX, int worldZ) {
+        for (TerrainPoint village : this.villages) {
+            if (Math.hypot(worldX - village.x(), worldZ - village.z()) <= 86.0D) {
+                return true;
+            }
+        }
+        for (TerrainPoint point : this.livingPoints) {
+            if (Math.hypot(worldX - point.x(), worldZ - point.z()) <= 26.0D) {
+                return true;
+            }
+        }
+        if (this.arena != null && Math.hypot(worldX - this.arena.x(), worldZ - this.arena.z()) <= 92.0D) {
+            return true;
+        }
+        return false;
+    }
+
+    private double distanceToSegment(int x, int z, int x1, int z1, int x2, int z2) {
+        double dx = x2 - x1;
+        double dz = z2 - z1;
+        double lengthSquared = dx * dx + dz * dz;
+        if (lengthSquared <= 0.001D) {
+            return Math.hypot(x - x1, z - z1);
+        }
+        double t = ((x - x1) * dx + (z - z1) * dz) / lengthSquared;
+        t = Math.max(0.0D, Math.min(1.0D, t));
+        return Math.hypot(x - (x1 + t * dx), z - (z1 + t * dz));
+    }
+
+    private int hash(int x, int z, int salt) {
+        long value = TerrainLayout.layoutSeed(this.worldName, this.floor) ^ (x * 73428767L) ^ (z * 91227153L) ^ (salt * 132897987541L);
+        value ^= value >>> 13;
+        value *= 1274126177L;
+        value ^= value >>> 16;
+        return (int) Math.floorMod(value, 10000L);
     }
 
     private int surfaceHeight(int worldX, int worldZ) {

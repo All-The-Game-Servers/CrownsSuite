@@ -1,12 +1,12 @@
 name: CrownsTerrain
-version: 1.3.0
+version: 1.4.0
 main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
 softdepend: [CrownsEvents]
 loadbefore: [CrownsMMO]
-description: Procedural floor terrain, villages, camps, landmarks, and arena placement for Crowns Suite.
+description: Relaunched Floor 1 procedural terrain, First Haven structures, camps, landmarks, and arena placement for Crowns Suite.
 commands:
   crownsterrain:
     description: Crowns Terrain commands

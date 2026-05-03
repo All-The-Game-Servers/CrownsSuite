@@ -40,7 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Relaunch default Floor 1 world is `crowns_floor_1`, so existing survival `world` chunks are not overwritten.
+- Relaunch default Floor 1 world is `crowns_floor_1_v2`, so existing survival `world` and older `crowns_floor_1` chunks are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -83,3 +83,17 @@ CrownsTerrain `1.3.0` keeps generation ownership separate from MMO progression, 
 - Persisted terrain points remain stable across restart, so quest locations do not reshuffle.
 - If CrownsTerrain is not installed, CrownsMMO continues to run and simply skips terrain-location quest objectives.
 - `/cterrain verify floor 1` checks that the Floor 1 world is loaded and that First Haven contains generated structure blocks.
+
+## 1.4.0 Floor 1 Terrain Relaunch
+
+CrownsTerrain `1.4.0` replaces the early prototype Floor 1 with a fresh-world relaunch.
+
+- Floor 1 defaults to `crowns_floor_1_v2` and the `first_haven_relaunch` profile.
+- First Haven is generated as a physical starter town with a spawn plaza, roads, houses, farms, market space, notice board, shrine, waystone, watchtower, and nearby camp.
+- Terrain uses named regions: meadow basin, oak highlands, river valley, starter forest, farmland flats, shrine ridge, and gate wilds.
+- The First Gate arena is now a visible generated structure with arena floor, gate arch, ruins, and approach routes.
+- Trees, rocks, ponds, fallen logs, and groves replace the old diagonal sapling pattern.
+- Structure blueprints are bundled inside the plugin and placed by CrownsTerrain without requiring WorldEdit.
+- `/cterrain verify floor 1` now checks for real First Haven, camp, waystone, and arena blocks.
+
+This release does not fix MMO death/respawn routing. Until the dedicated MMO integration patch, use `/cmmo start` or `/cmmo floor 1` to return to the floor world if a player respawns elsewhere.

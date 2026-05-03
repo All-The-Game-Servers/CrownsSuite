@@ -1,0 +1,31 @@
+key: ruin_pillar
+anchor: 1,0,1
+palette:
+S=STONE_BRICKS
+M=MOSSY_STONE_BRICKS
+A=COPPER_BLOCK
+layers:
+y=0
+SSS
+SSS
+SSS
+y=1
+S.S
+.M.
+S.S
+y=2
+S.S
+.S.
+S.S
+y=3
+S.S
+.A.
+S.S
+y=4
+...
+.S.
+...
+y=5
+...
+.M.
+...

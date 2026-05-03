@@ -23,15 +23,18 @@ import org.bukkit.WorldCreator;
 public class TerrainManager implements TerrainProvider {
     private final CrownsTerrainPlugin plugin;
     private final DataManager dataManager;
+    private final StructureTemplateManager structureTemplateManager;
     private final Map<String, TerrainPoint> pointCache = new ConcurrentHashMap<>();
 
     public TerrainManager(CrownsTerrainPlugin plugin) {
         this.plugin = plugin;
         this.dataManager = CrownsAPI.getDataManager();
+        this.structureTemplateManager = new StructureTemplateManager(plugin);
     }
 
     public void initialize() {
         this.ensureTables();
+        this.structureTemplateManager.load();
     }
 
     @Override
@@ -45,14 +48,19 @@ public class TerrainManager implements TerrainProvider {
             return null;
         }
         TerrainTheme theme = this.theme(floorNumber);
+        List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
+        TerrainPoint arena = this.getBossArena(floorNumber, worldName);
+        List<TerrainPoint> landmarks = this.getLandmarks(floorNumber, worldName);
+        List<TerrainPoint> livingPoints = this.getLivingPoints(floorNumber, worldName);
         return new FloorTerrainGenerator(
                 floorNumber,
                 worldName,
                 theme,
-                this.getVillages(floorNumber, worldName),
-                this.getBossArena(floorNumber, worldName),
-                this.getLandmarks(floorNumber, worldName),
-                this.getLivingPoints(floorNumber, worldName)
+                villages,
+                arena,
+                landmarks,
+                livingPoints,
+                FloorStructurePlanner.plan(floorNumber, theme, this.structureTemplateManager, villages, arena, landmarks, livingPoints)
         );
     }
 
@@ -168,6 +176,8 @@ public class TerrainManager implements TerrainProvider {
         World world = Bukkit.getWorld(worldName);
         lines.add("World: " + worldName + (world == null ? " (not loaded)" : " (loaded)"));
         lines.add("Profile: " + this.getTerrainProfile(floorNumber) + " | Size: " + this.getWorldSize(floorNumber));
+        lines.add("Expected world: " + worldName + (floorNumber == 1 && this.isFreshWorldRequired(floorNumber) ? " | fresh world required" : ""));
+        lines.add("Bundled templates loaded: " + this.structureTemplateManager.count());
         List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
         TerrainPoint firstHaven = villages.stream()
                 .filter(point -> point.key().equalsIgnoreCase("first-haven") || point.displayName().equalsIgnoreCase("First Haven"))
@@ -188,6 +198,16 @@ public class TerrainManager implements TerrainProvider {
         lines.add(this.hasVillageBlocks(world, firstHaven)
                 ? "PASS: First Haven generated blocks are present."
                 : "FAIL: First Haven point exists, but generated village blocks were not found nearby.");
+        TerrainPoint arena = this.getBossArena(floorNumber, worldName);
+        lines.add(arena != null && this.hasArenaBlocks(world, arena)
+                ? "PASS: First Gate arena generated blocks are present."
+                : "FAIL: First Gate arena generated blocks were not found.");
+        lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "camp"), Material.CAMPFIRE)
+                ? "PASS: starter camp feature blocks are present."
+                : "FAIL: starter camp feature blocks were not found.");
+        lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "waystone"), this.theme(floorNumber).accent())
+                ? "PASS: waystone feature blocks are present."
+                : "FAIL: waystone feature blocks were not found.");
         return lines;
     }
 
@@ -198,6 +218,10 @@ public class TerrainManager implements TerrainProvider {
     public double getStructureDensity(int floorNumber) {
         return this.plugin.getConfig().getDouble("terrain.floors." + floorNumber + ".structure-density",
                 this.plugin.getConfig().getDouble("terrain.defaults.structure-density", 1.0D));
+    }
+
+    public boolean isFreshWorldRequired(int floorNumber) {
+        return this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".fresh-world-required", false);
     }
 
     public int countPersistedPoints(int floorNumber, String worldName) {
@@ -220,6 +244,7 @@ public class TerrainManager implements TerrainProvider {
     public void reload() {
         this.plugin.reloadConfig();
         this.pointCache.clear();
+        this.structureTemplateManager.load();
     }
 
     public TerrainTheme theme(int floorNumber) {
@@ -338,6 +363,43 @@ public class TerrainManager implements TerrainProvider {
                     matches++;
                     if (matches >= 12) {
                         return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasArenaBlocks(World world, TerrainPoint point) {
+        TerrainTheme theme = this.theme(point.floor());
+        int matches = 0;
+        for (int dx = -52; dx <= 52; dx += 4) {
+            for (int dz = -52; dz <= 52; dz += 4) {
+                int x = point.x() + dx;
+                int z = point.z() + dz;
+                Material material = world.getBlockAt(x, Math.max(world.getMinHeight(), world.getHighestBlockYAt(x, z)), z).getType();
+                if (material == theme.road() || material == theme.wall() || material == theme.accent() || material == Material.STONE_BRICKS) {
+                    matches++;
+                    if (matches >= 16) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasPointBlocks(World world, List<TerrainPoint> points, Material expected) {
+        for (TerrainPoint point : points) {
+            world.getChunkAt(point.x() >> 4, point.z() >> 4).load(true);
+            for (int dx = -12; dx <= 12; dx++) {
+                for (int dz = -12; dz <= 12; dz++) {
+                    int x = point.x() + dx;
+                    int z = point.z() + dz;
+                    for (int y = Math.max(world.getMinHeight(), point.y()); y <= Math.min(world.getMaxHeight() - 1, point.y() + 12); y++) {
+                        if (world.getBlockAt(x, y, z).getType() == expected) {
+                            return true;
+                        }
                     }
                 }
             }

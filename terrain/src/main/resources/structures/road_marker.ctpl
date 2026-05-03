@@ -1,0 +1,31 @@
+key: road_marker
+anchor: 2,0,2
+palette:
+C=COBBLESTONE
+P=OAK_PLANKS
+L=LANTERN
+layers:
+y=0
+CCCCC
+CCCCC
+CCCCC
+CCCCC
+CCCCC
+y=1
+.....
+..P..
+.PPP.
+..P..
+.....
+y=2
+.....
+..P..
+..P..
+..P..
+.....
+y=3
+.....
+.....
+..L..
+.....
+.....

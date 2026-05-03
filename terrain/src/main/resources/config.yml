@@ -2,7 +2,7 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: crowns_floor_1
+  floor-1-world: crowns_floor_1_v2
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true
@@ -18,15 +18,44 @@ terrain:
     1:
       theme: First Haven
       palette: haven
-      terrain-profile: living_haven
+      terrain-profile: first_haven_relaunch
+      fresh-world-required: true
       world-size: 16000
       structure-density: 1.25
       enabled-structures: [village, camp, landmark, waystone, road_marker, shrine]
+      regions:
+        meadow-basin: "Starter meadow around First Haven with broad building space and safe travel."
+        oak-highlands: "Rolling oak hills with rocks, groves, and overlook paths."
+        river-valley: "Lower water-carved valleys with ponds, mud banks, and route breaks."
+        starter-forest: "Dense but readable forest for wood, camps, and early exploration."
+        farmland-flats: "Open farming land and small homestead routes."
+        shrine-ridge: "Higher mossy ridge for shrines and landmark silhouettes."
+        gate-wilds: "Rugged approach region around the First Gate arena."
+      structure-sets:
+        towns: true
+        camps: true
+        landmarks: true
+        roads: true
+        trees: true
+        rocks: true
+        ruins: true
+        arena: true
+      structure-density-controls:
+        towns: 1.0
+        camps: 1.0
+        landmarks: 1.0
+        roads: 1.0
+        trees: 1.25
+        rocks: 0.85
+        ruins: 0.8
+        arena: 1.0
       villages:
         first-haven:
           name: First Haven
           profile: haven
           radius: 72
+          x: 0
+          z: 0
         meadow-farms:
           name: Meadow Farms
           profile: farming
@@ -54,6 +83,8 @@ terrain:
       arena:
         key: first-gate-arena
         name: First Gate Arena
+        x: 960
+        z: 768
     2:
       theme: Ironwood Rise
       palette: ironwood

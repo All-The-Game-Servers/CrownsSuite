@@ -12,6 +12,21 @@ public final class TerrainLayout {
     }
 
     public static int surfaceHeight(int floor, String worldName, int x, int z) {
+        if (floor == 1) {
+            int height = floorOneSurfaceHeight(worldName, x, z);
+            for (TerrainPoint village : defaultVillages(floor, worldName, null)) {
+                int distance = Math.max(Math.abs(x - village.x()), Math.abs(z - village.z()));
+                if (distance <= 92) {
+                    height = blend(height, village.y(), 92 - distance, 92);
+                }
+            }
+            TerrainPoint arena = defaultArena(floor, worldName, null);
+            int arenaDistance = arena == null ? Integer.MAX_VALUE : (int) Math.round(Math.hypot(x - arena.x(), z - arena.z()));
+            if (arenaDistance <= 104) {
+                height = blend(height, arena.y(), 104 - arenaDistance, 104);
+            }
+            return Math.max(42, Math.min(132, height));
+        }
         TerrainTheme theme = TerrainTheme.forFloor(floor, null);
         double continent = fractalNoise(worldName, floor, x, z, 260.0D, 3);
         double hills = fractalNoise(worldName, floor + 17, x, z, floor == 1 ? 92.0D : 70.0D, 4);
@@ -35,6 +50,34 @@ public final class TerrainLayout {
             height = blend(height, arena.y(), 80 - arenaDistance, 80);
         }
         return Math.max(42, Math.min(130, height));
+    }
+
+    public static TerrainRegion region(int floor, String worldName, int x, int z) {
+        if (floor != 1) {
+            return TerrainRegion.OAK_HIGHLANDS;
+        }
+        double distance = Math.hypot(x, z);
+        if (distance < 430.0D) {
+            return TerrainRegion.MEADOW_BASIN;
+        }
+        double river = fractalNoise(worldName, 501, x, z, 360.0D, 3) + Math.sin((x + z) / 220.0D) * 0.35D;
+        if (Math.abs(river) < 0.10D) {
+            return TerrainRegion.RIVER_VALLEY;
+        }
+        if (x > 640 && z > 420) {
+            return TerrainRegion.GATE_WILDS;
+        }
+        if (z < -560) {
+            return TerrainRegion.SHRINE_RIDGE;
+        }
+        if (x < -460) {
+            return TerrainRegion.STARTER_FOREST;
+        }
+        if (z > 460) {
+            return TerrainRegion.FARMLAND_FLATS;
+        }
+        double highlands = fractalNoise(worldName, 617, x, z, 520.0D, 3);
+        return highlands > 0.18D ? TerrainRegion.OAK_HIGHLANDS : TerrainRegion.MEADOW_BASIN;
     }
 
     public static TerrainPoint defaultArena(int floor, String worldName, ConfigurationSection floorConfig) {
@@ -172,6 +215,9 @@ public final class TerrainLayout {
     }
 
     private static int surfaceHeightWithoutFeatures(int floor, String worldName, int x, int z) {
+        if (floor == 1) {
+            return floorOneSurfaceHeight(worldName, x, z);
+        }
         TerrainTheme theme = TerrainTheme.forFloor(floor, null);
         double continent = fractalNoise(worldName, floor, x, z, 260.0D, 3);
         double hills = fractalNoise(worldName, floor + 17, x, z, floor == 1 ? 92.0D : 70.0D, 4);
@@ -181,9 +227,36 @@ public final class TerrainLayout {
                 + (int) Math.round(hills * 9.0D * floorScale)));
     }
 
+    private static int floorOneSurfaceHeight(String worldName, int x, int z) {
+        TerrainRegion region = region(1, worldName, x, z);
+        double continent = fractalNoise(worldName, 1, x, z, 680.0D, 4);
+        double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 86.0D : 150.0D, 4);
+        double ridges = ridgeNoise(worldName, 31, x, z, region == TerrainRegion.SHRINE_RIDGE ? 130.0D : 240.0D);
+        double erosion = fractalNoise(worldName, 47, x, z, 90.0D, 2);
+        int height = region.baseHeight()
+                + (int) Math.round(continent * 9.0D)
+                + (int) Math.round(hills * (region == TerrainRegion.MEADOW_BASIN || region == TerrainRegion.FARMLAND_FLATS ? 5.0D : 11.0D))
+                + (int) Math.round(Math.max(0.0D, ridges) * (region == TerrainRegion.SHRINE_RIDGE ? 18.0D : 8.0D))
+                - (int) Math.round(Math.max(0.0D, -erosion) * 5.0D);
+        if (region == TerrainRegion.RIVER_VALLEY) {
+            height -= 5;
+        }
+        if (region == TerrainRegion.GATE_WILDS) {
+            height += (int) Math.round(ridges * 6.0D);
+        }
+        return Math.max(48, Math.min(122, height));
+    }
+
     private static int[] configuredOrProcedural(int floor, String worldName, ConfigurationSection section, String type, int index, List<TerrainPoint> existing) {
         if (section != null && section.isSet("x") && section.isSet("z")) {
             return new int[]{section.getInt("x"), section.getInt("z")};
+        }
+        String path = section == null || section.getCurrentPath() == null ? "" : section.getCurrentPath();
+        if (floor == 1 && type.equals("village") && index == 0 && path.endsWith(".first-haven")) {
+            return new int[]{0, 0};
+        }
+        if (floor == 1 && type.equals("arena")) {
+            return new int[]{defaultArenaX(floor), defaultArenaZ(floor)};
         }
         int size = worldSize(floor, section);
         int half = Math.max(512, size / 2);

@@ -1,0 +1,37 @@
+key: waystone
+anchor: 2,0,2
+palette:
+C=COBBLESTONE
+A=COPPER_BLOCK
+L=LANTERN
+layers:
+y=0
+CCCCC
+CCCCC
+CCCCC
+CCCCC
+CCCCC
+y=1
+.....
+..C..
+.CCC.
+..C..
+.....
+y=2
+.....
+..C..
+.CAC.
+..C..
+.....
+y=3
+.....
+..C..
+..A..
+..C..
+.....
+y=4
+.....
+.....
+..L..
+.....
+.....

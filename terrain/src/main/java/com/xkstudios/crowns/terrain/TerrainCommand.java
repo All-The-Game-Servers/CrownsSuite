@@ -104,6 +104,9 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("Profile: " + this.plugin.getTerrainManager().getTerrainProfile(floor)
                 + " | World size: " + this.plugin.getTerrainManager().getWorldSize(floor)
                 + " | Placement: seeded-random", NamedTextColor.GRAY));
+        if (this.plugin.getTerrainManager().isFreshWorldRequired(floor)) {
+            sender.sendMessage(Component.text("Fresh world required: create/use '" + worldName + "'. Existing floor worlds are not overwritten.", NamedTextColor.YELLOW));
+        }
         sender.sendMessage(Component.text("Structure density: " + String.format("%.2f", this.plugin.getTerrainManager().getStructureDensity(floor))
                 + " | Persisted points: " + this.plugin.getTerrainManager().countPersistedPoints(floor, worldName), NamedTextColor.DARK_GRAY));
         TerrainPoint arena = this.plugin.getTerrainManager().getBossArena(floor, worldName);

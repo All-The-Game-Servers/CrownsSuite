@@ -29,7 +29,8 @@
 
 ## CrownsMMO / Terrain Relaunch Notes
 
-- Floor 1 now defaults to the dedicated generated world `crowns_floor_1`, not the server's existing `world`.
+- CrownsTerrain `1.4.0` defaults Floor 1 terrain generation to the fresh world `crowns_floor_1_v2`, not the server's existing `world` or the older `crowns_floor_1`.
 - Run `/cterrain admin create 1` if you want to create the Floor 1 world manually before player testing.
 - Run `/cterrain verify floor 1` to confirm First Haven chunks and generated structure blocks exist.
 - New adventurers can run `/cmmo start` to enter First Haven and begin the Floor 1 path.
+- MMO respawn routing is not part of the terrain relaunch. If a death sends a player elsewhere, use `/cmmo start` or `/cmmo floor 1` until the follow-up MMO integration patch.

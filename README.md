@@ -26,7 +26,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
 - `CrownsMMO-1.7.0.jar`
-- `CrownsTerrain-1.3.0.jar`
+- `CrownsTerrain-1.4.0.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -94,17 +94,18 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 ## CrownsMMO 1.7.0
 
 - Adds the playable Floor 1 `First Haven Path` questline.
-- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated `crowns_floor_1` world.
+- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. When adopting CrownsTerrain `1.4.0`, update MMO Floor 1 to `crowns_floor_1_v2` after creating the fresh terrain world.
 - Adds quest board pages for available, active, completed, Floor 1, and story-path quests.
 - Adds `/cmmo quests completed`, `/cmmo quests floor <number>`, and `/cmmo admin quest inspect <player>`.
 - Adds clearer quest detail guidance, optional-provider status, reward previews, and progress messages.
 
-## CrownsTerrain 1.3.0
+## CrownsTerrain 1.4.0
 
-- Adds a new terrain provider plugin for CrownsMMO floor worlds.
-- Provides procedural floor terrain, seeded villages/camps/landmarks, dedicated Floor 1 world `crowns_floor_1` at 16k, and Floor 2+ at 8k by default.
-- Exposes generated POIs through CrownsAPI so CrownsMMO quests can reference villages, road markers, shrines, and landmarks.
-- Adds `/cterrain verify floor <number>` and guarded `/cterrain admin create <floor>` tooling for relaunch checks.
+- Rebuilds Floor 1 around the fresh world `crowns_floor_1_v2` and `first_haven_relaunch` terrain profile.
+- Adds region-aware terrain: meadow basin, oak highlands, river valley, starter forest, farmland flats, shrine ridge, and gate wilds.
+- Replaces diagonal sapling patterns with clustered trees, groves, ponds, rocks, fallen logs, readable roads, and physical blueprint-backed structures.
+- Adds bundled schematic-style templates for First Haven, houses, farms, market stalls, notice board, shrine, waystone, camps, landmarks, and the First Gate arena.
+- Expands `/cterrain verify floor <number>` so it checks real generated blocks, not only saved coordinates.
 - CrownsMMO falls back to normal world creation and non-terrain quest behavior when CrownsTerrain is not installed.
 
 ## Resource Pack 1.5.0
@@ -116,6 +117,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.3.0`.
+- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.4.0`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.
