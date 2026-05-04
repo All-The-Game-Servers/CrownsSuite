@@ -26,7 +26,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
 - `CrownsMMO-1.7.0.jar`
-- `CrownsTerrain-1.5.1.jar`
+- `CrownsTerrain-1.5.2.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -94,7 +94,7 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 ## CrownsMMO 1.7.0
 
 - Adds the playable Floor 1 `First Haven Path` questline.
-- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. When adopting CrownsTerrain `1.5.1`, update MMO Floor 1 to `crowns_floor_1_v2` after creating the fresh terrain world.
+- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. When adopting CrownsTerrain `1.5.2`, update MMO Floor 1 to `crowns_floor_1_v2` after creating the fresh terrain world.
 - Adds quest board pages for available, active, completed, Floor 1, and story-path quests.
 - Adds `/cmmo quests completed`, `/cmmo quests floor <number>`, and `/cmmo admin quest inspect <player>`.
 - Adds clearer quest detail guidance, optional-provider status, reward previews, and progress messages.
@@ -120,6 +120,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.5.1`.
+- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.5.2`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

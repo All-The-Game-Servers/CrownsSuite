@@ -1,12 +1,12 @@
 name: CrownsTerrain
-version: 1.5.1
+version: 1.5.2
 main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
 softdepend: [CrownsEvents]
 loadbefore: [CrownsMMO]
-description: Reference-guided Floor 1 worldgen with stabilized structures, authored town platforms, gentler hydrology, landmarks, and arenas for Crowns Suite.
+description: Reference-guided Floor 1 worldgen with heightmap-fitted structures, authored town platforms, gentler hydrology, landmarks, and arenas for Crowns Suite.
 commands:
   crownsterrain:
     description: Crowns Terrain commands

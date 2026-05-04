@@ -119,3 +119,12 @@ CrownsTerrain `1.5.1` fixes the first serious test issues from the `1.5.0` relau
 - Floor 1 height noise is gentler, reducing the repeated rolling-hill look.
 - Stream and pond placement is more conservative so water appears in low/valley terrain instead of carving random cut-out trenches through hills.
 - Tree clusters now use taller trunks, wider canopies, roots, and mixed leaves instead of tiny sapling-like blobs.
+
+## 1.5.2 Iris-Informed Placement Pass
+
+CrownsTerrain `1.5.2` uses Iris as architectural reference material without copying Iris code.
+
+- Structure planning now follows a heightmap-aware placement approach: each blueprint samples the terrain under its own footprint and fits its base Y near the median local ground height.
+- The existing platform clear/foundation pass remains as a safety net, but structures no longer rely on one town-wide Y value for every building.
+- This should reduce buried buildings, floating foundations, and huge artificial shelves around First Haven pieces.
+- The larger Iris lesson is that CrownsTerrain needs a real staged engine over time: resource loaders, object placement, biome/region actuators, decoration passes, metrics, and pregeneration tools instead of one oversized generator class.

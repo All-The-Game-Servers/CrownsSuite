@@ -60,7 +60,7 @@ public class TerrainManager implements TerrainProvider {
                 arena,
                 landmarks,
                 livingPoints,
-                FloorStructurePlanner.plan(floorNumber, theme, this.structureTemplateManager, villages, arena, landmarks, livingPoints)
+                FloorStructurePlanner.plan(floorNumber, worldName, theme, this.structureTemplateManager, villages, arena, landmarks, livingPoints)
         );
     }
 

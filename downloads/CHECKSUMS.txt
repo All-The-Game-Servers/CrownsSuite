@@ -6,5 +6,5 @@ c1a4f9ff0dd34b33fc7c86325e3ab039a54d53f2  CrownsEvents-1.3.0.jar
 b5f9f9e534cc77afcbfa0669f43631e8e08d2f9b  CrownsMMO-1.7.0.jar
 8b318e34cf10cde535d9b67c90c97e6987e56ac4  CrownsSuite-ResourcePack-1.5.0.sha1
 aa3a31780d939471971b0fd63dd3ed216f80e813  CrownsSuite-ResourcePack-1.5.0.zip
-c22e069c5b1032156aaac63a4dfdaa6cf9c1f943  CrownsTerrain-1.5.1.jar
-3533a39d6a0248e86c38fb2e9ba7cc2859ffc7e8  README.md
+b8e4356e9ed62b98691d693a4320704fb4c1314d  CrownsTerrain-1.5.2.jar
+42ff5f885f081406c8f852b60c66e38545dceee0  README.md
