@@ -20,8 +20,8 @@ public class TerrainMenuManager {
 
     public void openHub(Player player) {
         Inventory inventory = CrownsMenuHolder.create("terrain-hub", 54, Component.text("CrownsTerrain", NamedTextColor.GREEN));
-        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Hybrid Floor Generation", NamedTextColor.GREEN, List.of(
-                Component.text("Custom floor terrain with safe vanilla-like play.", NamedTextColor.GRAY),
+        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Set-Map Floor Generation", NamedTextColor.GREEN, List.of(
+                Component.text("Admins pregenerate floor routes before play.", NamedTextColor.GRAY),
                 Component.text("CrownsMMO still owns progression and combat.", NamedTextColor.DARK_GRAY)
         ), "lowlight/terrain/hub"));
         inventory.setItem(12, CrownsAPI.getSuiteGui().info(Material.OAK_DOOR, "Custom Villages", NamedTextColor.GOLD, List.of(
@@ -41,10 +41,14 @@ public class TerrainMenuManager {
         ), "lowlight/terrain/camp"));
         int slot = 28;
         for (int floor = 1; floor <= 3; floor++) {
-            String worldName = floor == 1 ? "world" : "crowns_floor_" + floor;
+            String worldName = this.plugin.getTerrainManager().getWorldName(floor);
             List<Component> lore = new ArrayList<>();
             lore.add(Component.text("Theme: " + this.plugin.getTerrainManager().getFloorTheme(floor), NamedTextColor.GRAY));
             lore.add(Component.text("Profile: " + this.plugin.getTerrainManager().getTerrainProfile(floor), NamedTextColor.DARK_GRAY));
+            TerrainGenerationStatus status = this.plugin.getTerrainManager().getGenerationStatus(floor);
+            if (this.plugin.getTerrainManager().isSetMapFloor(floor)) {
+                lore.add(Component.text("Generation: " + status.status(), status.readyForPlayers() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+            }
             lore.add(Component.text("World size: " + this.plugin.getTerrainManager().getWorldSize(floor) + " x " + this.plugin.getTerrainManager().getWorldSize(floor), NamedTextColor.GRAY));
             lore.add(Component.text("Villages: " + this.plugin.getTerrainManager().getVillages(floor, worldName).size(), NamedTextColor.YELLOW));
             lore.add(Component.text("Living points: " + this.plugin.getTerrainManager().getLivingPoints(floor, worldName).size(), NamedTextColor.GREEN));

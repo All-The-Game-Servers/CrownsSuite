@@ -57,7 +57,7 @@ public final class TerrainLayout {
             return TerrainRegion.OAK_HIGHLANDS;
         }
         double distance = Math.hypot(x, z);
-        boolean v3 = isV3(worldName);
+        boolean v3 = isRelaunch(worldName);
         if (distance < (v3 ? 560.0D : 430.0D)) {
             return TerrainRegion.MEADOW_BASIN;
         }
@@ -82,7 +82,7 @@ public final class TerrainLayout {
     }
 
     public static double streamSignal(String worldName, int x, int z) {
-        if (isV3(worldName)) {
+        if (isRelaunch(worldName)) {
             return fractalNoise(worldName, 501, x, z, 620.0D, 3)
                     + Math.sin((x + z) / 430.0D) * 0.28D
                     + Math.sin((x - z) / 700.0D) * 0.16D;
@@ -239,7 +239,7 @@ public final class TerrainLayout {
 
     private static int floorOneSurfaceHeight(String worldName, int x, int z) {
         TerrainRegion region = region(1, worldName, x, z);
-        boolean v3 = isV3(worldName);
+        boolean v3 = isRelaunch(worldName);
         double distance = Math.hypot(x, z);
         double continent = fractalNoise(worldName, 1, x, z, v3 ? 920.0D : 680.0D, 4);
         double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 155.0D : v3 ? 280.0D : 210.0D, 4);
@@ -265,8 +265,12 @@ public final class TerrainLayout {
         return Math.max(48, Math.min(122, height));
     }
 
-    private static boolean isV3(String worldName) {
-        return worldName != null && worldName.toLowerCase(Locale.ROOT).contains("_v3");
+    private static boolean isRelaunch(String worldName) {
+        if (worldName == null) {
+            return false;
+        }
+        String lower = worldName.toLowerCase(Locale.ROOT);
+        return lower.contains("_v3") || lower.contains("_v4");
     }
 
     private static int[] configuredOrProcedural(int floor, String worldName, ConfigurationSection section, String type, int index, List<TerrainPoint> existing) {

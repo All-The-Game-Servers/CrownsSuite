@@ -6,7 +6,7 @@ It is built primarily for CrownsMMO floor worlds: CrownsMMO owns progression, bo
 
 ## What It Adds
 
-- Hybrid floor generation for CrownsMMO worlds
+- Set-map floor generation for CrownsMMO worlds
 - Floor-themed terrain palettes
 - Custom code-authored villages
 - Camps, road markers, waystones, and starter shrines
@@ -40,7 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Relaunch default Floor 1 world is `crowns_floor_1_v3`, so existing survival `world` and older Crowns floor worlds are not overwritten.
+- Relaunch default Floor 1 world is `crowns_floor_1_v4`, so existing survival `world` and older Crowns floor worlds are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -61,6 +61,9 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain villages <floor>`
 - `/cterrain verify floor <floor>`
 - `/cterrain admin create <floor>`
+- `/cterrain admin generate <floor>`
+- `/cterrain admin status <floor>`
+- `/cterrain admin cancel <floor>`
 - `/cterrain admin locate village <floor>`
 - `/cterrain admin locate camp <floor>`
 - `/cterrain admin locate waystone <floor>`
@@ -140,3 +143,14 @@ CrownsTerrain `1.5.3` makes Floor 1 a fresh high-fantasy MMO starter world at `c
 - Terrain generation emphasizes a sheltered valley, shrine ridges, gate wilds, smoother river paths, authored road routes, and stronger high-fantasy silhouettes.
 - `/cterrain admin tp <type> <floor> [key]` lets staff teleport directly to generated points without copying coordinates.
 - `/cterrain verify floor 1` is now a stricter QA gate for physical structure count, route blocks, hydrology, region variety, First Haven, and First Gate arena.
+
+## 1.5.4 Set-Map Floors + Admin Pregeneration
+
+CrownsTerrain `1.5.4` pivots Floor 1 to a code-authored set map at `crowns_floor_1_v4`.
+
+- `/cterrain admin generate 1` creates/loads the floor and pregenerates the critical route before players use it.
+- `/cterrain admin status 1` reports `not-generated`, `generating`, `critical-ready`, `complete`, `failed`, or `cancelled`.
+- Normal player teleports into unready set-map floors are blocked until the floor is `critical-ready`.
+- The generated route includes First Haven, market square, farm gate, starter camp, starter shrine, first waystone, north road, arena approach, and First Gate arena.
+- `/cterrain verify floor 1` now checks generation status plus physical blocks for the set-map town, farms, roads, shrine, waystone, camp, and arena.
+- This release keeps old worlds untouched; staff should test using the fresh `crowns_floor_1_v4` world.

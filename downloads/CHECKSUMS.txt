@@ -3,8 +3,8 @@ e1e0ddc79b425627cccf027b07fadc5ed29d6f63  CrownsAPI-1.3.0.jar
 421cd662f28cbe28c1f94652d1b6d21e9aa9e329  CrownsDrugs-1.3.0.jar
 ae219465aa30c9f99d72c649834b92a55cdf4ae2  CrownsEconomy-1.3.0.jar
 c1a4f9ff0dd34b33fc7c86325e3ab039a54d53f2  CrownsEvents-1.3.0.jar
-b5f9f9e534cc77afcbfa0669f43631e8e08d2f9b  CrownsMMO-1.7.0.jar
+4f508edf0c5557ea0d9cf726ce5e5a65414f8596  CrownsMMO-1.7.0.jar
 8b318e34cf10cde535d9b67c90c97e6987e56ac4  CrownsSuite-ResourcePack-1.5.0.sha1
 aa3a31780d939471971b0fd63dd3ed216f80e813  CrownsSuite-ResourcePack-1.5.0.zip
-7f32f6f67dabf469eb92b11a8aa5bbd7370adc19  CrownsTerrain-1.5.3.jar
-ce4db452d111eb9bee82f799f9f5f6f631f17cc6  README.md
+941ddac4caa9aa39d32c34239486ab7e3850bd07  CrownsTerrain-1.5.4.jar
+d85bcfc9e9518267ff3d12afe1d76169c2f28720  README.md

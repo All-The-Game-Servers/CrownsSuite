@@ -148,7 +148,10 @@ public class MmoFloorManager {
         }
         this.ensureBossLocation(floor);
         Location spawn = this.spawnLocation(floor, world);
-        player.teleport(spawn);
+        if (!player.teleport(spawn)) {
+            player.sendMessage(Component.text("Floor " + floorNumber + " is not ready for teleporting yet.", NamedTextColor.RED));
+            return false;
+        }
         player.sendMessage(Component.text("Entered Floor " + floorNumber + ".", NamedTextColor.AQUA));
         return true;
     }

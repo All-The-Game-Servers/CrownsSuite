@@ -33,11 +33,15 @@ public class CrownsTerrainPlugin extends JavaPlugin {
             this.getCommand("crownsterrain").setTabCompleter(command);
         }
         Bukkit.getPluginManager().registerEvents(new TerrainMenuListener(this), this);
-        this.getLogger().info("CrownsTerrain enabled with hybrid floor generation.");
+        Bukkit.getPluginManager().registerEvents(new TerrainSafetyListener(this), this);
+        this.getLogger().info("CrownsTerrain enabled with set-map floor generation support.");
     }
 
     @Override
     public void onDisable() {
+        if (this.terrainManager != null) {
+            this.terrainManager.shutdown();
+        }
         CrownsAPI.unregisterSection("terrain");
         if (CrownsAPI.getTerrain() == this.terrainManager) {
             CrownsAPI.setTerrainProvider(null);

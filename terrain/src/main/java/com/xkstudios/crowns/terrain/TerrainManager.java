@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.WorldCreator;
@@ -25,6 +26,7 @@ public class TerrainManager implements TerrainProvider {
     private final DataManager dataManager;
     private final StructureTemplateManager structureTemplateManager;
     private final Map<String, TerrainPoint> pointCache = new ConcurrentHashMap<>();
+    private final Map<Integer, FloorGenerationJob> activeGenerationJobs = new ConcurrentHashMap<>();
 
     public TerrainManager(CrownsTerrainPlugin plugin) {
         this.plugin = plugin;
@@ -41,6 +43,9 @@ public class TerrainManager implements TerrainProvider {
     public ChunkGenerator getGeneratorForFloor(int floorNumber, String worldName, World.Environment environment, long resourceTier) {
         if (!this.plugin.getConfig().getBoolean("terrain.enabled", true)) {
             return null;
+        }
+        if (this.isSetMapFloor(floorNumber)) {
+            return new SetMapTerrainGenerator(floorNumber, worldName);
         }
         boolean affectAll = this.plugin.getConfig().getBoolean("terrain.affect-all-floors", true);
         int showcase = this.plugin.getConfig().getInt("terrain.showcase-floor", 2);
@@ -146,10 +151,38 @@ public class TerrainManager implements TerrainProvider {
     }
 
     public String getWorldName(int floorNumber) {
+        ConfigurationSection section = this.floorSection(floorNumber);
+        if (section != null && section.isSet("world")) {
+            return section.getString("world", floorNumber == 1 ? "crowns_floor_1_v4" : "crowns_floor_" + floorNumber);
+        }
         if (floorNumber == 1) {
             return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1");
         }
         return this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_") + floorNumber;
+    }
+
+    public int floorForWorld(String worldName) {
+        if (worldName == null || worldName.isBlank()) {
+            return 0;
+        }
+        for (int floor = 1; floor <= 64; floor++) {
+            ConfigurationSection section = this.floorSection(floor);
+            if (section == null && floor > 3) {
+                break;
+            }
+            if (this.getWorldName(floor).equalsIgnoreCase(worldName)) {
+                return floor;
+            }
+        }
+        String prefix = this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_");
+        if (worldName.toLowerCase(Locale.ROOT).startsWith(prefix.toLowerCase(Locale.ROOT))) {
+            try {
+                return Integer.parseInt(worldName.substring(prefix.length()));
+            } catch (NumberFormatException ignored) {
+                return 0;
+            }
+        }
+        return 0;
     }
 
     public World createFloorWorld(int floorNumber) {
@@ -170,6 +203,165 @@ public class TerrainManager implements TerrainProvider {
         return world;
     }
 
+    public boolean startGeneration(CommandSender sender, int floorNumber) {
+        if (!this.isSetMapFloor(floorNumber)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for set-map generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            return false;
+        }
+        if (this.activeGenerationJobs.containsKey(floorNumber)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is already generating. Use /cterrain admin status " + floorNumber + ".", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+            return false;
+        }
+        FloorGenerationJob job = new FloorGenerationJob(this.plugin, this, floorNumber, sender);
+        this.activeGenerationJobs.put(floorNumber, job);
+        job.start();
+        return true;
+    }
+
+    public boolean cancelGeneration(CommandSender sender, int floorNumber) {
+        FloorGenerationJob job = this.activeGenerationJobs.remove(floorNumber);
+        if (job == null) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " has no active generation job.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            return false;
+        }
+        job.cancel("Cancelled by " + sender.getName() + ".");
+        sender.sendMessage(net.kyori.adventure.text.Component.text("Cancelled CrownsTerrain generation for Floor " + floorNumber + ".", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+        return true;
+    }
+
+    public void clearActiveGeneration(int floorNumber) {
+        this.activeGenerationJobs.remove(floorNumber);
+    }
+
+    public boolean isFloorReadyForPlayers(int floorNumber) {
+        if (!this.isSetMapFloor(floorNumber)) {
+            return true;
+        }
+        return this.getGenerationStatus(floorNumber).readyForPlayers();
+    }
+
+    public boolean isSetMapFloor(int floorNumber) {
+        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "").equalsIgnoreCase("set-map");
+    }
+
+    public TerrainGenerationStatus getGenerationStatus(int floorNumber) {
+        FloorGenerationJob active = this.activeGenerationJobs.get(floorNumber);
+        if (active != null) {
+            return active.snapshot();
+        }
+        String worldName = this.getWorldName(floorNumber);
+        if (this.dataManager == null) {
+            return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.getTerrainProfile(floorNumber));
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                SELECT profile_version, status, total_chunks, generated_chunks, total_blocks, placed_blocks, started_at, completed_at, started_by, message
+                FROM terrain_generation_jobs
+                WHERE floor_number = ? AND world_name = ?
+                """)) {
+            statement.setInt(1, floorNumber);
+            statement.setString(2, worldName);
+            try (ResultSet result = statement.executeQuery()) {
+                if (result.next()) {
+                    return new TerrainGenerationStatus(
+                            floorNumber,
+                            worldName,
+                            result.getString("profile_version"),
+                            result.getString("status"),
+                            result.getInt("total_chunks"),
+                            result.getInt("generated_chunks"),
+                            result.getInt("total_blocks"),
+                            result.getInt("placed_blocks"),
+                            result.getLong("started_at"),
+                            result.getLong("completed_at"),
+                            result.getString("started_by"),
+                            result.getString("message")
+                    );
+                }
+            }
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not load generation status: " + exception.getMessage());
+        }
+        return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.getTerrainProfile(floorNumber));
+    }
+
+    public List<String> getGenerationStatusLines(int floorNumber) {
+        TerrainGenerationStatus status = this.getGenerationStatus(floorNumber);
+        List<String> lines = new ArrayList<>();
+        lines.add("Floor " + floorNumber + " world: " + status.worldName());
+        lines.add("Status: " + status.status() + " | " + status.progressSummary());
+        if (status.startedBy() != null && !status.startedBy().isBlank()) {
+            lines.add("Started by: " + status.startedBy());
+        }
+        if (status.message() != null && !status.message().isBlank()) {
+            lines.add("Message: " + status.message());
+        }
+        return lines;
+    }
+
+    public void saveGenerationJob(int floorNumber, String worldName, String status, int totalChunks, int generatedChunks,
+                                  int totalBlocks, int placedBlocks, String startedBy, String message) {
+        if (this.dataManager == null) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                INSERT OR REPLACE INTO terrain_generation_jobs
+                (floor_number, world_name, profile_version, status, total_chunks, generated_chunks, total_blocks, placed_blocks, started_at, completed_at, started_by, message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT started_at FROM terrain_generation_jobs WHERE floor_number = ? AND world_name = ?), ?), COALESCE((SELECT completed_at FROM terrain_generation_jobs WHERE floor_number = ? AND world_name = ?), 0), ?, ?)
+                """)) {
+            statement.setInt(1, floorNumber);
+            statement.setString(2, worldName);
+            statement.setString(3, this.getTerrainProfile(floorNumber));
+            statement.setString(4, status);
+            statement.setInt(5, totalChunks);
+            statement.setInt(6, generatedChunks);
+            statement.setInt(7, totalBlocks);
+            statement.setInt(8, placedBlocks);
+            statement.setInt(9, floorNumber);
+            statement.setString(10, worldName);
+            statement.setLong(11, now);
+            statement.setInt(12, floorNumber);
+            statement.setString(13, worldName);
+            statement.setString(14, startedBy == null ? "" : startedBy);
+            statement.setString(15, message == null ? "" : message);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not save generation status: " + exception.getMessage());
+        }
+    }
+
+    public void finishGenerationJob(int floorNumber, String status, int totalChunks, int generatedChunks,
+                                    int totalBlocks, int placedBlocks, String startedBy, String message) {
+        if (this.dataManager == null) {
+            return;
+        }
+        String worldName = this.getWorldName(floorNumber);
+        long now = System.currentTimeMillis();
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                INSERT OR REPLACE INTO terrain_generation_jobs
+                (floor_number, world_name, profile_version, status, total_chunks, generated_chunks, total_blocks, placed_blocks, started_at, completed_at, started_by, message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT started_at FROM terrain_generation_jobs WHERE floor_number = ? AND world_name = ?), ?), ?, ?, ?)
+                """)) {
+            statement.setInt(1, floorNumber);
+            statement.setString(2, worldName);
+            statement.setString(3, this.getTerrainProfile(floorNumber));
+            statement.setString(4, status);
+            statement.setInt(5, totalChunks);
+            statement.setInt(6, generatedChunks);
+            statement.setInt(7, totalBlocks);
+            statement.setInt(8, placedBlocks);
+            statement.setInt(9, floorNumber);
+            statement.setString(10, worldName);
+            statement.setLong(11, now);
+            statement.setLong(12, now);
+            statement.setString(13, startedBy == null ? "" : startedBy);
+            statement.setString(14, message == null ? "" : message);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not finish generation status: " + exception.getMessage());
+        }
+    }
+
     public List<String> verifyFloor(int floorNumber) {
         String worldName = this.getWorldName(floorNumber);
         List<String> lines = new ArrayList<>();
@@ -178,6 +370,10 @@ public class TerrainManager implements TerrainProvider {
         lines.add("Profile: " + this.getTerrainProfile(floorNumber) + " | Size: " + this.getWorldSize(floorNumber));
         lines.add("Expected world: " + worldName + (floorNumber == 1 && this.isFreshWorldRequired(floorNumber) ? " | fresh world required" : ""));
         lines.add("Bundled templates loaded: " + this.structureTemplateManager.count());
+        TerrainGenerationStatus generationStatus = this.getGenerationStatus(floorNumber);
+        if (this.isSetMapFloor(floorNumber)) {
+            lines.add("Generation: " + generationStatus.status() + " | " + generationStatus.progressSummary());
+        }
         List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
         TerrainPoint firstHaven = villages.stream()
                 .filter(point -> point.key().equalsIgnoreCase("first-haven") || point.displayName().equalsIgnoreCase("First Haven"))
@@ -186,7 +382,9 @@ public class TerrainManager implements TerrainProvider {
         lines.add("Villages: " + villages.size() + (firstHaven == null ? "" : " | First spawn: " + firstHaven.coordinateSummary()));
         lines.add("Persisted points: " + this.countPersistedPoints(floorNumber, worldName));
         if (world == null) {
-            lines.add("FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
+            lines.add(this.isSetMapFloor(floorNumber)
+                    ? "FAIL: world is not loaded. Run /cterrain admin generate " + floorNumber + " first."
+                    : "FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
             return lines;
         }
         if (firstHaven == null) {
@@ -208,6 +406,28 @@ public class TerrainManager implements TerrainProvider {
         lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "waystone"), this.theme(floorNumber).accent())
                 ? "PASS: waystone feature blocks are present."
                 : "FAIL: waystone feature blocks were not found.");
+        if (floorNumber == 1 && this.isSetMapFloor(floorNumber)) {
+            lines.add(generationStatus.readyForPlayers()
+                    ? "PASS: Floor 1 set-map generation is critical-ready."
+                    : "FAIL: Floor 1 set-map generation is not ready. Run /cterrain admin generate 1.");
+            lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "landmark"), Material.CUT_COPPER)
+                    ? "PASS: market square / civic anchor blocks are present."
+                    : "FAIL: market square / civic anchor blocks were not found.");
+            lines.add(this.hasFarmBlocks(world, this.getPoints(floorNumber, worldName, "road_marker"))
+                    ? "PASS: farm district blocks are present."
+                    : "FAIL: farm district blocks were not found.");
+            lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "shrine"), Material.MOSSY_STONE_BRICKS)
+                    ? "PASS: starter shrine blocks are present."
+                    : "FAIL: starter shrine blocks were not found.");
+            lines.add(this.hasRoadNetwork(world, floorNumber, worldName, firstHaven, arena)
+                    ? "PASS: critical-route roads have physical route blocks."
+                    : "FAIL: critical-route roads are missing between major points.");
+            lines.add(this.hasSetMapHouseBlocks(world, firstHaven)
+                    ? "PASS: First Haven has large authored building blocks."
+                    : "FAIL: First Haven large authored building blocks were not found.");
+            lines.add("Debug: if these fail, this world was likely loaded but never pregenerated with /cterrain admin generate 1.");
+            return lines;
+        }
         if (floorNumber == 1) {
             List<StructurePlacement> plannedPlacements = this.plannedPlacements(floorNumber, worldName);
             int minimumTownStructures = this.plugin.getConfig().getInt("terrain.floors.1.qa.minimum-town-structures", 20);
@@ -392,9 +612,33 @@ public class TerrainManager implements TerrainProvider {
                         PRIMARY KEY (floor_number, world_name, point_type, point_key)
                     )
                     """);
+            statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS terrain_generation_jobs (
+                        floor_number INTEGER NOT NULL,
+                        world_name TEXT NOT NULL,
+                        profile_version TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        total_chunks INTEGER NOT NULL DEFAULT 0,
+                        generated_chunks INTEGER NOT NULL DEFAULT 0,
+                        total_blocks INTEGER NOT NULL DEFAULT 0,
+                        placed_blocks INTEGER NOT NULL DEFAULT 0,
+                        started_at INTEGER NOT NULL,
+                        completed_at INTEGER NOT NULL DEFAULT 0,
+                        started_by TEXT,
+                        message TEXT,
+                        PRIMARY KEY (floor_number, world_name)
+                    )
+                    """);
         } catch (SQLException exception) {
             this.plugin.getLogger().warning("[CrownsTerrain] Terrain table setup failed: " + exception.getMessage());
         }
+    }
+
+    public void shutdown() {
+        for (Map.Entry<Integer, FloorGenerationJob> entry : new ArrayList<>(this.activeGenerationJobs.entrySet())) {
+            entry.getValue().cancel("Plugin disabled before generation completed.");
+        }
+        this.activeGenerationJobs.clear();
     }
 
     private ConfigurationSection floorSection(int floorNumber) {
@@ -452,6 +696,52 @@ public class TerrainManager implements TerrainProvider {
                     int z = point.z() + dz;
                     for (int y = Math.max(world.getMinHeight(), point.y()); y <= Math.min(world.getMaxHeight() - 1, point.y() + 12); y++) {
                         if (world.getBlockAt(x, y, z).getType() == expected) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasFarmBlocks(World world, List<TerrainPoint> points) {
+        for (TerrainPoint point : points) {
+            if (!point.key().equalsIgnoreCase("farm-gate")) {
+                continue;
+            }
+            world.getChunkAt(point.x() >> 4, point.z() >> 4).load(true);
+            int matches = 0;
+            for (int dx = -72; dx <= 72; dx += 2) {
+                for (int dz = -48; dz <= 48; dz += 2) {
+                    int x = point.x() + dx;
+                    int z = point.z() + dz;
+                    int y = Math.max(world.getMinHeight(), world.getHighestBlockYAt(x, z));
+                    Material material = world.getBlockAt(x, y, z).getType();
+                    if (material == Material.FARMLAND || material == Material.WATER) {
+                        matches++;
+                        if (matches >= 18) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasSetMapHouseBlocks(World world, TerrainPoint origin) {
+        int matches = 0;
+        for (int dx = -128; dx <= 128; dx += 4) {
+            for (int dz = -104; dz <= 104; dz += 4) {
+                int x = origin.x() + dx;
+                int z = origin.z() + dz;
+                world.getChunkAt(x >> 4, z >> 4).load(true);
+                for (int y = Math.max(world.getMinHeight(), origin.y() - 8); y <= Math.min(world.getMaxHeight() - 1, origin.y() + 24); y++) {
+                    Material type = world.getBlockAt(x, y, z).getType();
+                    if (type == Material.DARK_OAK_PLANKS || type == Material.STRIPPED_SPRUCE_LOG || type == Material.OAK_PLANKS || type == Material.STONE_BRICKS) {
+                        matches++;
+                        if (matches >= 32) {
                             return true;
                         }
                     }

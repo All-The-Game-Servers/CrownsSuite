@@ -1,12 +1,12 @@
 name: CrownsTerrain
-version: 1.5.3
+version: 1.5.4
 main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
 softdepend: [CrownsEvents]
 loadbefore: [CrownsMMO]
-description: Floor 1 v3 high-fantasy MMO worldgen with staged terrain, strict QA, expanded original blueprints, and admin landmark teleporting.
+description: Floor 1 v4 set-map generation with admin pregeneration, critical-route readiness, and landmark teleporting.
 commands:
   crownsterrain:
     description: Crowns Terrain commands
@@ -17,5 +17,5 @@ permissions:
     description: Allows opening CrownsTerrain information pages.
     default: true
   crowns.terrain.admin:
-    description: Allows CrownsTerrain admin locate and reload commands.
+    description: Allows CrownsTerrain admin generation, locate, teleport, and reload commands.
     default: op
