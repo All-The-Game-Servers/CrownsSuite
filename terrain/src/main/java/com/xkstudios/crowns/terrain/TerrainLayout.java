@@ -234,19 +234,21 @@ public final class TerrainLayout {
     private static int floorOneSurfaceHeight(String worldName, int x, int z) {
         TerrainRegion region = region(1, worldName, x, z);
         double continent = fractalNoise(worldName, 1, x, z, 680.0D, 4);
-        double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 86.0D : 150.0D, 4);
-        double ridges = ridgeNoise(worldName, 31, x, z, region == TerrainRegion.SHRINE_RIDGE ? 130.0D : 240.0D);
-        double erosion = fractalNoise(worldName, 47, x, z, 90.0D, 2);
+        double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 130.0D : 210.0D, 4);
+        double ridges = ridgeNoise(worldName, 31, x, z, region == TerrainRegion.SHRINE_RIDGE ? 170.0D : 310.0D);
+        double erosion = fractalNoise(worldName, 47, x, z, 180.0D, 2);
+        double terrace = Math.sin((x - z) / 180.0D) * 2.0D;
         int height = region.baseHeight()
-                + (int) Math.round(continent * 9.0D)
-                + (int) Math.round(hills * (region == TerrainRegion.MEADOW_BASIN || region == TerrainRegion.FARMLAND_FLATS ? 5.0D : 11.0D))
-                + (int) Math.round(Math.max(0.0D, ridges) * (region == TerrainRegion.SHRINE_RIDGE ? 18.0D : 8.0D))
-                - (int) Math.round(Math.max(0.0D, -erosion) * 5.0D);
+                + (int) Math.round(continent * 7.0D)
+                + (int) Math.round(hills * (region == TerrainRegion.MEADOW_BASIN || region == TerrainRegion.FARMLAND_FLATS ? 3.0D : 8.0D))
+                + (int) Math.round(Math.max(0.0D, ridges) * (region == TerrainRegion.SHRINE_RIDGE ? 14.0D : 5.0D))
+                - (int) Math.round(Math.max(0.0D, -erosion) * 3.0D)
+                + (int) Math.round(terrace);
         if (region == TerrainRegion.RIVER_VALLEY) {
-            height -= 5;
+            height -= 3;
         }
         if (region == TerrainRegion.GATE_WILDS) {
-            height += (int) Math.round(ridges * 6.0D);
+            height += (int) Math.round(ridges * 4.0D);
         }
         return Math.max(48, Math.min(122, height));
     }

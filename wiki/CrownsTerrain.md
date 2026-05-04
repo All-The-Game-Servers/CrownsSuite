@@ -109,3 +109,13 @@ CrownsTerrain `1.5.0` uses the reference pack as design inspiration only. No thi
 - Forests use role-based pools: canopy trees, edge trees, understory, mushrooms, roots/stumps, fallen logs, and rare hero trees.
 - New original templates cover gatehouse, bridge, town hall, mill, terraced farm, hillside house, switchback stairs, retaining wall, large shrine, giant tree base, stream camp, and ruined gate marker.
 - `/cterrain verify floor 1` now checks town anchors, gatehouse approach blocks, hero-tree/vertical landmark blocks, camps, waystones, and arena structures.
+
+## 1.5.1 Terrain Stability Hotfix
+
+CrownsTerrain `1.5.1` fixes the first serious test issues from the `1.5.0` relaunch.
+
+- Blueprint footprints now flatten and clear the generated terrain under them, so houses, town structures, and arena pieces should not spawn half-buried in hills.
+- Foundation supports extend deeper under structures to hide small slope mismatches.
+- Floor 1 height noise is gentler, reducing the repeated rolling-hill look.
+- Stream and pond placement is more conservative so water appears in low/valley terrain instead of carving random cut-out trenches through hills.
+- Tree clusters now use taller trunks, wider canopies, roots, and mixed leaves instead of tiny sapling-like blobs.

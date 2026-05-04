@@ -393,15 +393,17 @@ public class FloorTerrainGenerator extends ChunkGenerator {
         }
         double stream = TerrainLayout.streamSignal(this.worldName, worldX, worldZ);
         TerrainRegion region = TerrainLayout.region(this.floor, this.worldName, worldX, worldZ);
-        if (Math.abs(stream) <= 0.055D || region == TerrainRegion.RIVER_VALLEY && Math.abs(stream) <= 0.10D) {
-            int waterY = Math.min(surface, 63);
+        boolean streamCore = Math.abs(stream) <= 0.045D && surface <= 68;
+        boolean valleyStream = region == TerrainRegion.RIVER_VALLEY && Math.abs(stream) <= 0.085D && surface <= 70;
+        if (streamCore || valleyStream) {
+            int waterY = Math.min(surface, 62);
             chunkData.setBlock(localX, waterY, localZ, Material.WATER);
-            this.clearColumn(chunkData, localX, localZ, waterY + 1, waterY + 3, maxY);
-            if (Math.abs(stream) > 0.045D) {
+            this.clearColumn(chunkData, localX, localZ, waterY + 1, waterY + 2, maxY);
+            if (Math.abs(stream) > 0.035D) {
                 chunkData.setBlock(localX, Math.max(chunkData.getMinHeight() + 1, waterY - 1), localZ, Material.MUD);
             }
-        } else if (Math.abs(stream) <= 0.14D && surface <= 68) {
-            chunkData.setBlock(localX, surface, localZ, Material.MUD);
+        } else if (Math.abs(stream) <= 0.12D && surface <= 68) {
+            chunkData.setBlock(localX, surface, localZ, Math.floorMod(worldX + worldZ, 3) == 0 ? Material.MUD : Material.COARSE_DIRT);
         }
     }
 
@@ -457,19 +459,26 @@ public class FloorTerrainGenerator extends ChunkGenerator {
                 int dx = worldX - centerX;
                 int dz = worldZ - centerZ;
                 int dist = Math.max(Math.abs(dx), Math.abs(dz));
-                if (dist > 4 || surface < 63 || surface > maxY - 12) {
+                if (dist > 5 || surface < 63 || surface > maxY - 14) {
                     continue;
                 }
                 if (dx == 0 && dz == 0) {
-                    for (int y = surface + 1; y <= surface + 5; y++) {
-                        chunkData.setBlock(localX, y, localZ, Material.OAK_LOG);
+                    int trunkTop = surface + 6 + Math.floorMod(chance / 41, 3);
+                    for (int y = surface + 1; y <= trunkTop; y++) {
+                        chunkData.setBlock(localX, y, localZ, y == trunkTop ? Material.STRIPPED_OAK_LOG : Material.OAK_LOG);
                     }
                 }
-                if (dist <= 3 && surface + 5 < maxY) {
-                    int leafY = surface + 4 + (dist <= 1 ? 1 : 0);
-                    chunkData.setBlock(localX, leafY, localZ, Material.OAK_LEAVES);
-                    if (dist <= 2) {
+                if ((Math.abs(dx) == 3 && dz == 0 || Math.abs(dz) == 3 && dx == 0) && surface + 1 < maxY) {
+                    chunkData.setBlock(localX, surface + 1, localZ, Material.OAK_LOG);
+                }
+                if (dist <= 4 && surface + 8 < maxY) {
+                    int leafY = surface + 5 + (dist <= 1 ? 2 : dist <= 3 ? 1 : 0);
+                    chunkData.setBlock(localX, leafY, localZ, dist == 4 ? Material.AZALEA_LEAVES : Material.OAK_LEAVES);
+                    if (dist <= 3) {
                         chunkData.setBlock(localX, leafY + 1, localZ, Material.OAK_LEAVES);
+                    }
+                    if (dist <= 2 && leafY - 1 > surface) {
+                        chunkData.setBlock(localX, leafY - 1, localZ, Material.OAK_LEAVES);
                     }
                 }
             }
@@ -512,8 +521,8 @@ public class FloorTerrainGenerator extends ChunkGenerator {
         int centerX = gx * grid + 12 + Math.floorMod(chance, grid - 24);
         int centerZ = gz * grid + 12 + Math.floorMod(chance / 19, grid - 24);
         int distance = (int) Math.round(Math.hypot(worldX - centerX, worldZ - centerZ));
-        if (distance <= 5) {
-            chunkData.setBlock(localX, surface, localZ, distance <= 4 ? Material.WATER : Material.MUD);
+        if (distance <= 5 && surface <= 68) {
+            chunkData.setBlock(localX, surface, localZ, distance <= 3 ? Material.WATER : Material.MUD);
             this.clearColumn(chunkData, localX, localZ, surface + 1, surface + 3, maxY);
         }
     }
@@ -578,9 +587,12 @@ public class FloorTerrainGenerator extends ChunkGenerator {
         if (distance >= 4 && distance <= 9 && Math.floorMod(dx + dz, 3) == 0) {
             chunkData.setBlock(localX, surface + 1, localZ, Material.OAK_LOG);
         }
+        if (distance >= 3 && distance <= 6 && (Math.abs(dx) == distance || Math.abs(dz) == distance) && surface + 1 < maxY) {
+            chunkData.setBlock(localX, surface + 1, localZ, Material.ROOTED_DIRT);
+        }
         if (distance <= 10) {
             int leafY = surface + 10 + (distance <= 5 ? 2 : 0);
-            chunkData.setBlock(localX, leafY, localZ, Material.OAK_LEAVES);
+            chunkData.setBlock(localX, leafY, localZ, distance >= 8 ? Material.FLOWERING_AZALEA_LEAVES : Material.OAK_LEAVES);
             if (distance <= 7 && leafY + 1 < maxY) {
                 chunkData.setBlock(localX, leafY + 1, localZ, Material.AZALEA_LEAVES);
             }
@@ -589,7 +601,7 @@ public class FloorTerrainGenerator extends ChunkGenerator {
 
     private void applyStructures(ChunkData chunkData, int localX, int localZ, int maxY, int worldX, int worldZ) {
         for (StructurePlacement placement : this.structurePlacements) {
-            placement.applyToColumn(chunkData, localX, localZ, maxY, worldX, worldZ);
+            placement.applyToColumn(chunkData, localX, localZ, maxY, this.surfaceHeight(worldX, worldZ), worldX, worldZ);
         }
     }
 
@@ -650,6 +662,9 @@ public class FloorTerrainGenerator extends ChunkGenerator {
             if (distance <= 80) {
                 height = this.blend(height, this.arena.y(), 80 - distance, 80);
             }
+        }
+        for (StructurePlacement placement : this.structurePlacements) {
+            height = placement.surfaceHeightForColumn(height, worldX, worldZ);
         }
         return height;
     }
