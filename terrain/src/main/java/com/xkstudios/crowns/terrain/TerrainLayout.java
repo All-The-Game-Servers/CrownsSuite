@@ -60,7 +60,7 @@ public final class TerrainLayout {
         if (distance < 430.0D) {
             return TerrainRegion.MEADOW_BASIN;
         }
-        double river = fractalNoise(worldName, 501, x, z, 360.0D, 3) + Math.sin((x + z) / 220.0D) * 0.35D;
+        double river = streamSignal(worldName, x, z);
         if (Math.abs(river) < 0.10D) {
             return TerrainRegion.RIVER_VALLEY;
         }
@@ -78,6 +78,10 @@ public final class TerrainLayout {
         }
         double highlands = fractalNoise(worldName, 617, x, z, 520.0D, 3);
         return highlands > 0.18D ? TerrainRegion.OAK_HIGHLANDS : TerrainRegion.MEADOW_BASIN;
+    }
+
+    public static double streamSignal(String worldName, int x, int z) {
+        return fractalNoise(worldName, 501, x, z, 360.0D, 3) + Math.sin((x + z) / 220.0D) * 0.35D;
     }
 
     public static TerrainPoint defaultArena(int floor, String worldName, ConfigurationSection floorConfig) {

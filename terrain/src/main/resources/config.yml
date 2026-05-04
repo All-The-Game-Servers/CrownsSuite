@@ -49,6 +49,50 @@ terrain:
         rocks: 0.85
         ruins: 0.8
         arena: 1.0
+      anchors:
+        market-square:
+          district: civic
+          template: town_hall
+        bridgehead-gate:
+          district: defensive_edge
+          template: gatehouse
+        farm-terraces:
+          district: farming
+          template: terraced_farm
+        mill-creek:
+          district: road_edge
+          template: mill
+      districts:
+        civic: "Spawn plaza, town hall, notice board, waystone, and central square."
+        residential: "Hillside homes, retaining walls, paths, and overlooks."
+        market: "Market stalls and road-facing trade spaces."
+        farming: "Terraced farms, mill creek, water access, and useful starter crops."
+        road_edge: "Road markers, bridges, lamps, camps, and switchbacks."
+        defensive_edge: "Gatehouse, watchtower, walls, and safe town threshold."
+        wilderness_edge: "Hero trees, groves, roots, ruins, and transition clutter."
+      tree-pools:
+        canopy: [oak, large_oak]
+        edge: [oak, azalea]
+        understory: [fern, mushroom, moss]
+        roots-and-stumps: [oak_log, stripped_oak_log, rooted_dirt]
+        fallen-logs: [oak_log]
+        hero-trees: [ancient_oak]
+      road-rules:
+        slope-aware: true
+        max-comfort-grade: 4
+        supports-on-steep-grade: true
+        lamps: true
+        switchbacks: true
+      hydrology:
+        streams: true
+        ponds: true
+        mud-banks: true
+        bridge-crossings: true
+      landmark-rarity:
+        hero-tree: rare
+        spire: uncommon
+        ruin: uncommon
+        vista: rare
       villages:
         first-haven:
           name: First Haven

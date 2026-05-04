@@ -138,7 +138,7 @@ Staff commands:
 
 CrownsMMO 1.7.0 turns the quest foundation into a playable Floor 1 onboarding path.
 
-Use `/cmmo start` to enter the configured dedicated Floor 1 world at First Haven. CrownsTerrain `1.4.0` uses the fresh world `crowns_floor_1_v2`; update the MMO Floor 1 world config to that name when adopting the terrain relaunch.
+Use `/cmmo start` to enter the configured dedicated Floor 1 world at First Haven. CrownsTerrain `1.5.0` uses the fresh world `crowns_floor_1_v2`; update the MMO Floor 1 world config to that name when adopting the terrain relaunch.
 
 The first questline is `First Haven Path`, a board-driven story path for new adventurers:
 

@@ -97,3 +97,15 @@ CrownsTerrain `1.4.0` replaces the early prototype Floor 1 with a fresh-world re
 - `/cterrain verify floor 1` now checks for real First Haven, camp, waystone, and arena blocks.
 
 This release does not fix MMO death/respawn routing. Until the dedicated MMO integration patch, use `/cmmo start` or `/cmmo floor 1` to return to the floor world if a player respawns elsewhere.
+
+## 1.5.0 Reference-Guided Worldgen
+
+CrownsTerrain `1.5.0` uses the reference pack as design inspiration only. No third-party image or schematic asset is bundled.
+
+- First Haven now uses anchored settlement planning: civic core, market road, farming terraces, residential rise, defensive edge, road edge, and wilderness edge.
+- Preview output reports regions, districts, tree pools, and hydrology so staff can sanity-check the generated identity before playtesting.
+- Floor 1 generation adds a clearer pass stack: macro terrain, hydrology, biome paint, roads/supports, structures, and clutter.
+- Roads add slope support details such as retaining walls, stair accents, fence edges, lamps, bridges, and switchback templates.
+- Forests use role-based pools: canopy trees, edge trees, understory, mushrooms, roots/stumps, fallen logs, and rare hero trees.
+- New original templates cover gatehouse, bridge, town hall, mill, terraced farm, hillside house, switchback stairs, retaining wall, large shrine, giant tree base, stream camp, and ruined gate marker.
+- `/cterrain verify floor 1` now checks town anchors, gatehouse approach blocks, hero-tree/vertical landmark blocks, camps, waystones, and arena structures.

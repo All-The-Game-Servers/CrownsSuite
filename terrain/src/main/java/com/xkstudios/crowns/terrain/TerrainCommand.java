@@ -109,6 +109,10 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         }
         sender.sendMessage(Component.text("Structure density: " + String.format("%.2f", this.plugin.getTerrainManager().getStructureDensity(floor))
                 + " | Persisted points: " + this.plugin.getTerrainManager().countPersistedPoints(floor, worldName), NamedTextColor.DARK_GRAY));
+        sender.sendMessage(Component.text("Regions: " + String.join(", ", this.plugin.getTerrainManager().getRegionNames(floor)), NamedTextColor.GREEN));
+        sender.sendMessage(Component.text("Districts: " + String.join(", ", this.plugin.getTerrainManager().getDistrictNames(floor)), NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("Tree pools: " + this.plugin.getTerrainManager().getTreePoolSummary(floor), NamedTextColor.DARK_GREEN));
+        sender.sendMessage(Component.text("Hydrology: " + this.plugin.getTerrainManager().getHydrologySummary(floor), NamedTextColor.AQUA));
         TerrainPoint arena = this.plugin.getTerrainManager().getBossArena(floor, worldName);
         sender.sendMessage(Component.text(arena == null ? "Arena: unavailable" : "Arena: " + arena.displayName() + " at " + arena.coordinateSummary(), NamedTextColor.LIGHT_PURPLE));
         sender.sendMessage(Component.text("Villages: " + this.plugin.getTerrainManager().getVillages(floor, worldName).size(), NamedTextColor.GOLD));

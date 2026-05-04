@@ -16,7 +16,10 @@ public final class StructureTemplateManager {
     private static final List<String> BUNDLED_TEMPLATES = List.of(
             "spawn_plaza", "haven_house", "farm_plot", "market_stall", "notice_board",
             "watchtower", "waystone", "starter_shrine", "camp", "road_marker",
-            "landmark_spire", "gate_arena_core", "gate_arch", "ruin_pillar"
+            "landmark_spire", "gate_arena_core", "gate_arch", "ruin_pillar",
+            "gatehouse", "bridge", "town_hall", "mill", "terraced_farm",
+            "hillside_house", "switchback_stair", "retaining_wall", "large_shrine",
+            "giant_tree_base", "stream_camp", "ruined_gate_marker"
     );
 
     private final CrownsTerrainPlugin plugin;

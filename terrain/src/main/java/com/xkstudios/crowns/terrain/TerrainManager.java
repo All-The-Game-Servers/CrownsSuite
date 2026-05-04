@@ -208,6 +208,19 @@ public class TerrainManager implements TerrainProvider {
         lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "waystone"), this.theme(floorNumber).accent())
                 ? "PASS: waystone feature blocks are present."
                 : "FAIL: waystone feature blocks were not found.");
+        if (floorNumber == 1) {
+            lines.add(this.hasPointBlocks(world, List.of(firstHaven), Material.STONE_BRICKS)
+                    ? "PASS: First Haven anchors/district foundations are present."
+                    : "FAIL: First Haven anchor/district foundations were not found.");
+            TerrainPoint gatehouseCheck = arena == null ? null : new TerrainPoint(floorNumber, worldName, "arena", "gatehouse-check", "Gatehouse Check", arena.x(), arena.y(), arena.z() - 58);
+            lines.add(gatehouseCheck != null && this.hasPointBlocks(world, List.of(gatehouseCheck), Material.STONE_BRICKS)
+                    ? "PASS: gatehouse approach blocks are present."
+                    : "FAIL: gatehouse approach blocks were not found.");
+            lines.add(this.hasAnyHeroTreeBlock(world, firstHaven)
+                    ? "PASS: hero-tree / vertical landmark blocks are present near First Haven."
+                    : "FAIL: hero-tree / vertical landmark blocks were not found near First Haven.");
+            lines.add("Debug: missing structures usually mean templates are disabled, points are stale from an older world, chunks were generated before 1.5.0, or the server is still using old crowns_floor_1.");
+        }
         return lines;
     }
 
@@ -218,6 +231,28 @@ public class TerrainManager implements TerrainProvider {
     public double getStructureDensity(int floorNumber) {
         return this.plugin.getConfig().getDouble("terrain.floors." + floorNumber + ".structure-density",
                 this.plugin.getConfig().getDouble("terrain.defaults.structure-density", 1.0D));
+    }
+
+    public List<String> getRegionNames(int floorNumber) {
+        if (floorNumber != 1) {
+            return List.of(this.getTerrainProfile(floorNumber));
+        }
+        return TerrainDesignLanguage.floorOneRegions();
+    }
+
+    public List<String> getDistrictNames(int floorNumber) {
+        if (floorNumber != 1) {
+            return List.of("outpost", "road edge", "arena approach");
+        }
+        return TerrainDesignLanguage.floorOneDistricts();
+    }
+
+    public String getTreePoolSummary(int floorNumber) {
+        return floorNumber == 1 ? TerrainDesignLanguage.treePoolSummary() : "floor-themed trees and sparse adventure clutter";
+    }
+
+    public String getHydrologySummary(int floorNumber) {
+        return floorNumber == 1 ? TerrainDesignLanguage.hydrologySummary() : "floor-themed streams and water features";
     }
 
     public boolean isFreshWorldRequired(int floorNumber) {
@@ -400,6 +435,22 @@ public class TerrainManager implements TerrainProvider {
                         if (world.getBlockAt(x, y, z).getType() == expected) {
                             return true;
                         }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasAnyHeroTreeBlock(World world, TerrainPoint origin) {
+        for (int dx = -96; dx <= 96; dx += 4) {
+            for (int dz = -96; dz <= 96; dz += 4) {
+                int x = origin.x() + dx;
+                int z = origin.z() + dz;
+                for (int y = Math.max(world.getMinHeight(), origin.y()); y <= Math.min(world.getMaxHeight() - 1, origin.y() + 24); y++) {
+                    Material type = world.getBlockAt(x, y, z).getType();
+                    if (type == Material.OAK_LOG || type == Material.STRIPPED_OAK_LOG || type == Material.AZALEA_LEAVES) {
+                        return true;
                     }
                 }
             }
