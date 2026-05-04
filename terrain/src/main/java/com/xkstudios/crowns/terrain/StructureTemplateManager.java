@@ -19,7 +19,10 @@ public final class StructureTemplateManager {
             "landmark_spire", "gate_arena_core", "gate_arch", "ruin_pillar",
             "gatehouse", "bridge", "town_hall", "mill", "terraced_farm",
             "hillside_house", "switchback_stair", "retaining_wall", "large_shrine",
-            "giant_tree_base", "stream_camp", "ruined_gate_marker"
+            "giant_tree_base", "stream_camp", "ruined_gate_marker",
+            "fountain_plaza", "haven_house_tall", "haven_house_garden", "blacksmith",
+            "barn", "market_row", "gate_tower", "wall_fragment", "cliff_overlook",
+            "river_bridge", "arena_threshold", "arena_staging"
     );
 
     private final CrownsTerrainPlugin plugin;

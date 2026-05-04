@@ -34,20 +34,34 @@ public final class FloorStructurePlanner {
                 add(floor, worldName, placements, templates, anchor.templateKey(), anchor.x(), anchor.y(), anchor.z(), anchor.rotation(), foundation);
             }
             add(floor, worldName, placements, templates, "spawn_plaza", firstHaven.x(), firstHaven.y(), firstHaven.z(), 0, theme.road());
+            add(floor, worldName, placements, templates, "fountain_plaza", firstHaven.x() + 18, firstHaven.y(), firstHaven.z() - 10, 0, theme.road());
             add(floor, worldName, placements, templates, "notice_board", firstHaven.x() - 10, firstHaven.y(), firstHaven.z() - 16, 0, theme.road());
             add(floor, worldName, placements, templates, "waystone", firstHaven.x() + 15, firstHaven.y(), firstHaven.z() - 2, 0, theme.road());
             add(floor, worldName, placements, templates, "large_shrine", firstHaven.x() - 36, firstHaven.y(), firstHaven.z() + 30, 1, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "hillside_house", firstHaven.x() - 42, firstHaven.y(), firstHaven.z() - 28, 0, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "haven_house", firstHaven.x() + 38, firstHaven.y(), firstHaven.z() - 24, 2, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "hillside_house", firstHaven.x() - 36, firstHaven.y(), firstHaven.z() + 16, 1, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "haven_house_tall", firstHaven.x() - 18, firstHaven.y(), firstHaven.z() - 42, 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "haven_house_tall", firstHaven.x() + 18, firstHaven.y(), firstHaven.z() - 44, 2, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "haven_house_garden", firstHaven.x() - 58, firstHaven.y(), firstHaven.z() + 8, 1, Material.DIRT);
+            add(floor, worldName, placements, templates, "haven_house_garden", firstHaven.x() + 62, firstHaven.y(), firstHaven.z() - 10, 3, Material.DIRT);
             add(floor, worldName, placements, templates, "market_stall", firstHaven.x() + 34, firstHaven.y(), firstHaven.z() + 24, 3, theme.road());
+            add(floor, worldName, placements, templates, "market_row", firstHaven.x() + 52, firstHaven.y(), firstHaven.z() + 18, 3, theme.road());
+            add(floor, worldName, placements, templates, "blacksmith", firstHaven.x() + 58, firstHaven.y(), firstHaven.z() - 8, 3, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "watchtower", firstHaven.x() + 56, firstHaven.y(), firstHaven.z() + 48, 0, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "terraced_farm", firstHaven.x() - 4, firstHaven.y(), firstHaven.z() + 58, 0, Material.DIRT);
             add(floor, worldName, placements, templates, "farm_plot", firstHaven.x() + 24, firstHaven.y(), firstHaven.z() + 52, 0, Material.DIRT);
+            add(floor, worldName, placements, templates, "barn", firstHaven.x() - 34, firstHaven.y(), firstHaven.z() + 70, 1, Material.DIRT);
+            add(floor, worldName, placements, templates, "river_bridge", firstHaven.x() + 4, firstHaven.y(), firstHaven.z() + 84, 0, Material.COBBLESTONE);
             add(floor, worldName, placements, templates, "retaining_wall", firstHaven.x() - 48, firstHaven.y(), firstHaven.z() + 2, 1, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "switchback_stair", firstHaven.x() - 54, firstHaven.y(), firstHaven.z() - 8, 1, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "bridge", firstHaven.x() + 4, firstHaven.y(), firstHaven.z() + 84, 0, Material.COBBLESTONE);
             add(floor, worldName, placements, templates, "gatehouse", firstHaven.x(), firstHaven.y(), firstHaven.z() - 62, 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "gate_tower", firstHaven.x() - 22, firstHaven.y(), firstHaven.z() - 74, 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "gate_tower", firstHaven.x() + 22, firstHaven.y(), firstHaven.z() - 74, 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "wall_fragment", firstHaven.x() - 42, firstHaven.y(), firstHaven.z() - 66, 1, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "wall_fragment", firstHaven.x() + 42, firstHaven.y(), firstHaven.z() - 66, 1, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "cliff_overlook", firstHaven.x() - 88, firstHaven.y(), firstHaven.z() - 16, 1, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "giant_tree_base", firstHaven.x() - 72, firstHaven.y(), firstHaven.z() + 72, 0, Material.ROOTED_DIRT);
         }
         for (TerrainPoint village : villages) {
@@ -81,6 +95,8 @@ public final class FloorStructurePlanner {
         }
         if (arena != null) {
             add(floor, worldName, placements, templates, "gate_arena_core", arena.x(), arena.y(), arena.z(), 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "arena_staging", arena.x(), arena.y(), arena.z() - 72, 0, Material.STONE_BRICKS);
+            add(floor, worldName, placements, templates, "arena_threshold", arena.x(), arena.y(), arena.z() - 42, 0, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "gatehouse", arena.x(), arena.y(), arena.z() - 58, 0, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "gate_arch", arena.x(), arena.y(), arena.z() - 34, 0, Material.STONE_BRICKS);
             add(floor, worldName, placements, templates, "ruined_gate_marker", arena.x() - 42, arena.y(), arena.z() - 42, 0, Material.STONE_BRICKS);

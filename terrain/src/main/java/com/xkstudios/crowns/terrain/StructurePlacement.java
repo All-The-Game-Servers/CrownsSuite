@@ -56,6 +56,38 @@ public final class StructurePlacement {
                 && this.footprint.contains(key(worldX, worldZ));
     }
 
+    public String templateKey() {
+        return this.template.key();
+    }
+
+    public int originX() {
+        return this.originX;
+    }
+
+    public int baseY() {
+        return this.baseY;
+    }
+
+    public int originZ() {
+        return this.originZ;
+    }
+
+    public int minWorldX() {
+        return this.minWorldX;
+    }
+
+    public int maxWorldX() {
+        return this.maxWorldX;
+    }
+
+    public int minWorldZ() {
+        return this.minWorldZ;
+    }
+
+    public int maxWorldZ() {
+        return this.maxWorldZ;
+    }
+
     public int surfaceHeightForColumn(int currentHeight, int worldX, int worldZ) {
         if (this.touchesColumn(worldX, worldZ)) {
             return this.baseY - 1;

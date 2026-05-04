@@ -2,7 +2,7 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: crowns_floor_1_v2
+  floor-1-world: crowns_floor_1_v3
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true
@@ -18,11 +18,43 @@ terrain:
     1:
       theme: First Haven
       palette: haven
-      terrain-profile: first_haven_relaunch
+      terrain-profile: first_haven_v3
       fresh-world-required: true
       world-size: 16000
       structure-density: 1.25
       enabled-structures: [village, camp, landmark, waystone, road_marker, shrine]
+      engine-passes:
+        macro-terrain: true
+        biome-paint: true
+        hydrology: true
+        road-network: true
+        structure-placement: true
+        decoration: true
+      first-haven:
+        scale: large-town
+        target-structures: 24
+        style: high-fantasy-mmo
+      road-network:
+        hub: first-haven
+        connect-villages: true
+        connect-living-points: true
+        connect-arena: true
+        lamps: true
+        slope-supports: true
+      qa:
+        strict: true
+        minimum-town-structures: 20
+        require-road-network: true
+        require-hydrology: true
+        require-arena: true
+        require-hero-landmark: true
+      blueprint-sets:
+        first-haven-civic: [spawn_plaza, town_hall, fountain_plaza, notice_board, waystone, large_shrine]
+        first-haven-residential: [haven_house, haven_house_tall, haven_house_garden, hillside_house, retaining_wall, switchback_stair]
+        first-haven-market: [market_stall, market_row, blacksmith]
+        first-haven-farming: [terraced_farm, farm_plot, barn, mill]
+        first-haven-defensive: [gatehouse, watchtower, gate_tower, wall_fragment]
+        wilderness: [stream_camp, giant_tree_base, cliff_overlook, road_marker, starter_shrine]
       regions:
         meadow-basin: "Starter meadow around First Haven with broad building space and safe travel."
         oak-highlands: "Rolling oak hills with rocks, groves, and overlook paths."

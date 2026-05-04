@@ -69,7 +69,7 @@ The terrain identity layer for CrownsMMO floor worlds.
 - Safe/useful settlement design for future NPCs, shops, and quests
 - Optional provider layer so CrownsMMO can still run without it
 - Stable generated point metadata for CrownsMMO quest objectives
-- `1.5.2` upgrades Floor 1 as `crowns_floor_1_v2` with anchored town districts, stronger terrain regions, stabilized blueprint placement, gentler hydrology, biome-role tree pools, and a visible First Gate arena.
+- `1.5.3` upgrades Floor 1 as `crowns_floor_1_v3` with a high-fantasy First Haven v3 town, expanded original blueprints, stricter QA verification, admin point teleporting, stronger road/hydrology checks, and a visible First Gate arena route.
 
 ## CrownsEconomy Overview
 

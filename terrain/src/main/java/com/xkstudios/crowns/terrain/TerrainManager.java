@@ -209,6 +209,16 @@ public class TerrainManager implements TerrainProvider {
                 ? "PASS: waystone feature blocks are present."
                 : "FAIL: waystone feature blocks were not found.");
         if (floorNumber == 1) {
+            List<StructurePlacement> plannedPlacements = this.plannedPlacements(floorNumber, worldName);
+            int minimumTownStructures = this.plugin.getConfig().getInt("terrain.floors.1.qa.minimum-town-structures", 20);
+            int plannedTownStructures = this.countPlannedNear(plannedPlacements, firstHaven, 128);
+            int physicalTownStructures = this.countPhysicalPlacements(world, plannedPlacements, firstHaven, 128);
+            lines.add(plannedTownStructures >= minimumTownStructures
+                    ? "PASS: First Haven has " + plannedTownStructures + " planned authored pieces."
+                    : "FAIL: First Haven only has " + plannedTownStructures + " planned authored pieces; expected at least " + minimumTownStructures + ".");
+            lines.add(physicalTownStructures >= minimumTownStructures
+                    ? "PASS: First Haven has " + physicalTownStructures + " physical authored pieces generated."
+                    : "FAIL: First Haven only has " + physicalTownStructures + " physical authored pieces generated; expected at least " + minimumTownStructures + ".");
             lines.add(this.hasPointBlocks(world, List.of(firstHaven), Material.STONE_BRICKS)
                     ? "PASS: First Haven anchors/district foundations are present."
                     : "FAIL: First Haven anchor/district foundations were not found.");
@@ -216,10 +226,19 @@ public class TerrainManager implements TerrainProvider {
             lines.add(gatehouseCheck != null && this.hasPointBlocks(world, List.of(gatehouseCheck), Material.STONE_BRICKS)
                     ? "PASS: gatehouse approach blocks are present."
                     : "FAIL: gatehouse approach blocks were not found.");
+            lines.add(this.hasRoadNetwork(world, floorNumber, worldName, firstHaven, arena)
+                    ? "PASS: road network has physical route blocks to major points."
+                    : "FAIL: road network is missing route blocks to one or more major points.");
+            lines.add(this.hasHydrologyBlocks(world, firstHaven)
+                    ? "PASS: Floor 1 hydrology blocks are present near the starter region."
+                    : "FAIL: Floor 1 hydrology blocks were not found near the starter region.");
+            lines.add(this.hasRegionVariety(floorNumber, worldName)
+                    ? "PASS: Floor 1 region map exposes meadow, forest/highland, ridge/farm, river, and gate variety."
+                    : "FAIL: Floor 1 region map is too uniform; expected at least five region samples.");
             lines.add(this.hasAnyHeroTreeBlock(world, firstHaven)
                     ? "PASS: hero-tree / vertical landmark blocks are present near First Haven."
                     : "FAIL: hero-tree / vertical landmark blocks were not found near First Haven.");
-            lines.add("Debug: missing structures usually mean templates are disabled, points are stale from an older world, chunks were generated before 1.5.0, or the server is still using old crowns_floor_1.");
+            lines.add("Debug: missing structures usually mean templates are disabled, points are stale from an older world, chunks were generated before 1.5.3, or the server is still using an older floor world.");
         }
         return lines;
     }
@@ -456,6 +475,161 @@ public class TerrainManager implements TerrainProvider {
             }
         }
         return false;
+    }
+
+    private List<StructurePlacement> plannedPlacements(int floorNumber, String worldName) {
+        TerrainTheme theme = this.theme(floorNumber);
+        List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
+        TerrainPoint arena = this.getBossArena(floorNumber, worldName);
+        List<TerrainPoint> landmarks = this.getLandmarks(floorNumber, worldName);
+        List<TerrainPoint> livingPoints = this.getLivingPoints(floorNumber, worldName);
+        return FloorStructurePlanner.plan(floorNumber, worldName, theme, this.structureTemplateManager, villages, arena, landmarks, livingPoints);
+    }
+
+    private int countPlannedNear(List<StructurePlacement> placements, TerrainPoint origin, int radius) {
+        int count = 0;
+        for (StructurePlacement placement : placements) {
+            if (Math.hypot(placement.originX() - origin.x(), placement.originZ() - origin.z()) <= radius) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int countPhysicalPlacements(World world, List<StructurePlacement> placements, TerrainPoint origin, int radius) {
+        int count = 0;
+        for (StructurePlacement placement : placements) {
+            if (Math.hypot(placement.originX() - origin.x(), placement.originZ() - origin.z()) > radius) {
+                continue;
+            }
+            world.getChunkAt(placement.originX() >> 4, placement.originZ() >> 4).load(true);
+            int matches = 0;
+            int minX = Math.max(placement.minWorldX(), placement.originX() - 24);
+            int maxX = Math.min(placement.maxWorldX(), placement.originX() + 24);
+            int minZ = Math.max(placement.minWorldZ(), placement.originZ() - 24);
+            int maxZ = Math.min(placement.maxWorldZ(), placement.originZ() + 24);
+            for (int x = minX; x <= maxX; x += 2) {
+                for (int z = minZ; z <= maxZ; z += 2) {
+                    for (int y = Math.max(world.getMinHeight(), placement.baseY() - 2); y <= Math.min(world.getMaxHeight() - 1, placement.baseY() + 16); y++) {
+                        Material type = world.getBlockAt(x, y, z).getType();
+                        if (this.isAuthoredMaterial(type)) {
+                            matches++;
+                            if (matches >= 4) {
+                                count++;
+                                x = maxX + 1;
+                                z = maxZ + 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    private boolean hasRoadNetwork(World world, int floorNumber, String worldName, TerrainPoint hub, TerrainPoint arena) {
+        List<TerrainPoint> targets = new ArrayList<>();
+        targets.addAll(this.getPoints(floorNumber, worldName, "camp"));
+        targets.addAll(this.getPoints(floorNumber, worldName, "waystone"));
+        targets.addAll(this.getPoints(floorNumber, worldName, "shrine"));
+        targets.addAll(this.getPoints(floorNumber, worldName, "road_marker"));
+        if (arena != null) {
+            targets.add(arena);
+        }
+        int checked = 0;
+        int passed = 0;
+        for (TerrainPoint target : targets) {
+            checked++;
+            if (this.roadCoverage(world, hub, target) >= 0.32D) {
+                passed++;
+            }
+        }
+        return checked > 0 && passed >= Math.max(3, checked - 1);
+    }
+
+    private double roadCoverage(World world, TerrainPoint a, TerrainPoint b) {
+        double length = Math.max(1.0D, Math.hypot(b.x() - a.x(), b.z() - a.z()));
+        int samples = Math.max(8, (int) Math.round(length / 12.0D));
+        int hits = 0;
+        for (int i = 0; i <= samples; i++) {
+            double t = i / (double) samples;
+            int x = (int) Math.round(a.x() + (b.x() - a.x()) * t);
+            int z = (int) Math.round(a.z() + (b.z() - a.z()) * t);
+            world.getChunkAt(x >> 4, z >> 4).load(true);
+            if (this.hasRoadMaterialNear(world, x, z)) {
+                hits++;
+            }
+        }
+        return hits / (double) (samples + 1);
+    }
+
+    private boolean hasRoadMaterialNear(World world, int x, int z) {
+        TerrainTheme theme = this.theme(1);
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                int sampleX = x + dx;
+                int sampleZ = z + dz;
+                int y = Math.max(world.getMinHeight(), world.getHighestBlockYAt(sampleX, sampleZ));
+                for (int yy = Math.max(world.getMinHeight(), y - 2); yy <= Math.min(world.getMaxHeight() - 1, y + 1); yy++) {
+                    Material type = world.getBlockAt(sampleX, yy, sampleZ).getType();
+                    if (type == theme.road() || type == Material.STONE_BRICKS || type == Material.COBBLESTONE || type == Material.LANTERN) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasHydrologyBlocks(World world, TerrainPoint origin) {
+        int water = 0;
+        for (int dx = -320; dx <= 320; dx += 16) {
+            for (int dz = -320; dz <= 320; dz += 16) {
+                int x = origin.x() + dx;
+                int z = origin.z() + dz;
+                int y = world.getHighestBlockYAt(x, z);
+                for (int yy = Math.max(world.getMinHeight(), y - 3); yy <= Math.min(world.getMaxHeight() - 1, y + 1); yy++) {
+                    Material type = world.getBlockAt(x, yy, z).getType();
+                    if (type == Material.WATER || type == Material.MUD) {
+                        water++;
+                        if (water >= 8) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasRegionVariety(int floorNumber, String worldName) {
+        List<TerrainRegion> regions = new ArrayList<>();
+        int[][] samples = {
+                {0, 0}, {-680, 160}, {720, 520}, {120, 620}, {0, -680}, {960, 768}, {-460, -420}, {420, -260}
+        };
+        for (int[] sample : samples) {
+            TerrainRegion region = TerrainLayout.region(floorNumber, worldName, sample[0], sample[1]);
+            if (!regions.contains(region)) {
+                regions.add(region);
+            }
+        }
+        return regions.size() >= 5;
+    }
+
+    private boolean isAuthoredMaterial(Material type) {
+        return type == Material.STONE_BRICKS
+                || type == Material.MOSSY_STONE_BRICKS
+                || type == Material.COBBLESTONE
+                || type == Material.OAK_PLANKS
+                || type == Material.OAK_LOG
+                || type == Material.STRIPPED_OAK_LOG
+                || type == Material.DARK_OAK_PLANKS
+                || type == Material.COPPER_BLOCK
+                || type == Material.LANTERN
+                || type == Material.FARMLAND
+                || type == Material.BRICKS
+                || type == Material.CAMPFIRE;
     }
 
     private boolean isStructureEnabled(int floorNumber, String type) {

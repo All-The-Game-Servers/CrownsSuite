@@ -40,7 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Relaunch default Floor 1 world is `crowns_floor_1_v2`, so existing survival `world` and older `crowns_floor_1` chunks are not overwritten.
+- Relaunch default Floor 1 world is `crowns_floor_1_v3`, so existing survival `world` and older Crowns floor worlds are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -67,6 +67,7 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain admin locate road_marker <floor>`
 - `/cterrain admin locate shrine <floor>`
 - `/cterrain admin locate arena <floor>`
+- `/cterrain admin tp <type> <floor> [key]`
 - `/cterrain admin list <floor>`
 - `/cterrain admin reload`
 - `/cterrain admin regenerate <floor>` explains the guarded manual reset process and does not delete worlds.
@@ -120,11 +121,22 @@ CrownsTerrain `1.5.1` fixes the first serious test issues from the `1.5.0` relau
 - Stream and pond placement is more conservative so water appears in low/valley terrain instead of carving random cut-out trenches through hills.
 - Tree clusters now use taller trunks, wider canopies, roots, and mixed leaves instead of tiny sapling-like blobs.
 
-## 1.5.2 Iris-Informed Placement Pass
+## Previous Iris-Informed Placement Pass
 
-CrownsTerrain `1.5.2` uses Iris as architectural reference material without copying Iris code.
+The earlier Iris-informed pass used Iris as architectural reference material without copying Iris code.
 
 - Structure planning now follows a heightmap-aware placement approach: each blueprint samples the terrain under its own footprint and fits its base Y near the median local ground height.
 - The existing platform clear/foundation pass remains as a safety net, but structures no longer rely on one town-wide Y value for every building.
 - This should reduce buried buildings, floating foundations, and huge artificial shelves around First Haven pieces.
 - The larger Iris lesson is that CrownsTerrain needs a real staged engine over time: resource loaders, object placement, biome/region actuators, decoration passes, metrics, and pregeneration tools instead of one oversized generator class.
+
+## 1.5.3 Floor 1 v3 Fullscale Relaunch
+
+CrownsTerrain `1.5.3` makes Floor 1 a fresh high-fantasy MMO starter world at `crowns_floor_1_v3`.
+
+- Floor 1 uses the `first_haven_v3` profile and requires a fresh world to see the relaunch.
+- First Haven expands into a large authored town with civic, residential, market, farming, defensive, and wilderness-edge pieces.
+- New original templates include fountain plaza, tall homes, garden homes, blacksmith, barn, market row, gate towers, wall fragments, cliff overlook, river bridge, arena threshold, and staging area.
+- Terrain generation emphasizes a sheltered valley, shrine ridges, gate wilds, smoother river paths, authored road routes, and stronger high-fantasy silhouettes.
+- `/cterrain admin tp <type> <floor> [key]` lets staff teleport directly to generated points without copying coordinates.
+- `/cterrain verify floor 1` is now a stricter QA gate for physical structure count, route blocks, hydrology, region variety, First Haven, and First Gate arena.

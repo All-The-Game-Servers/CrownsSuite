@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -74,6 +76,13 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(Component.text("To regenerate, stop the server, back up data, remove the target floor world folder manually, then run /cterrain admin create <floor>.", NamedTextColor.YELLOW));
             return true;
         }
+        if (args.length >= 4 && args[1].equalsIgnoreCase("tp")) {
+            String type = normalizeType(args[2]);
+            int floor = this.parseFloor(args, 3, 1);
+            String key = args.length >= 5 ? args[4] : null;
+            this.teleportToPoint(sender, floor, type, key);
+            return true;
+        }
         if (args.length >= 4 && args[1].equalsIgnoreCase("locate")) {
             String type = normalizeType(args[2]);
             int floor = this.parseFloor(args, 3, 1);
@@ -85,7 +94,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             this.sendAllPoints(sender, floor);
             return true;
         }
-        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|create <floor>|regenerate <floor>|list <floor>|locate <type> <floor>>", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|create <floor>|regenerate <floor>|list <floor>|locate <type> <floor>|tp <type> <floor> [key]>", NamedTextColor.YELLOW));
         return true;
     }
 
@@ -140,7 +149,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         }
         sender.sendMessage(Component.text("Floor " + floor + " " + normalized.replace('_', ' ') + " Points", NamedTextColor.GOLD));
         for (TerrainPoint point : points) {
-            sender.sendMessage(Component.text("- " + point.displayName() + ": " + point.coordinateSummary(), NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("- " + point.displayName() + " [" + point.key() + "]: " + point.coordinateSummary(), NamedTextColor.GRAY));
         }
     }
 
@@ -153,8 +162,53 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         }
         sender.sendMessage(Component.text("Floor " + floor + " Terrain Points", NamedTextColor.GOLD));
         for (TerrainPoint point : points) {
-            sender.sendMessage(Component.text("- [" + point.type().replace('_', ' ') + "] " + point.displayName() + ": " + point.coordinateSummary(), NamedTextColor.GRAY));
+            sender.sendMessage(Component.text("- [" + point.type().replace('_', ' ') + "] " + point.displayName() + " [" + point.key() + "]: " + point.coordinateSummary(), NamedTextColor.GRAY));
         }
+    }
+
+    private void teleportToPoint(CommandSender sender, int floor, String type, String requestedKey) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("Only players can use /cterrain admin tp. Console can use /cterrain admin locate instead.", NamedTextColor.RED));
+            return;
+        }
+        String worldName = this.worldName(floor);
+        List<TerrainPoint> points = this.plugin.getTerrainManager().getPoints(floor, worldName, type);
+        if (points.isEmpty()) {
+            sender.sendMessage(Component.text("No " + type.replace('_', ' ') + " points exist for Floor " + floor + ".", NamedTextColor.RED));
+            return;
+        }
+        TerrainPoint target = null;
+        if (requestedKey != null && !requestedKey.isBlank()) {
+            String normalizedKey = requestedKey.toLowerCase().replace('-', '_');
+            for (TerrainPoint point : points) {
+                String pointKey = point.key().toLowerCase().replace('-', '_');
+                if (pointKey.equals(normalizedKey) || pointKey.replace('_', '-').equals(requestedKey.toLowerCase())) {
+                    target = point;
+                    break;
+                }
+            }
+            if (target == null) {
+                sender.sendMessage(Component.text("No " + type.replace('_', ' ') + " point key '" + requestedKey + "' exists. Available: " + this.keyList(points), NamedTextColor.RED));
+                return;
+            }
+        } else if (points.size() == 1) {
+            target = points.get(0);
+        } else {
+            sender.sendMessage(Component.text("Multiple " + type.replace('_', ' ') + " points exist. Add a key: " + this.keyList(points), NamedTextColor.YELLOW));
+            return;
+        }
+
+        World world = this.plugin.getTerrainManager().createFloorWorld(floor);
+        if (world == null) {
+            sender.sendMessage(Component.text("Could not load Floor " + floor + " world '" + worldName + "'.", NamedTextColor.RED));
+            return;
+        }
+        world.getChunkAt(target.x() >> 4, target.z() >> 4).load(true);
+        int safeY = Math.min(world.getMaxHeight() - 2, Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(target.x(), target.z()) + 1));
+        Location location = new Location(world, target.x() + 0.5D, safeY, target.z() + 0.5D, player.getLocation().getYaw(), player.getLocation().getPitch());
+        player.teleport(location);
+        sender.sendMessage(Component.text("Teleported to " + target.displayName() + " [" + target.key() + "] in " + world.getName()
+                + " at " + target.x() + ", " + safeY + ", " + target.z() + ".", NamedTextColor.GREEN));
     }
 
     private int parseFloor(String[] args, int index, int fallback) {
@@ -178,17 +232,34 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
-            return this.match(args[1], List.of("reload", "create", "regenerate", "locate", "list"));
+            return this.match(args[1], List.of("reload", "create", "regenerate", "locate", "list", "tp"));
         }
-        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("locate")) {
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("locate") || args[1].equalsIgnoreCase("tp"))) {
             return this.match(args[2], List.of("village", "camp", "landmark", "waystone", "road_marker", "shrine", "arena"));
         }
         if ((args.length == 2 && (args[0].equalsIgnoreCase("preview") || args[0].equalsIgnoreCase("villages")))
                 || (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("list"))
-                || (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("locate"))) {
+                || (args.length == 4 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("locate") || args[1].equalsIgnoreCase("tp")))) {
             return this.match(args[args.length - 1], List.of("1", "2", "3"));
         }
+        if (args.length == 5 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("tp")) {
+            String type = normalizeType(args[2]);
+            int floor = this.parseFloor(args, 3, 1);
+            List<String> keys = new ArrayList<>();
+            for (TerrainPoint point : this.plugin.getTerrainManager().getPoints(floor, this.worldName(floor), type)) {
+                keys.add(point.key());
+            }
+            return this.match(args[4], keys);
+        }
         return List.of();
+    }
+
+    private String keyList(List<TerrainPoint> points) {
+        List<String> keys = new ArrayList<>();
+        for (TerrainPoint point : points) {
+            keys.add(point.key());
+        }
+        return String.join(", ", keys);
     }
 
     private static String normalizeType(String type) {

@@ -26,7 +26,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
 - `CrownsMMO-1.7.0.jar`
-- `CrownsTerrain-1.5.2.jar`
+- `CrownsTerrain-1.5.3.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -94,21 +94,19 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 ## CrownsMMO 1.7.0
 
 - Adds the playable Floor 1 `First Haven Path` questline.
-- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. When adopting CrownsTerrain `1.5.2`, update MMO Floor 1 to `crowns_floor_1_v2` after creating the fresh terrain world.
+- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. When adopting CrownsTerrain `1.5.3`, update MMO Floor 1 to `crowns_floor_1_v3` after creating the fresh terrain world.
 - Adds quest board pages for available, active, completed, Floor 1, and story-path quests.
 - Adds `/cmmo quests completed`, `/cmmo quests floor <number>`, and `/cmmo admin quest inspect <player>`.
 - Adds clearer quest detail guidance, optional-provider status, reward previews, and progress messages.
 
-## CrownsTerrain 1.5.1
+## CrownsTerrain 1.5.3
 
-- Rebuilds Floor 1 around the fresh world `crowns_floor_1_v2` and `first_haven_relaunch` terrain profile.
-- Adds region-aware terrain: meadow basin, oak highlands, river valley, starter forest, farmland flats, shrine ridge, and gate wilds.
-- Replaces diagonal sapling patterns with biome-role tree pools, clustered groves, stream glades, ponds, rocks, fallen logs, readable roads, and physical blueprint-backed structures.
-- Adds anchored settlement planning with civic, residential, market, farming, road-edge, defensive-edge, and wilderness-edge districts.
-- Adds original bundled templates for gatehouse, town hall, mill, bridge, terraced farms, hillside houses, switchbacks, retaining walls, large shrines, hero tree bases, stream camps, and ruined gate markers.
-- Hotfixes structure placement so terrain is flattened and cleared under blueprint footprints instead of burying houses, town pieces, or arena pieces in the hillside.
-- Softens Floor 1 height noise and stream placement so hydrology reads more like low valley water and less like random cut-out ravines.
-- Expands `/cterrain preview` and `/cterrain verify floor <number>` with regions, districts, hydrology, tree pools, anchors, gatehouse checks, and structure debug hints.
+- Rebuilds Floor 1 around the fresh world `crowns_floor_1_v3` and `first_haven_v3` terrain profile.
+- Pushes Floor 1 toward high-fantasy MMO identity with a larger First Haven, stronger ridges, smoother streams, authored roads, and a visible First Gate route.
+- Expands First Haven to a large town with civic, residential, market, farming, defensive, and wilderness-edge authored pieces.
+- Adds original bundled templates for fountain plaza, tall homes, garden homes, blacksmith, barn, market row, gate towers, wall fragments, cliff overlook, river bridge, arena threshold, and staging area.
+- Adds `/cterrain admin tp <type> <floor> [key]` so staff can teleport directly to villages, camps, shrines, waystones, landmarks, road markers, and arenas.
+- Makes `/cterrain verify floor <number>` a stricter QA check for physical structure count, road routes, hydrology, region variety, First Haven, and First Gate arena.
 - CrownsMMO falls back to normal world creation and non-terrain quest behavior when CrownsTerrain is not installed.
 
 ## Resource Pack 1.5.0
@@ -120,6 +118,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.5.2`.
+- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.5.3`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

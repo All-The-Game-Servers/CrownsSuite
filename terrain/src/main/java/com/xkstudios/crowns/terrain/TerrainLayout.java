@@ -57,30 +57,36 @@ public final class TerrainLayout {
             return TerrainRegion.OAK_HIGHLANDS;
         }
         double distance = Math.hypot(x, z);
-        if (distance < 430.0D) {
+        boolean v3 = isV3(worldName);
+        if (distance < (v3 ? 560.0D : 430.0D)) {
             return TerrainRegion.MEADOW_BASIN;
         }
         double river = streamSignal(worldName, x, z);
-        if (Math.abs(river) < 0.10D) {
+        if (Math.abs(river) < (v3 ? 0.075D : 0.10D)) {
             return TerrainRegion.RIVER_VALLEY;
         }
         if (x > 640 && z > 420) {
             return TerrainRegion.GATE_WILDS;
         }
-        if (z < -560) {
+        if (z < (v3 ? -500 : -560)) {
             return TerrainRegion.SHRINE_RIDGE;
         }
-        if (x < -460) {
+        if (x < (v3 ? -520 : -460)) {
             return TerrainRegion.STARTER_FOREST;
         }
-        if (z > 460) {
+        if (z > (v3 ? 430 : 460)) {
             return TerrainRegion.FARMLAND_FLATS;
         }
         double highlands = fractalNoise(worldName, 617, x, z, 520.0D, 3);
-        return highlands > 0.18D ? TerrainRegion.OAK_HIGHLANDS : TerrainRegion.MEADOW_BASIN;
+        return highlands > (v3 ? 0.05D : 0.18D) ? TerrainRegion.OAK_HIGHLANDS : TerrainRegion.MEADOW_BASIN;
     }
 
     public static double streamSignal(String worldName, int x, int z) {
+        if (isV3(worldName)) {
+            return fractalNoise(worldName, 501, x, z, 620.0D, 3)
+                    + Math.sin((x + z) / 430.0D) * 0.28D
+                    + Math.sin((x - z) / 700.0D) * 0.16D;
+        }
         return fractalNoise(worldName, 501, x, z, 360.0D, 3) + Math.sin((x + z) / 220.0D) * 0.35D;
     }
 
@@ -233,24 +239,34 @@ public final class TerrainLayout {
 
     private static int floorOneSurfaceHeight(String worldName, int x, int z) {
         TerrainRegion region = region(1, worldName, x, z);
-        double continent = fractalNoise(worldName, 1, x, z, 680.0D, 4);
-        double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 130.0D : 210.0D, 4);
-        double ridges = ridgeNoise(worldName, 31, x, z, region == TerrainRegion.SHRINE_RIDGE ? 170.0D : 310.0D);
-        double erosion = fractalNoise(worldName, 47, x, z, 180.0D, 2);
-        double terrace = Math.sin((x - z) / 180.0D) * 2.0D;
+        boolean v3 = isV3(worldName);
+        double distance = Math.hypot(x, z);
+        double continent = fractalNoise(worldName, 1, x, z, v3 ? 920.0D : 680.0D, 4);
+        double hills = fractalNoise(worldName, 17, x, z, region == TerrainRegion.GATE_WILDS ? 155.0D : v3 ? 280.0D : 210.0D, 4);
+        double ridges = ridgeNoise(worldName, 31, x, z, region == TerrainRegion.SHRINE_RIDGE ? 170.0D : v3 ? 420.0D : 310.0D);
+        double erosion = fractalNoise(worldName, 47, x, z, v3 ? 260.0D : 180.0D, 2);
+        double terrace = Math.sin((x - z) / (v3 ? 260.0D : 180.0D)) * (v3 ? 3.0D : 2.0D);
+        double ringRise = v3 ? Math.max(0.0D, Math.min(1.0D, (distance - 520.0D) / 1100.0D)) : 0.0D;
+        double basinSoftener = v3 && distance < 260.0D ? (260.0D - distance) / 260.0D : 0.0D;
         int height = region.baseHeight()
                 + (int) Math.round(continent * 7.0D)
-                + (int) Math.round(hills * (region == TerrainRegion.MEADOW_BASIN || region == TerrainRegion.FARMLAND_FLATS ? 3.0D : 8.0D))
-                + (int) Math.round(Math.max(0.0D, ridges) * (region == TerrainRegion.SHRINE_RIDGE ? 14.0D : 5.0D))
+                + (int) Math.round(hills * (region == TerrainRegion.MEADOW_BASIN || region == TerrainRegion.FARMLAND_FLATS ? (v3 ? 2.0D : 3.0D) : (v3 ? 9.0D : 8.0D)))
+                + (int) Math.round(Math.max(0.0D, ridges) * (region == TerrainRegion.SHRINE_RIDGE ? 16.0D : v3 ? 8.0D : 5.0D))
                 - (int) Math.round(Math.max(0.0D, -erosion) * 3.0D)
-                + (int) Math.round(terrace);
+                + (int) Math.round(terrace)
+                + (int) Math.round(ringRise * 14.0D)
+                - (int) Math.round(basinSoftener * 4.0D);
         if (region == TerrainRegion.RIVER_VALLEY) {
-            height -= 3;
+            height -= v3 ? 2 : 3;
         }
         if (region == TerrainRegion.GATE_WILDS) {
-            height += (int) Math.round(ridges * 4.0D);
+            height += (int) Math.round(ridges * (v3 ? 8.0D : 4.0D));
         }
         return Math.max(48, Math.min(122, height));
+    }
+
+    private static boolean isV3(String worldName) {
+        return worldName != null && worldName.toLowerCase(Locale.ROOT).contains("_v3");
     }
 
     private static int[] configuredOrProcedural(int floor, String worldName, ConfigurationSection section, String type, int index, List<TerrainPoint> existing) {
