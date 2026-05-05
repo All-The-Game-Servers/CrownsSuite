@@ -5,6 +5,9 @@ import com.xkstudios.crowns.analytics.PlaytimeManager;
 import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.api.EconomyLedgerProvider;
 import com.xkstudios.crowns.api.InboxProvider;
+import com.xkstudios.crowns.api.ModuleDescriptor;
+import com.xkstudios.crowns.api.ModuleHealth;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.command.AdminCommand;
 import com.xkstudios.crowns.data.DataManager;
@@ -16,6 +19,7 @@ import com.xkstudios.crowns.util.EntityManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.List;
 
 public class CrownsPlugin extends JavaPlugin {
     private DataManager dataManager;
@@ -44,6 +48,16 @@ public class CrownsPlugin extends JavaPlugin {
         this.entityManager = new EntityManager(this);
 
         this.moderationManager.load();
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "admin",
+                "CrownsAdmin",
+                "CrownsAdmin",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsEconomy"),
+                List.of("moderation", "reports", "analytics", "operations")
+        ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "admin",
                 "Admin",
@@ -93,6 +107,7 @@ public class CrownsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         CrownsAPI.setEconomyLedgerProvider(null);
+        CrownsAPI.unregisterModule("admin");
         CrownsAPI.unregisterSection("admin");
         if (this.playtimeManager != null) {
             this.playtimeManager.closeAllSessions();
@@ -147,5 +162,31 @@ public class CrownsPlugin extends JavaPlugin {
         public Object getAt(String key) {
             return null;
         }
+    }
+
+    private ModuleHealth moduleHealth() {
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "admin",
+                "CrownsAdmin",
+                "CrownsAdmin",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsEconomy"),
+                List.of("moderation", "reports", "analytics", "operations")
+        );
+        List<String> warnings = new java.util.ArrayList<>();
+        if (this.moderationManager == null) {
+            warnings.add("Moderation manager is not initialized.");
+        }
+        if (this.playtimeManager == null || this.economyLedgerManager == null) {
+            warnings.add("Analytics managers are not fully initialized.");
+        }
+        if (CrownsAPI.getEconomy() == null) {
+            warnings.add("CrownsEconomy is missing; economy analytics may be incomplete.");
+        }
+        int openReports = this.moderationManager == null ? 0 : this.moderationManager.getOpenReports().size();
+        String summary = openReports == 0 ? "Staff operations online. No open reports." : "Staff operations online. Open reports: " + openReports + ".";
+        return ModuleHealth.of(descriptor, warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED, summary, warnings);
     }
 }

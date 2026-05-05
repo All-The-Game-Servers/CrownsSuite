@@ -36,4 +36,12 @@ public interface TerrainProvider {
     }
 
     String getFloorTheme(int floorNumber);
+
+    default boolean isFloorReadyForPlayers(int floorNumber) {
+        return true;
+    }
+
+    default String getFloorReadinessSummary(int floorNumber) {
+        return "Floor " + floorNumber + " readiness is not managed by this terrain provider.";
+    }
 }

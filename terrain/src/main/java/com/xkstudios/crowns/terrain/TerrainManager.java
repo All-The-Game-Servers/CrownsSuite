@@ -263,11 +263,23 @@ public class TerrainManager implements TerrainProvider {
         this.activeGenerationJobs.remove(floorNumber);
     }
 
+    @Override
     public boolean isFloorReadyForPlayers(int floorNumber) {
         if (!this.isManagedGenerationFloor(floorNumber)) {
             return true;
         }
         return this.getGenerationStatus(floorNumber).readyForPlayers();
+    }
+
+    @Override
+    public String getFloorReadinessSummary(int floorNumber) {
+        if (!this.isManagedGenerationFloor(floorNumber)) {
+            return "Floor " + floorNumber + " is unmanaged by CrownsTerrain and treated as ready.";
+        }
+        TerrainGenerationStatus status = this.getGenerationStatus(floorNumber);
+        String message = status.message() == null || status.message().isBlank() ? "" : " " + status.message();
+        return "Floor " + floorNumber + " " + status.status().toLowerCase(Locale.ROOT).replace('_', '-') + " in "
+                + status.worldName() + ": " + status.progressSummary() + "." + message;
     }
 
     public boolean isManagedGenerationFloor(int floorNumber) {

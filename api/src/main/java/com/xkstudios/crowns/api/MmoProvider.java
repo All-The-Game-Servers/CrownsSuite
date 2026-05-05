@@ -8,4 +8,8 @@ public interface MmoProvider {
     String getTopSkillSummary(UUID playerId);
 
     String getWorldProgressSummary(UUID playerId);
+
+    default String getSystemStatusSummary() {
+        return "MMO status unavailable.";
+    }
 }

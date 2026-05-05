@@ -1,8 +1,28 @@
+ext.crownsModuleVersions = [
+        api    : '1.4.0',
+        economy: '1.4.0',
+        admin  : '1.4.0',
+        events : '1.4.0',
+        drugs  : '1.4.0',
+        mmo    : '1.7.0',
+        terrain: '1.7.0'
+]
+
+ext.crownsJarNames = [
+        api    : 'CrownsAPI',
+        economy: 'CrownsEconomy',
+        admin  : 'CrownsAdmin',
+        events : 'CrownsEvents',
+        drugs  : 'CrownsDrugs',
+        mmo    : 'CrownsMMO',
+        terrain: 'CrownsTerrain'
+]
+
 subprojects {
     apply plugin: 'java'
 
     group = 'com.xkstudios'
-    version = '1.2.0'
+    version = rootProject.ext.crownsModuleVersions[name] ?: '1.4.0'
 
     java {
         toolchain {
@@ -34,5 +54,35 @@ subprojects {
 
     processResources {
         filteringCharset = 'UTF-8'
+    }
+
+    tasks.named('jar') {
+        archiveBaseName = rootProject.ext.crownsJarNames[name] ?: project.name
+    }
+}
+
+tasks.register('cleanDownloads') {
+    doLast {
+        delete fileTree("${rootDir}/downloads") {
+            include 'CrownsAPI-*.jar'
+            include 'CrownsEconomy-*.jar'
+            include 'CrownsAdmin-*.jar'
+            include 'CrownsEvents-*.jar'
+            include 'CrownsDrugs-*.jar'
+            include 'CrownsMMO-*.jar'
+            include 'CrownsTerrain-*.jar'
+        }
+    }
+}
+
+tasks.register('packageDownloads') {
+    dependsOn 'cleanDownloads'
+    dependsOn subprojects.collect { it.tasks.named('jar') }
+    doLast {
+        copy {
+            from subprojects.collect { it.tasks.named('jar').get().archiveFile }
+            into "${rootDir}/downloads"
+        }
+        println "Packaged current Crowns Suite jars into ${rootDir}/downloads"
     }
 }

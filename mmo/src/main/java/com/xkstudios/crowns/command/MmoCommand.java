@@ -1,6 +1,8 @@
 package com.xkstudios.crowns.command;
 
 import com.xkstudios.crowns.CrownsPlugin;
+import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.ModuleHealth;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +39,7 @@ public class MmoCommand implements TabExecutor {
         }
         switch (args[0].toLowerCase()) {
             case "start" -> this.plugin.getFloorManager().startPlayer(player);
+            case "status" -> this.sendStatus(player);
             case "party" -> this.handleParty(player, args);
             case "guild" -> this.handleGuild(player, args);
             case "skills" -> this.plugin.getMenuManager().openSkills(player);
@@ -265,6 +268,22 @@ public class MmoCommand implements TabExecutor {
         return true;
     }
 
+    private void sendStatus(CommandSender sender) {
+        sender.sendMessage("CrownsMMO Status");
+        sender.sendMessage(this.plugin.getMmoManager().getSystemStatusSummary());
+        sender.sendMessage("Floors configured: " + this.plugin.getFloorManager().getFloors().size());
+        if (CrownsAPI.getTerrain() == null) {
+            sender.sendMessage("Terrain: missing optional provider.");
+        } else {
+            sender.sendMessage("Terrain Floor 1: " + CrownsAPI.getTerrain().getFloorReadinessSummary(1));
+        }
+        for (ModuleHealth health : CrownsAPI.getModuleHealth()) {
+            if (List.of("terrain", "economy", "events", "admin", "drugs").contains(health.descriptor().key())) {
+                sender.sendMessage("- " + health.descriptor().displayName() + ": " + health.state() + " | " + health.summary());
+            }
+        }
+    }
+
     private boolean handleAdminFloor(CommandSender sender, String[] args) {
         if (args.length < 4) {
             sender.sendMessage("Usage: /cmmo admin floor <setspawn|setboss|unlock> ...");
@@ -415,7 +434,7 @@ public class MmoCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], List.of("start", "party", "guild", "skills", "professions", "combat", "world", "floors", "floor", "quests", "quest", "boss", "resources", "gear", "recipes", "actives", "admin"), suggestions);
+            return StringUtil.copyPartialMatches(args[0], List.of("start", "status", "party", "guild", "skills", "professions", "combat", "world", "floors", "floor", "quests", "quest", "boss", "resources", "gear", "recipes", "actives", "admin"), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("quests")) {
             return StringUtil.copyPartialMatches(args[1], List.of("active", "completed", "floor"), suggestions);

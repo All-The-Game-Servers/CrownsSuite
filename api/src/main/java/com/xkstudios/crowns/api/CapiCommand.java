@@ -52,12 +52,7 @@ public class CapiCommand implements TabExecutor {
         }
         if (root.equals("status")) {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage("Crowns Suite Status");
-                sender.sendMessage("Sections registered: " + CrownsAPI.getSections().size());
-                sender.sendMessage("Economy: " + (CrownsAPI.getEconomy() == null ? "offline" : "online"));
-                sender.sendMessage("Events: " + (CrownsAPI.getEvents() == null ? "offline" : "online"));
-                sender.sendMessage("MMO: " + (CrownsAPI.getMmo() == null ? "offline" : "online"));
-                sender.sendMessage("Terrain: " + (CrownsAPI.getTerrain() == null ? "offline" : "online"));
+                this.sendModuleStatus(sender);
                 return true;
             }
             SuiteGuiManager gui = CrownsAPI.getSuiteGui();
@@ -68,6 +63,18 @@ public class CapiCommand implements TabExecutor {
             gui.openStatus(player);
             return true;
         }
+        if (root.equals("modules")) {
+            if (sender instanceof Player player && CrownsAPI.getSuiteGui() != null) {
+                CrownsAPI.getSuiteGui().openStatus(player);
+                return true;
+            }
+            this.sendModuleStatus(sender);
+            return true;
+        }
+        if (root.equals("downloads")) {
+            this.sendDownloads(sender);
+            return true;
+        }
         if (root.equals("help")) {
             this.sendHelp(sender, label);
             return true;
@@ -75,6 +82,38 @@ public class CapiCommand implements TabExecutor {
 
         this.sendHelp(sender, label);
         return true;
+    }
+
+    private void sendModuleStatus(CommandSender sender) {
+        sender.sendMessage("Crowns Suite Module Status");
+        sender.sendMessage("Sections registered: " + CrownsAPI.getSections().size());
+        for (ModuleHealth health : CrownsAPI.getModuleHealth()) {
+            ModuleDescriptor descriptor = health.descriptor();
+            sender.sendMessage("- " + descriptor.displayName() + " " + descriptor.version() + " [" + health.state() + "] " + health.summary());
+            if (!descriptor.providedServices().isEmpty()) {
+                sender.sendMessage("  services: " + String.join(", ", descriptor.providedServices()));
+            }
+            for (String warning : health.warnings()) {
+                sender.sendMessage("  warning: " + warning);
+            }
+        }
+    }
+
+    private void sendDownloads(CommandSender sender) {
+        ResourcePackService packs = CrownsAPI.getResourcePackService();
+        sender.sendMessage("Crowns Suite Downloads");
+        sender.sendMessage("GitHub downloads: https://github.com/All-The-Game-Servers/CrownsSuite/tree/master/downloads");
+        if (packs == null) {
+            sender.sendMessage("Resource pack: service offline");
+        } else {
+            sender.sendMessage("Resource pack: " + packs.getVersion() + " | " + (packs.getDownloadUrl().isBlank() ? "<not configured>" : packs.getDownloadUrl()));
+            sender.sendMessage("Resource pack SHA1: " + (packs.getSha1().isBlank() ? "<not configured>" : packs.getSha1()));
+            sender.sendMessage("Server copy: " + packs.getLocalPackPath());
+        }
+        for (ModuleHealth health : CrownsAPI.getModuleHealth()) {
+            ModuleDescriptor descriptor = health.descriptor();
+            sender.sendMessage("- " + descriptor.pluginName() + "-" + descriptor.version() + ".jar [" + health.state() + "]");
+        }
     }
 
     private boolean handlePack(CommandSender sender, String label, String[] args, ResourcePackService packs) {
@@ -196,6 +235,8 @@ public class CapiCommand implements TabExecutor {
         sender.sendMessage("/" + label + " pack info - show configured pack details");
         sender.sendMessage("/" + label + " gui - open the Crowns Suite home");
         sender.sendMessage("/" + label + " status - open the suite module status page");
+        sender.sendMessage("/" + label + " modules - show installed module versions and health");
+        sender.sendMessage("/" + label + " downloads - show current jar/resource-pack download metadata");
         if (sender.hasPermission("crowns.api.admin")) {
             sender.sendMessage("/" + label + " pack share <player> - send the pack prompt to a player");
             sender.sendMessage("/" + label + " pack broadcast - send the pack prompt to everyone online");
@@ -206,7 +247,7 @@ public class CapiCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], List.of("pack", "gui", "status", "help"), suggestions);
+            return StringUtil.copyPartialMatches(args[0], List.of("pack", "gui", "status", "modules", "downloads", "help"), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("pack")) {
             List<String> base = new ArrayList<>(List.of("download", "prompt", "info", "link"));

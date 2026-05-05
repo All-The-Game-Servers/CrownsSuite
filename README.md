@@ -2,7 +2,7 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.3.0` is the suite-wide `Integration Polish + Quest Foundations` release. CrownsMMO currently has its own `1.7.0` playable Floor 1 quest release.
+`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO and CrownsTerrain currently remain on their own `1.7.0` Floor 1 relaunch line.
 
 It currently includes:
 
@@ -20,11 +20,11 @@ The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDriv
 
 Only the latest supported build for each plugin/resource pack is kept in that folder, so the download list is intentionally short.
 
-- `CrownsAPI-1.3.0.jar`
-- `CrownsEconomy-1.3.0.jar`
-- `CrownsAdmin-1.3.0.jar`
-- `CrownsEvents-1.3.0.jar`
-- `CrownsDrugs-1.3.0.jar`
+- `CrownsAPI-1.4.0.jar`
+- `CrownsEconomy-1.4.0.jar`
+- `CrownsAdmin-1.4.0.jar`
+- `CrownsEvents-1.4.0.jar`
+- `CrownsDrugs-1.4.0.jar`
 - `CrownsMMO-1.7.0.jar`
 - `CrownsTerrain-1.7.0.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
@@ -37,6 +37,7 @@ The current wiki home page is in [wiki/Home.md](C:\Users\sirgi\OneDrive\Document
 Suggested GitHub wiki structure:
 
 - `Home`
+- `Suite Architecture`
 - `CrownsEconomy`
 - `CrownsAdmin`
 - `CrownsEvents`
@@ -62,6 +63,16 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - [terrain](C:\Users\sirgi\OneDrive\Documents\New project\terrain)
 - [wiki](C:\Users\sirgi\OneDrive\Documents\New project\wiki)
 - [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack)
+
+## 1.4.0 Highlights
+
+- `CrownsAPI`: typed module registry, health states, `/capi modules`, `/capi downloads`, and richer status GUI diagnostics.
+- `CrownsEconomy`: publishes market activity summaries for MMO/admin integrations and suite status cards.
+- `CrownsAdmin`: adds `/ca suite` so staff can open the operations/module-health page directly.
+- `CrownsEvents`: exposes suite activity summaries so live events can react to MMO, economy, and future ceremony hooks.
+- `CrownsMMO`: adds `/cmmo status` and blocks normal entry into unready managed terrain floors with clear admin fix steps.
+- `CrownsTerrain`: reports Floor 1 readiness through the shared TerrainProvider so MMO and Admin surfaces can diagnose generation state.
+- `downloads`: the verification script packages only current jars and refreshes checksums.
 
 ## 1.3.0 Highlights
 

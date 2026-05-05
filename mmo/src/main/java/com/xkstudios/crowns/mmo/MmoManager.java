@@ -366,6 +366,17 @@ public class MmoManager implements MmoProvider {
         return "Bosses " + bosses + " • Discoveries " + biomes;
     }
 
+    @Override
+    public String getSystemStatusSummary() {
+        String terrain = CrownsAPI.getTerrain() == null
+                ? "Terrain: missing"
+                : "Terrain: " + CrownsAPI.getTerrain().getFloorReadinessSummary(1);
+        String economy = CrownsAPI.getEconomy() == null
+                ? "Economy: missing"
+                : "Economy: " + CrownsAPI.getEconomy().getMarketActivitySummary();
+        return this.getSkills().size() + " skills online | " + terrain + " | " + economy;
+    }
+
     public String formatLevelLine(UUID playerId, String playerName, MmoSkill skill) {
         long current = this.getCurrentLevelXp(playerId, playerName, skill);
         long needed = this.getNeededLevelXp(playerId, playerName, skill);

@@ -2,7 +2,7 @@
 
 Crowns Suite is the Lowlight SMP management toolkit by XKStudios. It is split into focused plugins so the server can grow without one giant jar doing everything.
 
-`1.3.0` focuses on suite cohesion, health visibility, and the first CrownsMMO quest foundations.
+`1.4.0` focuses on platform cohesion, module diagnostics, cleaner owner/admin workflows, and tighter MMO/Terrain/Economy/Admin integration.
 
 ## Plugins
 
@@ -15,7 +15,8 @@ The shared backbone for the suite.
 - Shared inbox, menu, and provider contracts
 - Manual resource-pack distribution and install info
 - Suite profile and recent alert surfaces
-- Suite status page for module versions, provider health, database state, and resource-pack state
+- Suite status page for module versions, provider health, database state, resource-pack state, and download metadata
+- Typed module registry with `MISSING`, `LOADED`, `DEGRADED`, `READY`, and `FAILED` states
 
 ### CrownsEconomy
 The player trade and money loop.
@@ -43,6 +44,7 @@ The seasonal content and server event framework.
 - Relics, milestones, and rewards
 - Opening-week style SMP content
 - Admin-triggered live moments for ceremonies and future server events
+- Reusable suite activity hooks for MMO floor clears, economy milestones, terrain discoveries, and future ceremonies
 
 ### CrownsDrugs
 The arcade-style criminal business plugin.

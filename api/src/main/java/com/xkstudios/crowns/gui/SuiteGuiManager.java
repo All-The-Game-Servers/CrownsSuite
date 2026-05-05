@@ -1,7 +1,9 @@
 package com.xkstudios.crowns.gui;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.ModuleHealth;
 import com.xkstudios.crowns.api.ResourcePackService;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.data.PlayerData;
 import com.xkstudios.crowns.inbox.InboxEntry;
@@ -17,7 +19,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -124,17 +125,28 @@ public class SuiteGuiManager {
                 Component.text("Database: " + this.databaseStatus(), this.databaseStatus().equals("online") ? NamedTextColor.GREEN : NamedTextColor.RED),
                 Component.text("Resource pack: " + (CrownsAPI.getResourcePackService() == null ? "offline" : CrownsAPI.getResourcePackService().getStatusSummary()), NamedTextColor.GRAY)
         ), "lowlight/suite/status"));
-        String[] pluginNames = {"CrownsAPI", "CrownsEconomy", "CrownsAdmin", "CrownsEvents", "CrownsDrugs", "CrownsMMO", "CrownsTerrain"};
-        Material[] icons = {Material.NETHER_STAR, Material.GOLD_INGOT, Material.SHIELD, Material.DRAGON_HEAD, Material.BREWING_STAND, Material.ENCHANTED_BOOK, Material.GRASS_BLOCK};
-        String[] models = {"lowlight/suite/api", "lowlight/suite/economy", "lowlight/suite/admin", "lowlight/suite/events", "lowlight/suite/drugs", "lowlight/suite/mmo", "lowlight/suite/terrain"};
         int[] slots = {10, 12, 14, 16, 28, 30, 32};
-        for (int i = 0; i < pluginNames.length; i++) {
-            Plugin installed = Bukkit.getPluginManager().getPlugin(pluginNames[i]);
+        List<ModuleHealth> healthEntries = CrownsAPI.getModuleHealth();
+        for (int i = 0; i < healthEntries.size() && i < slots.length; i++) {
+            ModuleHealth health = healthEntries.get(i);
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text(installed == null ? "Not installed or not loaded." : "Version: " + installed.getDescription().getVersion(), installed == null ? NamedTextColor.RED : NamedTextColor.GRAY));
-            lore.add(Component.text(installed == null ? "Provider: unavailable" : "Enabled: " + installed.isEnabled(), installed != null && installed.isEnabled() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
-            lore.add(Component.text(this.providerLine(pluginNames[i]), NamedTextColor.DARK_GRAY));
-            inventory.setItem(slots[i], this.info(icons[i], pluginNames[i], installed != null && installed.isEnabled() ? NamedTextColor.AQUA : NamedTextColor.DARK_GRAY, lore, models[i]));
+            lore.add(Component.text("State: " + health.state(), this.stateColor(health.state())));
+            lore.add(Component.text("Version: " + health.descriptor().version(), NamedTextColor.GRAY));
+            lore.add(Component.text("Requires API: " + health.descriptor().requiredApiVersion(), NamedTextColor.DARK_GRAY));
+            if (!health.descriptor().providedServices().isEmpty()) {
+                lore.add(Component.text("Services: " + String.join(", ", health.descriptor().providedServices()), NamedTextColor.DARK_GRAY));
+            }
+            lore.add(Component.text(health.summary(), NamedTextColor.GRAY));
+            for (String warning : health.warnings().stream().limit(2).toList()) {
+                lore.add(Component.text("! " + warning, NamedTextColor.YELLOW));
+            }
+            inventory.setItem(slots[i], this.info(
+                    this.moduleIcon(health.descriptor().key()),
+                    health.descriptor().displayName(),
+                    health.state().healthy() ? NamedTextColor.AQUA : NamedTextColor.DARK_GRAY,
+                    lore,
+                    this.moduleModel(health.descriptor().key())
+            ));
         }
         inventory.setItem(48, this.button(Material.BOOK, "Resource Pack", NamedTextColor.LIGHT_PURPLE, List.of(
                 Component.text("Open the manual pack page.", NamedTextColor.GRAY)
@@ -292,14 +304,39 @@ public class SuiteGuiManager {
         }
     }
 
-    private String providerLine(String pluginName) {
-        return switch (pluginName) {
-            case "CrownsEconomy" -> CrownsAPI.getEconomy() == null ? "Economy provider missing" : "Economy provider online";
-            case "CrownsEvents" -> CrownsAPI.getEvents() == null ? "Events provider missing" : "Events provider online";
-            case "CrownsMMO" -> CrownsAPI.getMmo() == null ? "MMO provider missing" : "MMO provider online";
-            case "CrownsTerrain" -> CrownsAPI.getTerrain() == null ? "Terrain provider missing" : "Terrain provider online";
-            case "CrownsAPI" -> CrownsAPI.getDataManager() == null ? "Data manager missing" : "API services online";
-            default -> "Optional module section";
+    private Material moduleIcon(String key) {
+        return switch (key) {
+            case "api" -> Material.NETHER_STAR;
+            case "economy" -> Material.GOLD_INGOT;
+            case "admin" -> Material.SHIELD;
+            case "events" -> Material.DRAGON_HEAD;
+            case "drugs" -> Material.BREWING_STAND;
+            case "mmo" -> Material.ENCHANTED_BOOK;
+            case "terrain" -> Material.GRASS_BLOCK;
+            default -> Material.PAPER;
+        };
+    }
+
+    private String moduleModel(String key) {
+        return switch (key) {
+            case "api" -> "lowlight/suite/api";
+            case "economy" -> "lowlight/suite/economy";
+            case "admin" -> "lowlight/suite/admin";
+            case "events" -> "lowlight/suite/events";
+            case "drugs" -> "lowlight/suite/drugs";
+            case "mmo" -> "lowlight/suite/mmo";
+            case "terrain" -> "lowlight/suite/terrain";
+            default -> "lowlight/suite/status";
+        };
+    }
+
+    private NamedTextColor stateColor(ServiceState state) {
+        return switch (state) {
+            case READY -> NamedTextColor.GREEN;
+            case LOADED -> NamedTextColor.AQUA;
+            case DEGRADED -> NamedTextColor.YELLOW;
+            case FAILED -> NamedTextColor.RED;
+            case MISSING -> NamedTextColor.DARK_GRAY;
         };
     }
 }

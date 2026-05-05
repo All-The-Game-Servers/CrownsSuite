@@ -1,5 +1,5 @@
 name: CrownsEconomy
-version: 1.3.0
+version: 1.4.0
 main: com.xkstudios.crowns.CrownsPlugin
 api-version: "1.21"
 authors: [XKStudios]

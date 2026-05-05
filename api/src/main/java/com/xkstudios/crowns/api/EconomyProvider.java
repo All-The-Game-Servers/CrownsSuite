@@ -10,4 +10,8 @@ public interface EconomyProvider {
     void deposit(UUID player, long amount);
 
     String formatCurrency(long pennies);
+
+    default String getMarketActivitySummary() {
+        return "Market activity unavailable.";
+    }
 }

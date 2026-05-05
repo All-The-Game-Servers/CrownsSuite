@@ -20,4 +20,8 @@ public interface EventsProvider {
     default java.util.List<String> getLiveEventSummaries() {
         return java.util.List.of();
     }
+
+    default java.util.List<String> getRecentSuiteActivitySummaries() {
+        return java.util.List.of();
+    }
 }

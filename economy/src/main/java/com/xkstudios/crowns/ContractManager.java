@@ -132,6 +132,8 @@ public class ContractManager {
         this.plugin.getInboxManager().push(commission.requesterUuid(), commission.requesterName(), "commission_filled",
                 "Commission completed",
                 player.getName() + " fulfilled your " + commission.displayName() + ".");
+        CrownsAPI.publishActivity("economy", "commission_filled", "Player commission fulfilled",
+                player.getName() + " fulfilled " + commission.amount() + "x " + this.prettyMaterial(commission.material()) + ".", player.getUniqueId());
         return true;
     }
 
@@ -161,6 +163,8 @@ public class ContractManager {
         this.plugin.getInboxManager().push(player.getUniqueId(), player.getName(), "contract_completed",
                 "Server contract completed",
                 "You completed " + contract.displayName() + " for " + Currency.format(contract.payout()) + ".");
+        CrownsAPI.publishActivity("economy", "server_contract_completed", "Server contract completed",
+                player.getName() + " completed " + contract.displayName() + ".", player.getUniqueId());
         if (contract.remainingClaims() <= 0) {
             this.deleteContract(contract.id());
             this.contracts.remove(contract.id());

@@ -3,6 +3,9 @@ package com.xkstudios.crowns;
 import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.api.EventsProvider;
 import com.xkstudios.crowns.api.InboxProvider;
+import com.xkstudios.crowns.api.ModuleDescriptor;
+import com.xkstudios.crowns.api.ModuleHealth;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.command.EventsCommand;
 import com.xkstudios.crowns.data.DataManager;
@@ -15,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.List;
 
 public class CrownsPlugin extends JavaPlugin {
     private DataManager dataManager;
@@ -37,6 +41,16 @@ public class CrownsPlugin extends JavaPlugin {
         this.eventManager = new EventManager(this);
         this.menuManager = new EventMenuManager(this);
         this.eventManager.load();
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "events",
+                "CrownsEvents",
+                "CrownsEvents",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsEconomy"),
+                List.of("events", "archives", "live-moments", "activity-hooks")
+        ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "events",
                 "Events",
@@ -71,6 +85,13 @@ public class CrownsPlugin extends JavaPlugin {
             public java.util.List<String> getLiveEventSummaries() {
                 return eventManager.getLiveMomentSummaries();
             }
+
+            @Override
+            public java.util.List<String> getRecentSuiteActivitySummaries() {
+                return CrownsAPI.getRecentActivities(6).stream()
+                        .map(activity -> activity.source() + ": " + activity.title())
+                        .toList();
+            }
         });
 
         EventsCommand command = new EventsCommand(this);
@@ -86,6 +107,7 @@ public class CrownsPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         CrownsAPI.setEventsProvider(null);
+        CrownsAPI.unregisterModule("events");
         CrownsAPI.unregisterSection("events");
         if (this.eventManager != null) {
             this.eventManager.shutdown();
@@ -128,5 +150,29 @@ public class CrownsPlugin extends JavaPlugin {
                 provider.sendNotification(playerUuid, title, body == null ? "" : body);
             }
         }
+    }
+
+    private ModuleHealth moduleHealth() {
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "events",
+                "CrownsEvents",
+                "CrownsEvents",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsEconomy"),
+                List.of("events", "archives", "live-moments", "activity-hooks")
+        );
+        List<String> warnings = new java.util.ArrayList<>();
+        if (this.eventManager == null) {
+            warnings.add("EventManager is not initialized.");
+        }
+        if (CrownsAPI.getEconomy() == null) {
+            warnings.add("CrownsEconomy is missing; currency rewards will be skipped.");
+        }
+        String summary = this.eventManager == null
+                ? "Event framework unavailable."
+                : this.eventManager.getStatusLabel() + ": " + this.eventManager.getMenuLabel();
+        return ModuleHealth.of(descriptor, warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED, summary, warnings);
     }
 }

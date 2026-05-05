@@ -2,6 +2,9 @@ package com.xkstudios.crowns;
 
 import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.api.EconomyProvider;
+import com.xkstudios.crowns.api.ModuleDescriptor;
+import com.xkstudios.crowns.api.ModuleHealth;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
 import com.xkstudios.crowns.command.EconomyCommand;
 import com.xkstudios.crowns.economy.CoinflipManager;
@@ -23,6 +26,7 @@ import com.xkstudios.crowns.market.AuctionManager;
 import com.xkstudios.crowns.market.PermanentStallManager;
 import com.xkstudios.crowns.util.AntiExploitManager;
 import java.util.UUID;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -96,7 +100,22 @@ public class CrownsPlugin extends JavaPlugin {
             public String formatCurrency(long pennies) {
                 return Currency.format(pennies);
             }
+
+            @Override
+            public String getMarketActivitySummary() {
+                return demandManager.getSuiteSummary() + " " + contractManager.getSummary();
+            }
         });
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "economy",
+                "CrownsEconomy",
+                "CrownsEconomy",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of(),
+                List.of("economy", "auctions", "stalls", "contracts", "market-activity", "gambling")
+        ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "economy",
                 "Economy",
@@ -156,6 +175,7 @@ public class CrownsPlugin extends JavaPlugin {
         if (CrownsAPI.getEconomy() != null) {
             CrownsAPI.setEconomyProvider(null);
         }
+        CrownsAPI.unregisterModule("economy");
         CrownsAPI.unregisterSection("economy");
         if (this.dataManager != null) {
             this.dataManager.flushAll();
@@ -220,5 +240,35 @@ public class CrownsPlugin extends JavaPlugin {
 
     public MenuManager getMenuManager() {
         return menuManager;
+    }
+
+    private ModuleHealth moduleHealth() {
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "economy",
+                "CrownsEconomy",
+                "CrownsEconomy",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of(),
+                List.of("economy", "auctions", "stalls", "contracts", "market-activity", "gambling")
+        );
+        List<String> warnings = new java.util.ArrayList<>();
+        if (this.dataManager == null) {
+            warnings.add("Shared DataManager is missing.");
+        }
+        if (this.economyManager == null) {
+            warnings.add("EconomyManager is not initialized.");
+        }
+        if (this.auctionManager == null) {
+            warnings.add("Auction House is not initialized.");
+        }
+        if (this.contractManager == null) {
+            warnings.add("Contracts and commissions are not initialized.");
+        }
+        String summary = this.contractManager == null
+                ? "Economy core is partially unavailable."
+                : this.demandManager.getSuiteSummary() + " " + this.contractManager.getSummary();
+        return ModuleHealth.of(descriptor, warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED, summary, warnings);
     }
 }

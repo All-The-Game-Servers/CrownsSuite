@@ -1,10 +1,14 @@
 package com.xkstudios.crowns.terrain;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.ModuleDescriptor;
+import com.xkstudios.crowns.api.ModuleHealth;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.List;
 
 public class CrownsTerrainPlugin extends JavaPlugin {
     private TerrainManager terrainManager;
@@ -17,6 +21,16 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         this.menuManager = new TerrainMenuManager(this);
         this.terrainManager.initialize();
         CrownsAPI.setTerrainProvider(this.terrainManager);
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "terrain",
+                "CrownsTerrain",
+                "CrownsTerrain",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsMMO"),
+                List.of("terrain", "floor-readiness", "blueprints", "debug-maps")
+        ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "terrain",
                 "Terrain",
@@ -46,6 +60,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         if (CrownsAPI.getTerrain() == this.terrainManager) {
             CrownsAPI.setTerrainProvider(null);
         }
+        CrownsAPI.unregisterModule("terrain");
     }
 
     public TerrainManager getTerrainManager() {
@@ -54,5 +69,28 @@ public class CrownsTerrainPlugin extends JavaPlugin {
 
     public TerrainMenuManager getMenuManager() {
         return this.menuManager;
+    }
+
+    private ModuleHealth moduleHealth() {
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "terrain",
+                "CrownsTerrain",
+                "CrownsTerrain",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsMMO"),
+                List.of("terrain", "floor-readiness", "blueprints", "debug-maps")
+        );
+        List<String> warnings = new java.util.ArrayList<>();
+        if (this.terrainManager == null) {
+            warnings.add("TerrainManager is not initialized.");
+        } else if (!this.terrainManager.isFloorReadyForPlayers(1)) {
+            warnings.add("Floor 1 is not ready for players: " + this.terrainManager.getFloorReadinessSummary(1));
+        }
+        String summary = this.terrainManager == null
+                ? "Terrain provider unavailable."
+                : this.terrainManager.getFloorReadinessSummary(1);
+        return ModuleHealth.of(descriptor, warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED, summary, warnings);
     }
 }

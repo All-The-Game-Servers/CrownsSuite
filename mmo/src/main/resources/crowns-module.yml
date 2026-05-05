@@ -1,0 +1,23 @@
+key: mmo
+name: CrownsMMO
+version: 1.7.0
+required-api-version: 1.4.0
+required-dependencies:
+  - CrownsAPI
+optional-dependencies:
+  - CrownsTerrain
+  - CrownsEconomy
+  - CrownsEvents
+  - CrownsAdmin
+  - CrownsDrugs
+provided-services:
+  - mmo
+  - floors
+  - quests
+  - skills
+  - parties
+  - guilds
+health-checks:
+  - floor-manager
+  - quest-manager
+  - terrain-readiness

@@ -5,6 +5,7 @@ import com.xkstudios.crowns.analytics.EconomyLedgerSummary;
 import com.xkstudios.crowns.analytics.PlaytimeEntry;
 import com.xkstudios.crowns.analytics.PlaytimePeriod;
 import com.xkstudios.crowns.analytics.PlaytimeSnapshot;
+import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.economy.Currency;
 import com.xkstudios.crowns.moderation.ModerationReport;
 import com.xkstudios.crowns.moderation.StaffCapability;
@@ -59,6 +60,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             case "echest" -> this.echest(player, args);
             case "analytics" -> this.analytics(player, args);
             case "playtime" -> this.playtime(player, args);
+            case "suite" -> this.suite(player);
             case "clearitems" -> this.clearItems(player, args);
             case "clearmobs" -> this.clearMobs(player, args);
             case "entities" -> this.entities(player);
@@ -212,6 +214,15 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean suite(Player player) {
+        if (CrownsAPI.getSuiteGui() == null) {
+            this.msg(player, "CrownsAPI status GUI is not available right now.", NamedTextColor.RED);
+            return true;
+        }
+        CrownsAPI.getSuiteGui().openStatus(player);
+        return true;
+    }
+
     private boolean invsee(Player player, String[] args) {
         if (!this.require(player, StaffCapability.INSPECT) || args.length < 2) {
             return true;
@@ -345,6 +356,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
                 "/ca invsee <player>",
                 "/ca echest <player>",
                 "/ca analytics economy [today|7d|30d|all]",
+                "/ca suite",
                 "/ca playtime <player>",
                 "/ca playtime top [today|7d|30d|all]",
                 "/ca clearitems [radius]",
@@ -361,7 +373,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return this.filter(List.of("staffmode", "vanish", "freeze", "unfreeze", "mute", "unmute", "warn", "kick", "ban", "unban", "note", "reports", "invsee", "echest", "clearitems", "clearmobs", "entities", "analytics", "playtime"), args[0]);
+            return this.filter(List.of("staffmode", "vanish", "freeze", "unfreeze", "mute", "unmute", "warn", "kick", "ban", "unban", "note", "reports", "invsee", "echest", "clearitems", "clearmobs", "entities", "analytics", "playtime", "suite"), args[0]);
         }
         if (args.length == 2 && List.of("freeze", "unfreeze", "mute", "unmute", "warn", "kick", "ban", "note", "invsee", "echest", "playtime").contains(args[0].toLowerCase(Locale.ROOT))) {
             return this.onlineAndOfflineNames(args[1]);

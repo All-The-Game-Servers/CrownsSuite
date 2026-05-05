@@ -1,7 +1,11 @@
 package com.xkstudios.crowns;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.ModuleDescriptor;
+import com.xkstudios.crowns.api.ModuleHealth;
+import com.xkstudios.crowns.api.ServiceState;
 import com.xkstudios.crowns.api.SuiteSection;
+import com.xkstudios.crowns.api.TerrainProvider;
 import com.xkstudios.crowns.command.MmoCommand;
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.listener.MmoListener;
@@ -15,6 +19,7 @@ import com.xkstudios.crowns.mmo.social.MmoPartyManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.util.List;
 
 public class CrownsPlugin extends JavaPlugin {
     private DataManager dataManager;
@@ -48,6 +53,16 @@ public class CrownsPlugin extends JavaPlugin {
         this.questManager.initialize();
         this.guildManager.initialize();
         CrownsAPI.setMmoProvider(this.mmoManager);
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "mmo",
+                "CrownsMMO",
+                "CrownsMMO",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"),
+                List.of("mmo", "floors", "quests", "skills", "parties", "guilds")
+        ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "mmo",
                 "MMO",
@@ -70,6 +85,7 @@ public class CrownsPlugin extends JavaPlugin {
     public void onDisable() {
         CrownsAPI.unregisterSection("mmo");
         CrownsAPI.setMmoProvider(null);
+        CrownsAPI.unregisterModule("mmo");
     }
 
     public DataManager getDataManager() {
@@ -102,5 +118,34 @@ public class CrownsPlugin extends JavaPlugin {
 
     public MmoMenuManager getMenuManager() {
         return this.menuManager;
+    }
+
+    private ModuleHealth moduleHealth() {
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "mmo",
+                "CrownsMMO",
+                "CrownsMMO",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of("CrownsAPI"),
+                List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"),
+                List.of("mmo", "floors", "quests", "skills", "parties", "guilds")
+        );
+        List<String> warnings = new java.util.ArrayList<>();
+        if (this.mmoManager == null || this.floorManager == null || this.questManager == null) {
+            warnings.add("One or more MMO managers are not initialized.");
+        }
+        TerrainProvider terrain = CrownsAPI.getTerrain();
+        if (terrain == null) {
+            warnings.add("CrownsTerrain is missing; Floor 1 uses fallback world generation and route checks are unavailable.");
+        } else if (!terrain.isFloorReadyForPlayers(1)) {
+            warnings.add("Floor 1 is not player-ready: " + terrain.getFloorReadinessSummary(1));
+        }
+        if (CrownsAPI.getEconomy() == null) {
+            warnings.add("CrownsEconomy is missing; quest currency rewards and trade hooks are skipped.");
+        }
+        String summary = this.mmoManager == null ? "MMO layer unavailable." : this.mmoManager.getSystemStatusSummary();
+        ServiceState state = warnings.stream().anyMatch(line -> line.contains("not player-ready")) ? ServiceState.DEGRADED : (warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED);
+        return ModuleHealth.of(descriptor, state, summary, warnings);
     }
 }

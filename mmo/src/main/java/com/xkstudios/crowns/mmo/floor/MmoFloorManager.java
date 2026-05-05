@@ -141,6 +141,13 @@ public class MmoFloorManager {
             player.sendMessage(Component.text(this.formatUnlockLine(player, floorNumber), NamedTextColor.RED));
             return false;
         }
+        TerrainProvider terrain = CrownsAPI.getTerrain();
+        if (terrain != null && !terrain.isFloorReadyForPlayers(floorNumber)) {
+            player.sendMessage(Component.text("Floor " + floorNumber + " is not ready for normal player entry yet.", NamedTextColor.RED));
+            player.sendMessage(Component.text(terrain.getFloorReadinessSummary(floorNumber), NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Staff fix: /cterrain admin blueprint " + floorNumber + ", /cterrain admin debugmaps " + floorNumber + ", /cterrain admin generate " + floorNumber + ", then /cterrain verify floor " + floorNumber + ".", NamedTextColor.GRAY));
+            return false;
+        }
         World world = this.ensureWorld(floor);
         if (world == null) {
             player.sendMessage(Component.text("Floor " + floorNumber + " could not be loaded.", NamedTextColor.RED));
@@ -209,6 +216,8 @@ public class MmoFloorManager {
         }
         target.sendMessage(Component.text("Floor " + floorNumber + " unlocked.", NamedTextColor.GOLD));
         CrownsAPI.publishAlert("mmo", "Floor unlocked", target.getName() + " unlocked Floor " + floorNumber + ".", target.getUniqueId(), false);
+        CrownsAPI.publishActivity("mmo", "floor_unlocked", "Floor unlocked",
+                target.getName() + " unlocked Floor " + floorNumber + " via " + (source == null ? "unknown" : source) + ".", target.getUniqueId());
         return true;
     }
 

@@ -6,6 +6,7 @@ import com.xkstudios.crowns.economy.Currency;
 import com.xkstudios.crowns.gui.SuiteGuiManager;
 import com.xkstudios.crowns.gui.SuiteMenuListener;
 import com.xkstudios.crowns.inbox.InboxManager;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -30,6 +31,16 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setDataManager(this.dataManager);
         CrownsAPI.setSuiteGui(this.suiteGuiManager);
         CrownsAPI.setResourcePackService(this.resourcePackService);
+        CrownsAPI.registerModule(new ModuleDescriptor(
+                "api",
+                "CrownsAPI",
+                "CrownsAPI",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of(),
+                List.of(),
+                List.of("data", "gui", "modules", "resource-pack", "inbox")
+        ), this::apiHealth);
         CrownsAPI.setPlayerDataProvider(new PlayerDataProvider() {
             @Override
             public PlayerData getOrCreate(UUID uuid, String name) {
@@ -66,10 +77,49 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setDataManager(null);
         CrownsAPI.setSuiteGui(null);
         CrownsAPI.setResourcePackService(null);
+        CrownsAPI.unregisterModule("api");
         CrownsAPI.clearSections();
         if (this.dataManager != null) {
             this.dataManager.close();
         }
+    }
+
+    private ModuleHealth apiHealth() {
+        List<String> warnings = new java.util.ArrayList<>();
+        boolean databaseOnline = false;
+        try {
+            databaseOnline = this.dataManager != null
+                    && this.dataManager.getConnection() != null
+                    && !this.dataManager.getConnection().isClosed();
+        } catch (SQLException exception) {
+            warnings.add("Database check failed: " + exception.getMessage());
+        }
+        if (!databaseOnline) {
+            warnings.add("Shared crowns.db connection is offline.");
+        }
+        if (this.suiteGuiManager == null) {
+            warnings.add("Suite GUI manager is not registered.");
+        }
+        if (this.resourcePackService == null) {
+            warnings.add("Resource-pack service is not registered.");
+        } else if (!this.resourcePackService.isEnabled()) {
+            warnings.add("Resource-pack metadata is disabled in API config.");
+        }
+        ModuleDescriptor descriptor = new ModuleDescriptor(
+                "api",
+                "CrownsAPI",
+                "CrownsAPI",
+                this.getDescription().getVersion(),
+                "1.4.0",
+                List.of(),
+                List.of(),
+                List.of("data", "gui", "modules", "resource-pack", "inbox")
+        );
+        if (!databaseOnline) {
+            return ModuleHealth.of(descriptor, ServiceState.FAILED, "Core API services are unavailable.", warnings);
+        }
+        return ModuleHealth.of(descriptor, warnings.isEmpty() ? ServiceState.READY : ServiceState.DEGRADED,
+                "Core API services online. Sections: " + CrownsAPI.getSections().size() + ".", warnings);
     }
 
     public DataManager getDataManager() {

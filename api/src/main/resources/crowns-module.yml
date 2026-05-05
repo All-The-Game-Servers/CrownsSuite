@@ -1,0 +1,16 @@
+key: api
+name: CrownsAPI
+version: 1.4.0
+required-api-version: 1.4.0
+required-dependencies: []
+optional-dependencies: []
+provided-services:
+  - data
+  - gui
+  - modules
+  - resource-pack
+  - inbox
+health-checks:
+  - database
+  - suite-gui
+  - resource-pack

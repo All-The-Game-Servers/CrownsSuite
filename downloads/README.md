@@ -6,11 +6,11 @@ Only the latest supported build for each plugin is kept here to avoid downloadin
 
 ## Plugin JARs
 
-- `CrownsAPI-1.3.0.jar`
-- `CrownsEconomy-1.3.0.jar`
-- `CrownsAdmin-1.3.0.jar`
-- `CrownsEvents-1.3.0.jar`
-- `CrownsDrugs-1.3.0.jar`
+- `CrownsAPI-1.4.0.jar`
+- `CrownsEconomy-1.4.0.jar`
+- `CrownsAdmin-1.4.0.jar`
+- `CrownsEvents-1.4.0.jar`
+- `CrownsDrugs-1.4.0.jar`
 - `CrownsMMO-1.7.0.jar`
 - `CrownsTerrain-1.7.0.jar`
 
@@ -24,4 +24,4 @@ Only the latest supported build for each plugin is kept here to avoid downloadin
 
 Keep this folder committed so players and staff can fetch the latest suite builds directly from the repository page, and optionally duplicate these files into GitHub Releases later.
 
-Note: `CrownsMMO` and `CrownsTerrain` require the updated `CrownsAPI-1.3.0.jar` from this same folder, because the shared provider surfaces include MMO, terrain, suite status, and quest integration. The current resource pack is `1.5.0`, rebuilt for Minecraft `1.21.11`, so the MMO, terrain, quest, and suite status visuals resolve in-game. `CrownsMMO-1.7.0.jar` is the playable Floor 1 quest build. `CrownsTerrain-1.7.0.jar` is the Floor 1 v6 hybrid-engine/pregeneration build and defaults to the fresh world `crowns_floor_1_v6`.
+Note: `CrownsMMO` and `CrownsTerrain` require the updated `CrownsAPI-1.4.0.jar` from this same folder, because the shared provider surfaces include module health, terrain readiness, suite activity, and download diagnostics. The current resource pack is `1.5.0`, rebuilt for Minecraft `1.21.11`, so the MMO, terrain, quest, and suite status visuals resolve in-game. `CrownsMMO-1.7.0.jar` is the playable Floor 1 quest build. `CrownsTerrain-1.7.0.jar` is the Floor 1 v6 hybrid-engine/pregeneration build and defaults to the fresh world `crowns_floor_1_v6`.
