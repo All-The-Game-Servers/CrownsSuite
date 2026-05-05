@@ -6,7 +6,7 @@ It is built primarily for CrownsMMO floor worlds: CrownsMMO owns progression, bo
 
 ## What It Adds
 
-- Hybrid blueprint floor generation for CrownsMMO worlds
+- Hybrid route-first floor engine generation for CrownsMMO worlds
 - Floor-themed terrain palettes
 - Custom code-authored villages
 - Camps, road markers, waystones, and starter shrines
@@ -40,7 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Current relaunch default Floor 1 world is `crowns_floor_1_v5`, so existing survival `world` and older Crowns floor worlds are not overwritten.
+- Current relaunch default Floor 1 world is `crowns_floor_1_v6`, so existing survival `world` and older Crowns floor worlds are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -168,3 +168,16 @@ CrownsTerrain `1.6.0` moves Floor 1 to the fresh hybrid route-first world `crown
 - The authored spine remains First Haven, market square, farm gate, starter camp, starter shrine, first waystone, arena approach, and First Gate arena.
 - Procedural support now belongs around that spine: macro terrain, moisture/biome variation, river masks, road corridors, parcels, and jittered wilderness decoration candidates.
 - `/cterrain verify floor 1` checks both blueprint QA metrics and physical world evidence before staff treat the floor as release-ready.
+
+## 1.7.0 Full Hybrid Floor Engine
+
+CrownsTerrain `1.7.0` moves Floor 1 to the fresh hybrid-engine world `crowns_floor_1_v6`.
+
+- `/cterrain admin blueprint 1` writes a versioned blueprint artifact set under the plugin data folder.
+- The artifact set includes `floor.bpbin`, `floor.index.json`, `scores.json`, and debug PNGs for height, slope, moisture, biome, hydrology, roads, parcels, landmarks, and QA.
+- Runtime chunk generation reads immutable blueprint data and pure local coordinates only.
+- A blueprint-backed biome provider paints Floor 1 biomes without relying on ad-hoc chunk decisions.
+- A LimitedRegion populator handles local trees, rocks, and ruins so object placement is separated from macro terrain.
+- `/cterrain admin generate 1` pregenerates the critical route before players arrive.
+- Normal player teleports remain blocked until Floor 1 reaches `CRITICAL_READY` or better.
+- `TerrainProvider` remains compatible for CrownsMMO quests, boss arenas, waystones, shrines, camps, road markers, landmarks, and villages.

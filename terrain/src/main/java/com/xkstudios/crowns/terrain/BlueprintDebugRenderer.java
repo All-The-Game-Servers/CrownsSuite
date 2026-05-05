@@ -24,19 +24,22 @@ public final class BlueprintDebugRenderer {
         File slope = new File(outputDir, "floor-" + blueprint.floor() + "-slope.png");
         File moisture = new File(outputDir, "floor-" + blueprint.floor() + "-moisture.png");
         File biome = new File(outputDir, "floor-" + blueprint.floor() + "-biomes.png");
+        File hydrology = new File(outputDir, "floor-" + blueprint.floor() + "-hydrology.png");
         File roads = new File(outputDir, "floor-" + blueprint.floor() + "-roads.png");
         File parcels = new File(outputDir, "floor-" + blueprint.floor() + "-parcels.png");
         File landmarks = new File(outputDir, "floor-" + blueprint.floor() + "-landmarks.png");
         File qa = new File(outputDir, "floor-" + blueprint.floor() + "-qa.png");
+        File scores = BlueprintScoreReport.write(outputDir, blueprint);
         ImageIO.write(map(blueprint, MapKind.HEIGHT), "png", height);
         ImageIO.write(map(blueprint, MapKind.SLOPE), "png", slope);
         ImageIO.write(map(blueprint, MapKind.MOISTURE), "png", moisture);
         ImageIO.write(map(blueprint, MapKind.BIOME), "png", biome);
+        ImageIO.write(map(blueprint, MapKind.HYDROLOGY), "png", hydrology);
         ImageIO.write(overlay(blueprint, MapKind.ROADS), "png", roads);
         ImageIO.write(overlay(blueprint, MapKind.PARCELS), "png", parcels);
         ImageIO.write(overlay(blueprint, MapKind.LANDMARKS), "png", landmarks);
         ImageIO.write(qa(blueprint), "png", qa);
-        return List.of(height, slope, moisture, biome, roads, parcels, landmarks, qa);
+        return List.of(height, slope, moisture, biome, hydrology, roads, parcels, landmarks, qa, scores);
     }
 
     private static BufferedImage map(FloorBlueprint blueprint, MapKind kind) {
@@ -50,6 +53,7 @@ public final class BlueprintDebugRenderer {
                     case SLOPE -> gradient(Math.min(1.0D, blueprint.slope(x, z) / 3.0D), new Color(38, 80, 40), new Color(210, 36, 32));
                     case MOISTURE -> gradient(blueprint.moisture(x, z), new Color(132, 105, 48), new Color(34, 103, 190));
                     case BIOME -> biomeColor(blueprint.biomeKey(x, z));
+                    case HYDROLOGY -> hydrologyColor(blueprint, x, z);
                     default -> Color.BLACK;
                 };
                 image.setRGB(px, pz, color.getRGB());
@@ -104,6 +108,7 @@ public final class BlueprintDebugRenderer {
             graphics.drawString("Max road slope: " + String.format("%.2f", metrics.maxRoadSlope()), 16, 60);
             graphics.drawString("Parcels: " + metrics.parcels() + "  Decorations: " + metrics.decorations(), 16, 76);
             graphics.drawString("Biome samples: " + metrics.biomeSamples(), 16, 92);
+            graphics.drawString(BlueprintScoreReport.summary(blueprint), 16, 108);
         } finally {
             graphics.dispose();
         }
@@ -131,6 +136,17 @@ public final class BlueprintDebugRenderer {
         };
     }
 
+    private static Color hydrologyColor(FloorBlueprint blueprint, int x, int z) {
+        double riverDistance = blueprint.riverDistance(x, z);
+        if (riverDistance <= 5.5D) {
+            return new Color(30, 93, 166);
+        }
+        if (riverDistance <= 18.0D) {
+            return new Color(71, 128, 152);
+        }
+        return gradient(Math.max(0.0D, 1.0D - riverDistance / 110.0D), new Color(92, 122, 78), new Color(48, 106, 145));
+    }
+
     private static Color parcelColor(String district) {
         return switch (district) {
             case "civic" -> Color.WHITE;
@@ -156,6 +172,7 @@ public final class BlueprintDebugRenderer {
         SLOPE,
         MOISTURE,
         BIOME,
+        HYDROLOGY,
         ROADS,
         PARCELS,
         LANDMARKS

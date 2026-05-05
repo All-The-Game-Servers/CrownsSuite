@@ -64,12 +64,12 @@ The Season 2 SAO-inspired MMO layer.
 ### CrownsTerrain
 The terrain identity layer for CrownsMMO floor worlds.
 
-- Hybrid floor generation for livable but authored worlds
+- Hybrid route-first floor engine generation for livable but authored worlds
 - Floor-themed custom villages, landmarks, and boss arena locations
 - Safe/useful settlement design for future NPCs, shops, and quests
 - Optional provider layer so CrownsMMO can still run without it
 - Stable generated point metadata for CrownsMMO quest objectives
-- `1.6.0` pivots Floor 1 to the hybrid-blueprint world `crowns_floor_1_v5`, adds `/cterrain admin blueprint 1` and `/cterrain admin debugmaps 1`, tracks generation status, blocks unready player teleports, and pregenerates the First Haven critical route before play.
+- `1.7.0` pivots Floor 1 to the hybrid-engine world `crowns_floor_1_v6`, writes blueprint artifacts/debug maps/scores, tracks generation readiness, blocks unready player teleports, and pregenerates the First Haven critical route before play.
 
 ## CrownsEconomy Overview
 

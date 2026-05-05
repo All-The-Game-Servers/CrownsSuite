@@ -12,21 +12,33 @@ public final class FloorBlueprint {
     private final long seed;
     private final List<Node> nodes;
     private final List<Road> roads;
+    private final List<MacroCell> macroCells;
     private final List<Parcel> parcels;
+    private final List<Stamp> stamps;
     private final List<Decoration> decorations;
+    private final List<ChunkRef> chunkRefs;
     private final Metrics metrics;
 
     public FloorBlueprint(int floor, String worldName, String profileVersion, long seed,
                           List<Node> nodes, List<Road> roads, List<Parcel> parcels,
                           List<Decoration> decorations, Metrics metrics) {
+        this(floor, worldName, profileVersion, seed, nodes, roads, List.of(), parcels, List.of(), decorations, List.of(), metrics);
+    }
+
+    public FloorBlueprint(int floor, String worldName, String profileVersion, long seed,
+                          List<Node> nodes, List<Road> roads, List<MacroCell> macroCells, List<Parcel> parcels,
+                          List<Stamp> stamps, List<Decoration> decorations, List<ChunkRef> chunkRefs, Metrics metrics) {
         this.floor = floor;
         this.worldName = worldName;
         this.profileVersion = profileVersion;
         this.seed = seed;
         this.nodes = List.copyOf(nodes);
         this.roads = List.copyOf(roads);
+        this.macroCells = List.copyOf(macroCells);
         this.parcels = List.copyOf(parcels);
+        this.stamps = List.copyOf(stamps);
         this.decorations = List.copyOf(decorations);
+        this.chunkRefs = List.copyOf(chunkRefs);
         this.metrics = metrics;
     }
 
@@ -54,12 +66,24 @@ public final class FloorBlueprint {
         return this.roads;
     }
 
+    public List<MacroCell> macroCells() {
+        return this.macroCells;
+    }
+
     public List<Parcel> parcels() {
         return this.parcels;
     }
 
+    public List<Stamp> stamps() {
+        return this.stamps;
+    }
+
     public List<Decoration> decorations() {
         return this.decorations;
+    }
+
+    public List<ChunkRef> chunkRefs() {
+        return this.chunkRefs;
     }
 
     public Metrics metrics() {
@@ -204,6 +228,30 @@ public final class FloorBlueprint {
             value = value * 31L + node.x();
             value = value * 31L + node.z();
         }
+        for (Road road : this.roads) {
+            value = value * 31L + road.key().hashCode();
+            value = value * 31L + road.width();
+        }
+        for (Parcel parcel : this.parcels) {
+            value = value * 31L + parcel.key().hashCode();
+            value = value * 31L + parcel.minX();
+            value = value * 31L + parcel.maxZ();
+        }
+        for (Decoration decoration : this.decorations) {
+            value = value * 31L + decoration.key().hashCode();
+            value = value * 31L + decoration.x();
+            value = value * 31L + decoration.z();
+        }
+        for (Stamp stamp : this.stamps) {
+            value = value * 31L + stamp.key().hashCode();
+            value = value * 31L + stamp.x();
+            value = value * 31L + stamp.z();
+        }
+        for (ChunkRef chunkRef : this.chunkRefs) {
+            value = value * 31L + chunkRef.chunkX();
+            value = value * 31L + chunkRef.chunkZ();
+            value = value * 31L + (chunkRef.critical() ? 1 : 0);
+        }
         return value;
     }
 
@@ -299,6 +347,9 @@ public final class FloorBlueprint {
     public record Road(Node from, Node to, int width, String key) {
     }
 
+    public record MacroCell(int x, int z, int height, double moisture, double slope, boolean river, String biome) {
+    }
+
     public record Parcel(String key, String district, int minX, int minZ, int maxX, int maxZ, int y, String role) {
         public boolean contains(int x, int z) {
             return x >= this.minX && x <= this.maxX && z >= this.minZ && z <= this.maxZ;
@@ -313,7 +364,13 @@ public final class FloorBlueprint {
         }
     }
 
+    public record Stamp(String key, String type, int x, int y, int z, int width, int depth, String role) {
+    }
+
     public record Decoration(String key, String type, int x, int z, int radius) {
+    }
+
+    public record ChunkRef(int chunkX, int chunkZ, boolean critical, int roadRefs, int parcelRefs, int stampRefs, int decorationRefs) {
     }
 
     public record Metrics(double averageRoadSlope, double maxRoadSlope, int deadEndRoads, int biomeSamples,

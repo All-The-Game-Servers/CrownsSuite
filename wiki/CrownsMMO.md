@@ -138,7 +138,7 @@ Staff commands:
 
 CrownsMMO 1.7.0 turns the quest foundation into a playable Floor 1 onboarding path.
 
-Use `/cmmo start` to enter the configured dedicated Floor 1 world at First Haven. CrownsTerrain `1.6.0` uses the fresh world `crowns_floor_1_v5`; staff should run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`, then wait for `critical-ready` before sending players there.
+Use `/cmmo start` to enter the configured dedicated Floor 1 world at First Haven. CrownsTerrain `1.7.0` uses the fresh world `crowns_floor_1_v6`; staff should run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`, then wait for `CRITICAL_READY` before sending players there.
 
 The first questline is `First Haven Path`, a board-driven story path for new adventurers:
 

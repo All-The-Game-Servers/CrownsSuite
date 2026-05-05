@@ -26,7 +26,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsEvents-1.3.0.jar`
 - `CrownsDrugs-1.3.0.jar`
 - `CrownsMMO-1.7.0.jar`
-- `CrownsTerrain-1.6.0.jar`
+- `CrownsTerrain-1.7.0.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -94,20 +94,20 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 ## CrownsMMO 1.7.0
 
 - Adds the playable Floor 1 `First Haven Path` questline.
-- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. With CrownsTerrain `1.6.0`, Floor 1 defaults to `crowns_floor_1_v5` after staff run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`.
+- Adds `/cmmo start` and relaunch onboarding that sends new adventurers to First Haven in the dedicated Floor 1 world. With CrownsTerrain `1.7.0`, Floor 1 defaults to `crowns_floor_1_v6` after staff run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`.
 - Adds quest board pages for available, active, completed, Floor 1, and story-path quests.
 - Adds `/cmmo quests completed`, `/cmmo quests floor <number>`, and `/cmmo admin quest inspect <player>`.
 - Adds clearer quest detail guidance, optional-provider status, reward previews, and progress messages.
 
-## CrownsTerrain 1.6.0
+## CrownsTerrain 1.7.0
 
-- Moves Floor 1 to a fresh hybrid-blueprint world, `crowns_floor_1_v5`, so old floor worlds remain untouched.
-- Adds `/cterrain admin blueprint 1` to precompute deterministic floor intent before chunks render.
-- Adds `/cterrain admin debugmaps 1` for height, slope, moisture, biome, roads, parcels, landmarks, and QA PNGs.
+- Moves Floor 1 to a fresh hybrid-engine world, `crowns_floor_1_v6`, so old floor worlds remain untouched.
+- Adds a versioned blueprint artifact set: `floor.bpbin`, `floor.index.json`, `scores.json`, and debug maps.
+- Adds a blueprint-backed biome provider and LimitedRegion decoration populator so runtime chunk generation stays thread-safe.
 - Keeps `/cterrain admin generate 1`, `/cterrain admin status 1`, and `/cterrain admin cancel 1` for staff-controlled critical-route pregeneration.
 - Builds the playable route first: First Haven, market square, farm gate, starter camp, starter shrine, waystone, roads, arena approach, and First Gate arena.
 - Keeps `/cterrain admin tp <type> <floor> [key]` so staff can teleport directly to villages, camps, shrines, waystones, landmarks, road markers, and arenas.
-- Blocks normal player teleports into unready managed floors until generation reaches `critical-ready`.
+- Blocks normal player teleports into unready managed floors until generation reaches `CRITICAL_READY`.
 - CrownsMMO falls back to normal world creation and non-terrain quest behavior when CrownsTerrain is not installed.
 
 ## Resource Pack 1.5.0
@@ -119,6 +119,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.6.0`.
+- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.7.0`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

@@ -15,15 +15,19 @@ public record TerrainGenerationStatus(
         String message
 ) {
     public static TerrainGenerationStatus notGenerated(int floor, String worldName, String profileVersion) {
-        return new TerrainGenerationStatus(floor, worldName, profileVersion, "not-generated", 0, 0, 0, 0, 0L, 0L, "", "No generation job has completed for this floor.");
+        return new TerrainGenerationStatus(floor, worldName, profileVersion, "NOT_GENERATED", 0, 0, 0, 0, 0L, 0L, "", "No generation job has completed for this floor.");
     }
 
     public boolean readyForPlayers() {
-        return this.status.equalsIgnoreCase("critical-ready") || this.status.equalsIgnoreCase("complete");
+        return this.status.equalsIgnoreCase("CRITICAL_READY")
+                || this.status.equalsIgnoreCase("SAFE_READY")
+                || this.status.equalsIgnoreCase("FULL_READY")
+                || this.status.equalsIgnoreCase("critical-ready")
+                || this.status.equalsIgnoreCase("complete");
     }
 
     public boolean active() {
-        return this.status.equalsIgnoreCase("generating");
+        return this.status.equalsIgnoreCase("GENERATING") || this.status.equalsIgnoreCase("generating");
     }
 
     public String progressSummary() {

@@ -28,6 +28,6 @@ public final class TerrainSafetyListener implements Listener {
             return;
         }
         event.setCancelled(true);
-        event.getPlayer().sendMessage(Component.text("That Crowns floor is still being generated. Ask staff to run /cterrain admin generate " + floor + " and wait for critical-ready.", NamedTextColor.RED));
+            event.getPlayer().sendMessage(Component.text("That Crowns floor is still being generated. Ask staff to run /cterrain admin generate " + floor + " and wait for CRITICAL_READY.", NamedTextColor.RED));
     }
 }

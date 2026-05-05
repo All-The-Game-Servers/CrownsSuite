@@ -127,7 +127,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
 
     private void sendInfo(CommandSender sender) {
         sender.sendMessage(Component.text("CrownsTerrain", NamedTextColor.GREEN)
-                .append(Component.text(" provides hybrid blueprint floors, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
+                .append(Component.text(" provides hybrid route-first floor engine generation, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("Use /cterrain admin blueprint 1, /cterrain admin debugmaps 1, /cterrain admin generate 1, or /cterrain preview <floor>.", NamedTextColor.YELLOW));
         if (sender instanceof Player player) {
             this.plugin.getMenuManager().openHub(player);
@@ -138,7 +138,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         String worldName = this.worldName(floor);
         sender.sendMessage(Component.text("Floor " + floor + " Theme: " + this.plugin.getTerrainManager().getFloorTheme(floor), NamedTextColor.AQUA));
         String placement = this.plugin.getTerrainManager().isHybridBlueprintFloor(floor)
-                ? "hybrid blueprint"
+                ? "hybrid engine"
                 : this.plugin.getTerrainManager().isSetMapFloor(floor) ? "set-map pregenerated" : "seeded-random";
         sender.sendMessage(Component.text("Profile: " + this.plugin.getTerrainManager().getTerrainProfile(floor)
                 + " | World size: " + this.plugin.getTerrainManager().getWorldSize(floor)

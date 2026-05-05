@@ -34,7 +34,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         }
         Bukkit.getPluginManager().registerEvents(new TerrainMenuListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TerrainSafetyListener(this), this);
-        this.getLogger().info("CrownsTerrain enabled with hybrid blueprint floor generation support.");
+        this.getLogger().info("CrownsTerrain enabled with hybrid route-first floor engine support.");
     }
 
     @Override

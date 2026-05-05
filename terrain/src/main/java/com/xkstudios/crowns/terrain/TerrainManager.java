@@ -176,10 +176,10 @@ public class TerrainManager implements TerrainProvider {
     public String getWorldName(int floorNumber) {
         ConfigurationSection section = this.floorSection(floorNumber);
         if (section != null && section.isSet("world")) {
-            return section.getString("world", floorNumber == 1 ? "crowns_floor_1_v5" : "crowns_floor_" + floorNumber);
+            return section.getString("world", floorNumber == 1 ? "crowns_floor_1_v6" : "crowns_floor_" + floorNumber);
         }
         if (floorNumber == 1) {
-            return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1_v5");
+            return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1_v6");
         }
         return this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_") + floorNumber;
     }
@@ -216,7 +216,11 @@ public class TerrainManager implements TerrainProvider {
         }
         WorldCreator creator = new WorldCreator(worldName)
                 .environment(World.Environment.NORMAL)
-                .generator(this.getGeneratorForFloor(floorNumber, worldName, World.Environment.NORMAL, floorNumber));
+                .generator(this.getGeneratorForFloor(floorNumber, worldName, World.Environment.NORMAL, floorNumber))
+                .generateStructures(!this.isHybridBlueprintFloor(floorNumber));
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            creator.biomeProvider(new BlueprintBiomeProvider(this.getOrCreateBlueprint(floorNumber)));
+        }
         World world = creator.createWorld();
         if (world != null) {
             world.getWorldBorder().setCenter(0.0D, 0.0D);
@@ -275,7 +279,8 @@ public class TerrainManager implements TerrainProvider {
     }
 
     public boolean isHybridBlueprintFloor(int floorNumber) {
-        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "").equalsIgnoreCase("hybrid-blueprint");
+        String mode = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "");
+        return mode.equalsIgnoreCase("hybrid-blueprint") || mode.equalsIgnoreCase("hybrid-engine");
     }
 
     public FloorBlueprint getOrCreateBlueprint(int floorNumber) {
@@ -287,7 +292,21 @@ public class TerrainManager implements TerrainProvider {
         if (cached != null) {
             return cached;
         }
-        FloorBlueprint blueprint = FloorBlueprintFactory.create(floorNumber, worldName, profileVersion, seed);
+        File artifactDir = FloorBlueprintArtifactStore.directory(this.plugin.getDataFolder(), floorNumber, worldName, profileVersion);
+        FloorBlueprint blueprint = null;
+        try {
+            blueprint = FloorBlueprintArtifactStore.load(artifactDir);
+        } catch (IOException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not load blueprint artifact; rebuilding: " + exception.getMessage());
+        }
+        if (blueprint == null || blueprint.seed() != seed || !blueprint.worldName().equals(worldName) || !blueprint.profileVersion().equals(profileVersion)) {
+            blueprint = FloorBlueprintFactory.create(floorNumber, worldName, profileVersion, seed);
+            try {
+                FloorBlueprintArtifactStore.save(artifactDir, blueprint);
+            } catch (IOException exception) {
+                this.plugin.getLogger().warning("[CrownsTerrain] Could not save blueprint artifact: " + exception.getMessage());
+            }
+        }
         this.blueprintCache.put(key, blueprint);
         this.saveBlueprintMetadataIfMissing(blueprint);
         for (FloorBlueprint.Node node : blueprint.nodes()) {
@@ -298,18 +317,20 @@ public class TerrainManager implements TerrainProvider {
 
     public void prepareBlueprint(CommandSender sender, int floorNumber) {
         if (!this.isHybridBlueprintFloor(floorNumber)) {
-            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-blueprint generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-engine generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
             return;
         }
         FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
-        sender.sendMessage(net.kyori.adventure.text.Component.text("Prepared Floor " + floorNumber + " blueprint '" + blueprint.profileVersion() + "' for " + blueprint.worldName() + ".", net.kyori.adventure.text.format.NamedTextColor.GREEN));
+        File artifactDir = FloorBlueprintArtifactStore.directory(this.plugin.getDataFolder(), floorNumber, blueprint.worldName(), blueprint.profileVersion());
+        sender.sendMessage(net.kyori.adventure.text.Component.text("Prepared Floor " + floorNumber + " hybrid-engine blueprint '" + blueprint.profileVersion() + "' for " + blueprint.worldName() + ".", net.kyori.adventure.text.format.NamedTextColor.GREEN));
         sender.sendMessage(net.kyori.adventure.text.Component.text("Hash: " + blueprint.hash() + " | QA: " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore())
                 + " | Nodes: " + blueprint.nodes().size() + " | Roads: " + blueprint.roads().size() + " | Parcels: " + blueprint.parcels().size(), net.kyori.adventure.text.format.NamedTextColor.GRAY));
+        sender.sendMessage(net.kyori.adventure.text.Component.text("Artifact: " + artifactDir.getAbsolutePath(), net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY));
     }
 
     public void generateDebugMaps(CommandSender sender, int floorNumber) {
         if (!this.isHybridBlueprintFloor(floorNumber)) {
-            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-blueprint debug maps.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-engine debug maps.", net.kyori.adventure.text.format.NamedTextColor.RED));
             return;
         }
         if (!this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".debug-maps.enabled", true)) {
@@ -317,14 +338,15 @@ public class TerrainManager implements TerrainProvider {
             return;
         }
         FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
-        File outputDir = new File(this.plugin.getDataFolder(), "debug-maps/floor-" + floorNumber);
+        File outputDir = new File(FloorBlueprintArtifactStore.directory(this.plugin.getDataFolder(), floorNumber, blueprint.worldName(), blueprint.profileVersion()), "debug-maps");
         try {
             List<File> files = BlueprintDebugRenderer.render(outputDir, blueprint);
-            this.saveBlueprintMetadata(blueprint, "debug-ready", outputDir.getPath(), "Debug maps rendered: " + files.size());
-            sender.sendMessage(net.kyori.adventure.text.Component.text("Rendered " + files.size() + " Floor " + floorNumber + " blueprint debug maps.", net.kyori.adventure.text.format.NamedTextColor.GREEN));
+            this.saveBlueprintMetadata(blueprint, "SCORES_READY", outputDir.getPath(), "Debug maps and scores rendered: " + files.size());
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Rendered " + files.size() + " Floor " + floorNumber + " blueprint debug artifacts.", net.kyori.adventure.text.format.NamedTextColor.GREEN));
             sender.sendMessage(net.kyori.adventure.text.Component.text("Path: " + outputDir.getAbsolutePath(), net.kyori.adventure.text.format.NamedTextColor.GRAY));
+            sender.sendMessage(net.kyori.adventure.text.Component.text(BlueprintScoreReport.summary(blueprint), net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA));
         } catch (IOException exception) {
-            this.saveBlueprintMetadata(blueprint, "debug-failed", outputDir.getPath(), exception.getMessage());
+            this.saveBlueprintMetadata(blueprint, "DEBUG_FAILED", outputDir.getPath(), exception.getMessage());
             sender.sendMessage(net.kyori.adventure.text.Component.text("Could not render debug maps: " + exception.getMessage(), net.kyori.adventure.text.format.NamedTextColor.RED));
         }
     }
@@ -336,13 +358,19 @@ public class TerrainManager implements TerrainProvider {
             return lines;
         }
         FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+        File artifactDir = FloorBlueprintArtifactStore.directory(this.plugin.getDataFolder(), floorNumber, blueprint.worldName(), blueprint.profileVersion());
         lines.add("Blueprint: " + blueprint.profileVersion() + " | hash " + blueprint.hash());
+        lines.add("Artifact: " + artifactDir.getPath()
+                + " | bpbin " + (new File(artifactDir, "floor.bpbin").exists() ? "yes" : "missing")
+                + " | scores " + (new File(artifactDir, "scores.json").exists() ? "yes" : "missing"));
         lines.add("Seed: " + blueprint.seed() + " | QA " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore()));
         lines.add("Metrics: avg road slope " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().averageRoadSlope())
                 + " | max " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().maxRoadSlope())
                 + " | parcels " + blueprint.metrics().parcels()
                 + " | decorations " + blueprint.metrics().decorations());
-        lines.add("Intent: " + blueprint.nodes().size() + " nodes, " + blueprint.roads().size() + " roads, " + blueprint.parcels().size() + " parcels.");
+        lines.add("Intent: " + blueprint.nodes().size() + " nodes, " + blueprint.roads().size() + " roads, " + blueprint.parcels().size()
+                + " parcels, " + blueprint.stamps().size() + " stamps, " + blueprint.chunkRefs().size() + " indexed chunks.");
+        lines.add("Scores: " + BlueprintScoreReport.summary(blueprint));
         if (this.dataManager != null) {
             try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
                     SELECT status, debug_path, message FROM terrain_blueprints
@@ -508,13 +536,23 @@ public class TerrainManager implements TerrainProvider {
         if (this.isHybridBlueprintFloor(floorNumber)) {
             blueprint = this.getOrCreateBlueprint(floorNumber);
             double minimumQa = this.plugin.getConfig().getDouble("terrain.floors." + floorNumber + ".qa.minimum-qa-score", 0.70D);
+            File artifactDir = FloorBlueprintArtifactStore.directory(this.plugin.getDataFolder(), floorNumber, blueprint.worldName(), blueprint.profileVersion());
             lines.add("Blueprint: " + blueprint.profileVersion() + " | hash " + blueprint.hash());
+            lines.add(new File(artifactDir, "floor.bpbin").exists()
+                    ? "PASS: blueprint binary artifact exists."
+                    : "FAIL: blueprint binary artifact floor.bpbin is missing.");
+            lines.add(new File(artifactDir, "floor.index.json").exists()
+                    ? "PASS: blueprint index sidecar exists."
+                    : "FAIL: blueprint index sidecar floor.index.json is missing.");
+            lines.add(new File(artifactDir, "scores.json").exists()
+                    ? "PASS: blueprint score report exists."
+                    : "FAIL: blueprint score report scores.json is missing. Run /cterrain admin debugmaps " + floorNumber + ".");
             lines.add("Blueprint QA: " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore())
                     + " | road slope avg/max "
                     + String.format(Locale.ROOT, "%.2f", blueprint.metrics().averageRoadSlope())
                     + "/"
                     + String.format(Locale.ROOT, "%.2f", blueprint.metrics().maxRoadSlope()));
-            lines.add(blueprint.metrics().qaScore() >= minimumQa
+            lines.add(BlueprintScoreReport.passes(blueprint, minimumQa)
                     ? "PASS: blueprint QA score meets threshold " + String.format(Locale.ROOT, "%.2f", minimumQa) + "."
                     : "FAIL: blueprint QA score is below threshold " + String.format(Locale.ROOT, "%.2f", minimumQa) + ".");
             lines.add(blueprint.roads().isEmpty()
@@ -558,7 +596,7 @@ public class TerrainManager implements TerrainProvider {
                 : "FAIL: waystone feature blocks were not found.");
         if (floorNumber == 1 && this.isManagedGenerationFloor(floorNumber)) {
             lines.add(generationStatus.readyForPlayers()
-                    ? "PASS: Floor 1 managed route generation is critical-ready."
+                    ? "PASS: Floor 1 managed route generation is CRITICAL_READY or better."
                     : "FAIL: Floor 1 managed route generation is not ready. Run /cterrain admin generate 1.");
             lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "landmark"), Material.CUT_COPPER)
                     ? "PASS: market square / civic anchor blocks are present."
@@ -721,7 +759,7 @@ public class TerrainManager implements TerrainProvider {
             statement.setString(3, blueprint.profileVersion());
             statement.setLong(4, blueprint.seed());
             statement.setLong(5, blueprint.hash());
-            statement.setString(6, status == null ? "ready" : status);
+            statement.setString(6, status == null ? "BLUEPRINT_READY" : status);
             statement.setDouble(7, blueprint.metrics().qaScore());
             statement.setLong(8, System.currentTimeMillis());
             statement.setString(9, debugPath == null ? "" : debugPath);
@@ -746,7 +784,7 @@ public class TerrainManager implements TerrainProvider {
             statement.setString(3, blueprint.profileVersion());
             statement.setLong(4, blueprint.seed());
             statement.setLong(5, blueprint.hash());
-            statement.setString(6, "ready");
+            statement.setString(6, "BLUEPRINT_READY");
             statement.setDouble(7, blueprint.metrics().qaScore());
             statement.setLong(8, System.currentTimeMillis());
             statement.setString(9, "");

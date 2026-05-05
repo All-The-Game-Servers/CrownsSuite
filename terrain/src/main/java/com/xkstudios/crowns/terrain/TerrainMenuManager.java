@@ -20,7 +20,7 @@ public class TerrainMenuManager {
 
     public void openHub(Player player) {
         Inventory inventory = CrownsMenuHolder.create("terrain-hub", 54, Component.text("CrownsTerrain", NamedTextColor.GREEN));
-        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Hybrid Blueprint Generation", NamedTextColor.GREEN, List.of(
+        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Hybrid Floor Engine", NamedTextColor.GREEN, List.of(
                 Component.text("Admins precompute intent, debug maps, and route chunks.", NamedTextColor.GRAY),
                 Component.text("Chunk rendering stays pure and Paper-safe.", NamedTextColor.DARK_GRAY)
         ), "lowlight/terrain/hub"));

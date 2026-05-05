@@ -60,10 +60,10 @@ public final class FloorGenerationJob {
             this.starter.sendMessage(Component.text("CrownsTerrain could not create Floor " + this.floor + " world '" + this.worldName + "'.", NamedTextColor.RED));
             return;
         }
-        this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), 0, 0, 0, this.startedBy, "Loading critical route chunks.");
+        this.terrainManager.saveGenerationJob(this.floor, this.worldName, "GENERATING", this.chunks.size(), 0, 0, 0, this.startedBy, "Loading critical route chunks.");
         this.task = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, this::tick, 1L, 1L);
         this.starter.sendMessage(Component.text("Started CrownsTerrain Floor " + this.floor + " " + this.modeLabel() + " generation for '" + this.worldName + "'.", NamedTextColor.GREEN));
-        this.starter.sendMessage(Component.text("Critical-route chunks: " + this.chunks.size() + ". Players should wait for status critical-ready.", NamedTextColor.YELLOW));
+        this.starter.sendMessage(Component.text("Critical-route chunks: " + this.chunks.size() + ". Players should wait for status CRITICAL_READY.", NamedTextColor.YELLOW));
     }
 
     public void cancel(String reason) {
@@ -71,12 +71,12 @@ public final class FloorGenerationJob {
         if (this.task != null) {
             this.task.cancel();
         }
-        this.terrainManager.finishGenerationJob(this.floor, "cancelled", this.chunks.size(), this.chunkIndex, this.operations.size(), this.blockIndex, this.startedBy, reason == null ? "Cancelled." : reason);
+        this.terrainManager.finishGenerationJob(this.floor, "CANCELLED", this.chunks.size(), this.chunkIndex, this.operations.size(), this.blockIndex, this.startedBy, reason == null ? "Cancelled." : reason);
         this.terrainManager.clearActiveGeneration(this.floor);
     }
 
     public TerrainGenerationStatus snapshot() {
-        return new TerrainGenerationStatus(this.floor, this.worldName, this.profileVersion(), this.cancelled ? "cancelled" : "generating",
+        return new TerrainGenerationStatus(this.floor, this.worldName, this.profileVersion(), this.cancelled ? "CANCELLED" : "GENERATING",
                 this.chunks.size(), this.chunkIndex, this.operations.size(), this.blockIndex, 0L, 0L, this.startedBy,
                 this.phase == Phase.LOAD_CHUNKS ? "Loading critical route chunks." : "Placing authored route blocks.");
     }
@@ -104,14 +104,14 @@ public final class FloorGenerationJob {
             this.chunkIndex++;
         }
         if (this.chunkIndex % Math.max(1, this.chunksPerTick * 10) == 0 || this.chunkIndex >= this.chunks.size()) {
-            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), this.chunkIndex,
+            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "GENERATING", this.chunks.size(), this.chunkIndex,
                     this.operations.size(), this.blockIndex, this.startedBy, "Loading critical route chunks.");
         }
         if (this.chunkIndex >= this.chunks.size()) {
             this.operations = this.blueprint == null
                     ? SetMapFloorBuilder.operations(this.world, this.terrainManager.theme(this.floor), this.terrainManager.getAllPoints(this.floor, this.worldName))
                     : SetMapFloorBuilder.operations(this.terrainManager.theme(this.floor), this.blueprint);
-            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), this.chunkIndex,
+            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "GENERATING", this.chunks.size(), this.chunkIndex,
                     this.operations.size(), 0, this.startedBy, "Placing authored route blocks.");
             this.phase = Phase.BUILD_SET_MAP;
         }
@@ -124,7 +124,7 @@ public final class FloorGenerationJob {
             this.blockIndex++;
         }
         if (this.blockIndex % Math.max(1, this.blocksPerTick * 10) == 0 || this.blockIndex >= this.operations.size()) {
-            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), this.chunkIndex,
+            this.terrainManager.saveGenerationJob(this.floor, this.worldName, "GENERATING", this.chunks.size(), this.chunkIndex,
                     this.operations.size(), this.blockIndex, this.startedBy, "Placing authored route blocks.");
         }
         if (this.blockIndex >= this.operations.size()) {
@@ -137,10 +137,10 @@ public final class FloorGenerationJob {
             this.task.cancel();
         }
         this.world.save();
-        this.terrainManager.finishGenerationJob(this.floor, "critical-ready", this.chunks.size(), this.chunkIndex,
+        this.terrainManager.finishGenerationJob(this.floor, "CRITICAL_READY", this.chunks.size(), this.chunkIndex,
                 this.operations.size(), this.blockIndex, this.startedBy, "Critical route generated: First Haven, roads, camp, shrine, waystone, farms, and arena.");
         this.terrainManager.clearActiveGeneration(this.floor);
-        this.starter.sendMessage(Component.text("CrownsTerrain Floor " + this.floor + " is critical-ready. Run /cterrain verify floor " + this.floor + ".", NamedTextColor.GREEN));
+        this.starter.sendMessage(Component.text("CrownsTerrain Floor " + this.floor + " is CRITICAL_READY. Run /cterrain verify floor " + this.floor + ".", NamedTextColor.GREEN));
     }
 
     private String profileVersion() {
@@ -148,6 +148,6 @@ public final class FloorGenerationJob {
     }
 
     private String modeLabel() {
-        return this.blueprint == null ? "set-map" : "hybrid blueprint";
+        return this.blueprint == null ? "set-map" : "hybrid engine";
     }
 }

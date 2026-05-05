@@ -1,12 +1,12 @@
 name: CrownsTerrain
-version: 1.6.0
+version: 1.7.0
 main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]
 depend: [CrownsAPI]
 softdepend: [CrownsEvents]
 loadbefore: [CrownsMMO]
-description: Hybrid route-first blueprint terrain generation with debug maps, pregeneration, and landmark teleporting.
+description: Hybrid route-first floor engine with immutable blueprints, debug maps, pregeneration, and landmark teleporting.
 commands:
   crownsterrain:
     description: Crowns Terrain commands

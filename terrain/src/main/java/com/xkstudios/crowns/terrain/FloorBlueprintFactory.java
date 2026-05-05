@@ -42,11 +42,14 @@ public final class FloorBlueprintFactory {
                 new FloorBlueprint.Parcel("starter-shrine", "shrine", -126, -216, -54, -144, 74, "shrine"),
                 new FloorBlueprint.Parcel("first-gate-arena", "arena", 884, 690, 1036, 844, 78, "arena")
         );
+        List<FloorBlueprint.Stamp> stamps = stamps(nodes, parcels);
         List<FloorBlueprint.Decoration> decorations = generateDecorations(seed, roads, parcels);
         FloorBlueprint blueprint = new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, parcels, decorations,
                 new FloorBlueprint.Metrics(0.0D, 0.0D, 0, 0, parcels.size(), decorations.size(), 3, 0.0D));
+        List<FloorBlueprint.MacroCell> macroCells = macroCells(blueprint);
+        List<FloorBlueprint.ChunkRef> chunkRefs = chunkRefs(nodes, roads, parcels, stamps, decorations);
         FloorBlueprint.Metrics metrics = measure(blueprint);
-        return new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, parcels, decorations, metrics);
+        return new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, macroCells, parcels, stamps, decorations, chunkRefs, metrics);
     }
 
     private static FloorBlueprint fallback(int floor, String worldName, String profileVersion, long seed) {
@@ -55,7 +58,10 @@ public final class FloorBlueprintFactory {
         List<FloorBlueprint.Node> nodes = List.of(outpost, arena);
         List<FloorBlueprint.Road> roads = List.of(new FloorBlueprint.Road(outpost, arena, 5, "outpost-arena"));
         List<FloorBlueprint.Parcel> parcels = List.of(new FloorBlueprint.Parcel("outpost", "outpost", -48, -48, 48, 48, 70, "outpost"));
-        return new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, parcels, List.of(),
+        List<FloorBlueprint.Stamp> stamps = stamps(nodes, parcels);
+        FloorBlueprint partial = new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, parcels, List.of(),
+                new FloorBlueprint.Metrics(0.0D, 0.0D, 0, 2, parcels.size(), 0, 0, 0.7D));
+        return new FloorBlueprint(floor, worldName, profileVersion, seed, nodes, roads, macroCells(partial), parcels, stamps, List.of(), chunkRefs(nodes, roads, parcels, stamps, List.of()),
                 new FloorBlueprint.Metrics(0.0D, 0.0D, 0, 2, parcels.size(), 0, 0, 0.7D));
     }
 
@@ -99,6 +105,86 @@ public final class FloorBlueprintFactory {
             }
         }
         return result;
+    }
+
+    private static List<FloorBlueprint.MacroCell> macroCells(FloorBlueprint blueprint) {
+        List<FloorBlueprint.MacroCell> cells = new ArrayList<>();
+        for (int x = -768; x <= 1152; x += 64) {
+            for (int z = -768; z <= 1152; z += 64) {
+                cells.add(new FloorBlueprint.MacroCell(
+                        x,
+                        z,
+                        blueprint.surfaceHeight(x, z),
+                        blueprint.moisture(x, z),
+                        blueprint.slope(x, z),
+                        blueprint.river(x, z),
+                        blueprint.biomeKey(x, z)
+                ));
+            }
+        }
+        return cells;
+    }
+
+    private static List<FloorBlueprint.Stamp> stamps(List<FloorBlueprint.Node> nodes, List<FloorBlueprint.Parcel> parcels) {
+        List<FloorBlueprint.Stamp> result = new ArrayList<>();
+        for (FloorBlueprint.Parcel parcel : parcels) {
+            int width = Math.max(8, Math.min(48, parcel.maxX() - parcel.minX()));
+            int depth = Math.max(8, Math.min(48, parcel.maxZ() - parcel.minZ()));
+            result.add(new FloorBlueprint.Stamp(parcel.key() + "-stamp", parcel.district(), parcel.centerX(), parcel.y(), parcel.centerZ(), width, depth, parcel.role()));
+        }
+        for (FloorBlueprint.Node node : nodes) {
+            result.add(new FloorBlueprint.Stamp(node.key() + "-anchor", node.type(), node.x(), node.y(), node.z(), Math.max(8, node.flattenRadius() / 2), Math.max(8, node.flattenRadius() / 2), node.role()));
+        }
+        return result;
+    }
+
+    private static List<FloorBlueprint.ChunkRef> chunkRefs(List<FloorBlueprint.Node> nodes, List<FloorBlueprint.Road> roads, List<FloorBlueprint.Parcel> parcels,
+                                                          List<FloorBlueprint.Stamp> stamps, List<FloorBlueprint.Decoration> decorations) {
+        List<FloorBlueprint.ChunkRef> refs = new ArrayList<>();
+        for (int chunkX = -56; chunkX <= 80; chunkX++) {
+            for (int chunkZ = -56; chunkZ <= 80; chunkZ++) {
+                int centerX = chunkX * 16 + 8;
+                int centerZ = chunkZ * 16 + 8;
+                int roadRefs = 0;
+                for (FloorBlueprint.Road road : roads) {
+                    if (distanceToSegment(centerX, centerZ, road.from().x(), road.from().z(), road.to().x(), road.to().z()) <= 64.0D) {
+                        roadRefs++;
+                    }
+                }
+                int parcelRefs = 0;
+                for (FloorBlueprint.Parcel parcel : parcels) {
+                    if (centerX >= parcel.minX() - 32 && centerX <= parcel.maxX() + 32 && centerZ >= parcel.minZ() - 32 && centerZ <= parcel.maxZ() + 32) {
+                        parcelRefs++;
+                    }
+                }
+                int stampRefs = 0;
+                for (FloorBlueprint.Stamp stamp : stamps) {
+                    if (Math.abs(centerX - stamp.x()) <= stamp.width() + 32 && Math.abs(centerZ - stamp.z()) <= stamp.depth() + 32) {
+                        stampRefs++;
+                    }
+                }
+                int decorationRefs = 0;
+                for (FloorBlueprint.Decoration decoration : decorations) {
+                    if (Math.abs(centerX - decoration.x()) <= decoration.radius() + 24 && Math.abs(centerZ - decoration.z()) <= decoration.radius() + 24) {
+                        decorationRefs++;
+                    }
+                }
+                boolean critical = stampRefs > 0 || roadRefs > 0 || nearNode(centerX, centerZ, nodes, 96);
+                if (critical || parcelRefs > 0 || decorationRefs > 0) {
+                    refs.add(new FloorBlueprint.ChunkRef(chunkX, chunkZ, critical, roadRefs, parcelRefs, stampRefs, decorationRefs));
+                }
+            }
+        }
+        return refs;
+    }
+
+    private static boolean nearNode(int x, int z, List<FloorBlueprint.Node> nodes, int radius) {
+        for (FloorBlueprint.Node node : nodes) {
+            if (Math.hypot(x - node.x(), z - node.z()) <= radius) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static FloorBlueprint.Metrics measure(FloorBlueprint blueprint) {

@@ -1,8 +1,12 @@
 package com.xkstudios.crowns.terrain;
 
+import java.util.List;
 import java.util.Random;
 import org.bukkit.HeightMap;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.generator.BiomeProvider;
+import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 
@@ -38,6 +42,16 @@ public final class BlueprintTerrainGenerator extends ChunkGenerator {
     @Override
     public int getBaseHeight(WorldInfo worldInfo, Random random, int x, int z, HeightMap heightMap) {
         return this.blueprint.surfaceHeight(x, z) + 1;
+    }
+
+    @Override
+    public BiomeProvider getDefaultBiomeProvider(WorldInfo worldInfo) {
+        return new BlueprintBiomeProvider(this.blueprint);
+    }
+
+    @Override
+    public List<BlockPopulator> getDefaultPopulators(World world) {
+        return List.of(new BlueprintBlockPopulator(this.blueprint));
     }
 
     @Override
@@ -100,59 +114,6 @@ public final class BlueprintTerrainGenerator extends ChunkGenerator {
             chunkData.setBlock(localX, roadY, localZ, roadDistance <= 5.0D ? Material.COBBLESTONE : Material.ANDESITE);
             for (int y = roadY + 1; y <= roadY + 4 && y < maxY; y++) {
                 chunkData.setBlock(localX, y, localZ, Material.AIR);
-            }
-        }
-        for (FloorBlueprint.Decoration decoration : this.blueprint.decorations()) {
-            int dx = worldX - decoration.x();
-            int dz = worldZ - decoration.z();
-            int distance = (int) Math.round(Math.hypot(dx, dz));
-            if (distance > decoration.radius()) {
-                continue;
-            }
-            if (decoration.type().equals("tree")) {
-                this.applyTree(chunkData, localX, localZ, maxY, surface, dx, dz, distance);
-            } else if (decoration.type().equals("rock")) {
-                this.applyRock(chunkData, localX, localZ, maxY, surface, distance);
-            } else if (decoration.type().equals("ruin")) {
-                this.applyRuin(chunkData, localX, localZ, maxY, surface, dx, dz);
-            }
-        }
-    }
-
-    private void applyTree(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int dx, int dz, int distance) {
-        if (surface + 12 >= maxY) {
-            return;
-        }
-        if (dx == 0 && dz == 0) {
-            for (int y = surface + 1; y <= surface + 8; y++) {
-                chunkData.setBlock(localX, y, localZ, y % 4 == 0 ? Material.STRIPPED_OAK_LOG : Material.OAK_LOG);
-            }
-        }
-        if (distance >= 3 && distance <= 7 && surface + 1 < maxY && Math.floorMod(dx + dz, 3) == 0) {
-            chunkData.setBlock(localX, surface + 1, localZ, Material.OAK_LOG);
-        }
-        if (distance <= 7) {
-            int leafY = surface + 7 + (distance <= 3 ? 2 : 0);
-            if (leafY < maxY) {
-                chunkData.setBlock(localX, leafY, localZ, distance >= 6 ? Material.AZALEA_LEAVES : Material.OAK_LEAVES);
-            }
-        }
-    }
-
-    private void applyRock(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int distance) {
-        if (distance <= 2 && surface + 2 < maxY) {
-            chunkData.setBlock(localX, surface + 1, localZ, distance == 0 ? Material.MOSSY_COBBLESTONE : Material.COBBLESTONE);
-            if (distance == 0) {
-                chunkData.setBlock(localX, surface + 2, localZ, Material.MOSSY_COBBLESTONE);
-            }
-        }
-    }
-
-    private void applyRuin(ChunkData chunkData, int localX, int localZ, int maxY, int surface, int dx, int dz) {
-        if ((Math.abs(dx) == 4 || Math.abs(dz) == 4) && surface + 3 < maxY) {
-            chunkData.setBlock(localX, surface + 1, localZ, Material.MOSSY_STONE_BRICKS);
-            if (Math.floorMod(dx + dz, 2) == 0) {
-                chunkData.setBlock(localX, surface + 2, localZ, Material.CRACKED_STONE_BRICKS);
             }
         }
     }

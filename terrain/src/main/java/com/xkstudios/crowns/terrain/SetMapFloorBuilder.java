@@ -116,7 +116,7 @@ public final class SetMapFloorBuilder {
 
     private static TerrainPoint point(Map<String, TerrainPoint> map, String key, String type, int x, int y, int z) {
         TerrainPoint point = map.get(key.toLowerCase().replace('-', '_'));
-        return point == null ? new TerrainPoint(1, "crowns_floor_1_v5", type, key, key, x, y, z) : point;
+        return point == null ? new TerrainPoint(1, "crowns_floor_1_v6", type, key, key, x, y, z) : point;
     }
 
     private static void addTownTerrain(List<BlockOperation> ops, TerrainPoint haven) {

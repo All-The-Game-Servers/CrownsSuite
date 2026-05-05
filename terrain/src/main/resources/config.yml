@@ -2,7 +2,7 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: crowns_floor_1_v5
+  floor-1-world: crowns_floor_1_v6
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true
@@ -13,15 +13,15 @@ terrain:
     arena-radius: 72
     spawn-safe-radius: 192
     structure-density: 1.0
-    placement-mode: hybrid-blueprint
+    placement-mode: hybrid-engine
   floors:
     1:
       theme: First Haven
       palette: haven
-      world: crowns_floor_1_v5
-      generation-mode: hybrid-blueprint
-      terrain-profile: first_haven_v5
-      blueprint-version: first_haven_blueprint_v1
+      world: crowns_floor_1_v6
+      generation-mode: hybrid-engine
+      terrain-profile: first_haven_engine
+      blueprint-version: first_haven_engine_v1
       fresh-world-required: true
       world-size: 16000
       structure-density: 1.25
@@ -31,6 +31,10 @@ terrain:
         mobs: true
         structures: false
         decorations: false
+      artifacts:
+        storage: binary-with-json-sidecars
+        write-index: true
+        write-scores: true
       debug-maps:
         enabled: true
         size: 512
@@ -67,6 +71,11 @@ terrain:
         thresholds:
           average-road-slope: 0.85
           max-road-slope: 2.40
+          minimum-qa-score: 0.70
+          minimum-walkability-score: 0.70
+          minimum-route-continuity-score: 0.85
+          minimum-landmark-spacing-score: 0.70
+          minimum-parcel-validity-score: 0.75
           minimum-biome-samples: 5
           minimum-parcels: 7
           minimum-decorations: 40
