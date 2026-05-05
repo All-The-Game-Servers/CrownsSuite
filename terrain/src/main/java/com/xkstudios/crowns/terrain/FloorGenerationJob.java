@@ -23,6 +23,7 @@ public final class FloorGenerationJob {
     private final String startedBy;
     private final int chunksPerTick;
     private final int blocksPerTick;
+    private final FloorBlueprint blueprint;
     private final List<SetMapFloorBuilder.ChunkCoord> chunks;
     private final CommandSender starter;
     private BukkitTask task;
@@ -42,8 +43,13 @@ public final class FloorGenerationJob {
         this.starter = starter;
         this.chunksPerTick = Math.max(1, plugin.getConfig().getInt("terrain.floors." + floor + ".pregeneration.chunks-per-tick", 12));
         this.blocksPerTick = Math.max(128, plugin.getConfig().getInt("terrain.floors." + floor + ".pregeneration.block-ops-per-tick", 3500));
-        List<TerrainPoint> points = terrainManager.getAllPoints(floor, this.worldName);
-        this.chunks = new ArrayList<>(SetMapFloorBuilder.criticalChunks(points));
+        this.blueprint = terrainManager.isHybridBlueprintFloor(floor) ? terrainManager.getOrCreateBlueprint(floor) : null;
+        if (this.blueprint != null) {
+            this.chunks = new ArrayList<>(SetMapFloorBuilder.criticalChunks(this.blueprint));
+        } else {
+            List<TerrainPoint> points = terrainManager.getAllPoints(floor, this.worldName);
+            this.chunks = new ArrayList<>(SetMapFloorBuilder.criticalChunks(points));
+        }
     }
 
     public void start() {
@@ -56,7 +62,7 @@ public final class FloorGenerationJob {
         }
         this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), 0, 0, 0, this.startedBy, "Loading critical route chunks.");
         this.task = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, this::tick, 1L, 1L);
-        this.starter.sendMessage(Component.text("Started CrownsTerrain Floor " + this.floor + " set-map generation for '" + this.worldName + "'.", NamedTextColor.GREEN));
+        this.starter.sendMessage(Component.text("Started CrownsTerrain Floor " + this.floor + " " + this.modeLabel() + " generation for '" + this.worldName + "'.", NamedTextColor.GREEN));
         this.starter.sendMessage(Component.text("Critical-route chunks: " + this.chunks.size() + ". Players should wait for status critical-ready.", NamedTextColor.YELLOW));
     }
 
@@ -70,9 +76,9 @@ public final class FloorGenerationJob {
     }
 
     public TerrainGenerationStatus snapshot() {
-        return new TerrainGenerationStatus(this.floor, this.worldName, "first_haven_v4", this.cancelled ? "cancelled" : "generating",
+        return new TerrainGenerationStatus(this.floor, this.worldName, this.profileVersion(), this.cancelled ? "cancelled" : "generating",
                 this.chunks.size(), this.chunkIndex, this.operations.size(), this.blockIndex, 0L, 0L, this.startedBy,
-                this.phase == Phase.LOAD_CHUNKS ? "Loading critical route chunks." : "Placing authored set-map blocks.");
+                this.phase == Phase.LOAD_CHUNKS ? "Loading critical route chunks." : "Placing authored route blocks.");
     }
 
     private void tick() {
@@ -102,9 +108,11 @@ public final class FloorGenerationJob {
                     this.operations.size(), this.blockIndex, this.startedBy, "Loading critical route chunks.");
         }
         if (this.chunkIndex >= this.chunks.size()) {
-            this.operations = SetMapFloorBuilder.operations(this.world, this.terrainManager.theme(this.floor), this.terrainManager.getAllPoints(this.floor, this.worldName));
+            this.operations = this.blueprint == null
+                    ? SetMapFloorBuilder.operations(this.world, this.terrainManager.theme(this.floor), this.terrainManager.getAllPoints(this.floor, this.worldName))
+                    : SetMapFloorBuilder.operations(this.terrainManager.theme(this.floor), this.blueprint);
             this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), this.chunkIndex,
-                    this.operations.size(), 0, this.startedBy, "Placing authored set-map blocks.");
+                    this.operations.size(), 0, this.startedBy, "Placing authored route blocks.");
             this.phase = Phase.BUILD_SET_MAP;
         }
     }
@@ -117,7 +125,7 @@ public final class FloorGenerationJob {
         }
         if (this.blockIndex % Math.max(1, this.blocksPerTick * 10) == 0 || this.blockIndex >= this.operations.size()) {
             this.terrainManager.saveGenerationJob(this.floor, this.worldName, "generating", this.chunks.size(), this.chunkIndex,
-                    this.operations.size(), this.blockIndex, this.startedBy, "Placing authored set-map blocks.");
+                    this.operations.size(), this.blockIndex, this.startedBy, "Placing authored route blocks.");
         }
         if (this.blockIndex >= this.operations.size()) {
             this.phase = Phase.FINISH;
@@ -133,5 +141,13 @@ public final class FloorGenerationJob {
                 this.operations.size(), this.blockIndex, this.startedBy, "Critical route generated: First Haven, roads, camp, shrine, waystone, farms, and arena.");
         this.terrainManager.clearActiveGeneration(this.floor);
         this.starter.sendMessage(Component.text("CrownsTerrain Floor " + this.floor + " is critical-ready. Run /cterrain verify floor " + this.floor + ".", NamedTextColor.GREEN));
+    }
+
+    private String profileVersion() {
+        return this.blueprint == null ? this.terrainManager.getTerrainProfile(this.floor) : this.blueprint.profileVersion();
+    }
+
+    private String modeLabel() {
+        return this.blueprint == null ? "set-map" : "hybrid blueprint";
     }
 }

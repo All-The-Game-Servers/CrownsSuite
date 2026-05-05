@@ -4,6 +4,8 @@ import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.api.TerrainPoint;
 import com.xkstudios.crowns.api.TerrainProvider;
 import com.xkstudios.crowns.data.DataManager;
+import java.io.File;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +28,7 @@ public class TerrainManager implements TerrainProvider {
     private final DataManager dataManager;
     private final StructureTemplateManager structureTemplateManager;
     private final Map<String, TerrainPoint> pointCache = new ConcurrentHashMap<>();
+    private final Map<String, FloorBlueprint> blueprintCache = new ConcurrentHashMap<>();
     private final Map<Integer, FloorGenerationJob> activeGenerationJobs = new ConcurrentHashMap<>();
 
     public TerrainManager(CrownsTerrainPlugin plugin) {
@@ -43,6 +46,14 @@ public class TerrainManager implements TerrainProvider {
     public ChunkGenerator getGeneratorForFloor(int floorNumber, String worldName, World.Environment environment, long resourceTier) {
         if (!this.plugin.getConfig().getBoolean("terrain.enabled", true)) {
             return null;
+        }
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+            boolean caves = this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".vanilla.caves", true);
+            boolean mobs = this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".vanilla.mobs", true);
+            boolean decorations = this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".vanilla.decorations", false);
+            boolean structures = this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".vanilla.structures", false);
+            return new BlueprintTerrainGenerator(blueprint, caves, mobs, decorations, structures);
         }
         if (this.isSetMapFloor(floorNumber)) {
             return new SetMapTerrainGenerator(floorNumber, worldName);
@@ -71,11 +82,17 @@ public class TerrainManager implements TerrainProvider {
 
     @Override
     public TerrainPoint getBossArena(int floorNumber, String worldName) {
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            return this.getBlueprintPoints(floorNumber, worldName, "arena").stream().findFirst().orElse(null);
+        }
         return this.getOrCreatePoint(TerrainLayout.defaultArena(floorNumber, worldName, this.floorSection(floorNumber)));
     }
 
     @Override
     public List<TerrainPoint> getVillages(int floorNumber, String worldName) {
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            return this.getBlueprintPoints(floorNumber, worldName, "village");
+        }
         List<TerrainPoint> points = new ArrayList<>();
         for (TerrainPoint point : TerrainLayout.defaultVillages(floorNumber, worldName, this.floorSection(floorNumber))) {
             points.add(this.getOrCreatePoint(point));
@@ -85,6 +102,9 @@ public class TerrainManager implements TerrainProvider {
 
     @Override
     public List<TerrainPoint> getLandmarks(int floorNumber, String worldName) {
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            return this.getBlueprintPoints(floorNumber, worldName, "landmark");
+        }
         List<TerrainPoint> points = new ArrayList<>();
         for (TerrainPoint point : TerrainLayout.defaultLandmarks(floorNumber, worldName, this.floorSection(floorNumber))) {
             points.add(this.getOrCreatePoint(point));
@@ -108,6 +128,9 @@ public class TerrainManager implements TerrainProvider {
         String normalized = normalizeType(type);
         if (!this.isStructureEnabled(floorNumber, normalized)) {
             return List.of();
+        }
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            return this.getBlueprintPoints(floorNumber, worldName, normalized);
         }
         List<TerrainPoint> points = new ArrayList<>();
         if (normalized.equals("village")) {
@@ -153,10 +176,10 @@ public class TerrainManager implements TerrainProvider {
     public String getWorldName(int floorNumber) {
         ConfigurationSection section = this.floorSection(floorNumber);
         if (section != null && section.isSet("world")) {
-            return section.getString("world", floorNumber == 1 ? "crowns_floor_1_v4" : "crowns_floor_" + floorNumber);
+            return section.getString("world", floorNumber == 1 ? "crowns_floor_1_v5" : "crowns_floor_" + floorNumber);
         }
         if (floorNumber == 1) {
-            return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1");
+            return this.plugin.getConfig().getString("terrain.floor-1-world", "crowns_floor_1_v5");
         }
         return this.plugin.getConfig().getString("terrain.generated-world-prefix", "crowns_floor_") + floorNumber;
     }
@@ -204,9 +227,12 @@ public class TerrainManager implements TerrainProvider {
     }
 
     public boolean startGeneration(CommandSender sender, int floorNumber) {
-        if (!this.isSetMapFloor(floorNumber)) {
-            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for set-map generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
+        if (!this.isManagedGenerationFloor(floorNumber)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for managed CrownsTerrain generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
             return false;
+        }
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            this.getOrCreateBlueprint(floorNumber);
         }
         if (this.activeGenerationJobs.containsKey(floorNumber)) {
             sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is already generating. Use /cterrain admin status " + floorNumber + ".", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
@@ -234,14 +260,115 @@ public class TerrainManager implements TerrainProvider {
     }
 
     public boolean isFloorReadyForPlayers(int floorNumber) {
-        if (!this.isSetMapFloor(floorNumber)) {
+        if (!this.isManagedGenerationFloor(floorNumber)) {
             return true;
         }
         return this.getGenerationStatus(floorNumber).readyForPlayers();
     }
 
+    public boolean isManagedGenerationFloor(int floorNumber) {
+        return this.isSetMapFloor(floorNumber) || this.isHybridBlueprintFloor(floorNumber);
+    }
+
     public boolean isSetMapFloor(int floorNumber) {
         return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "").equalsIgnoreCase("set-map");
+    }
+
+    public boolean isHybridBlueprintFloor(int floorNumber) {
+        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "").equalsIgnoreCase("hybrid-blueprint");
+    }
+
+    public FloorBlueprint getOrCreateBlueprint(int floorNumber) {
+        String worldName = this.getWorldName(floorNumber);
+        String profileVersion = this.getBlueprintVersion(floorNumber);
+        long seed = this.getBlueprintSeed(floorNumber, worldName);
+        String key = floorNumber + ":" + worldName.toLowerCase(Locale.ROOT) + ":" + profileVersion + ":" + seed;
+        FloorBlueprint cached = this.blueprintCache.get(key);
+        if (cached != null) {
+            return cached;
+        }
+        FloorBlueprint blueprint = FloorBlueprintFactory.create(floorNumber, worldName, profileVersion, seed);
+        this.blueprintCache.put(key, blueprint);
+        this.saveBlueprintMetadataIfMissing(blueprint);
+        for (FloorBlueprint.Node node : blueprint.nodes()) {
+            this.getOrCreatePoint(node.toPoint(floorNumber, worldName));
+        }
+        return blueprint;
+    }
+
+    public void prepareBlueprint(CommandSender sender, int floorNumber) {
+        if (!this.isHybridBlueprintFloor(floorNumber)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-blueprint generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
+        }
+        FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+        sender.sendMessage(net.kyori.adventure.text.Component.text("Prepared Floor " + floorNumber + " blueprint '" + blueprint.profileVersion() + "' for " + blueprint.worldName() + ".", net.kyori.adventure.text.format.NamedTextColor.GREEN));
+        sender.sendMessage(net.kyori.adventure.text.Component.text("Hash: " + blueprint.hash() + " | QA: " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore())
+                + " | Nodes: " + blueprint.nodes().size() + " | Roads: " + blueprint.roads().size() + " | Parcels: " + blueprint.parcels().size(), net.kyori.adventure.text.format.NamedTextColor.GRAY));
+    }
+
+    public void generateDebugMaps(CommandSender sender, int floorNumber) {
+        if (!this.isHybridBlueprintFloor(floorNumber)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for hybrid-blueprint debug maps.", net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
+        }
+        if (!this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".debug-maps.enabled", true)) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Debug maps are disabled for Floor " + floorNumber + ".", net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
+        }
+        FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+        File outputDir = new File(this.plugin.getDataFolder(), "debug-maps/floor-" + floorNumber);
+        try {
+            List<File> files = BlueprintDebugRenderer.render(outputDir, blueprint);
+            this.saveBlueprintMetadata(blueprint, "debug-ready", outputDir.getPath(), "Debug maps rendered: " + files.size());
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Rendered " + files.size() + " Floor " + floorNumber + " blueprint debug maps.", net.kyori.adventure.text.format.NamedTextColor.GREEN));
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Path: " + outputDir.getAbsolutePath(), net.kyori.adventure.text.format.NamedTextColor.GRAY));
+        } catch (IOException exception) {
+            this.saveBlueprintMetadata(blueprint, "debug-failed", outputDir.getPath(), exception.getMessage());
+            sender.sendMessage(net.kyori.adventure.text.Component.text("Could not render debug maps: " + exception.getMessage(), net.kyori.adventure.text.format.NamedTextColor.RED));
+        }
+    }
+
+    public List<String> getBlueprintStatusLines(int floorNumber) {
+        List<String> lines = new ArrayList<>();
+        if (!this.isHybridBlueprintFloor(floorNumber)) {
+            lines.add("Blueprint: not configured for this floor.");
+            return lines;
+        }
+        FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+        lines.add("Blueprint: " + blueprint.profileVersion() + " | hash " + blueprint.hash());
+        lines.add("Seed: " + blueprint.seed() + " | QA " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore()));
+        lines.add("Metrics: avg road slope " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().averageRoadSlope())
+                + " | max " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().maxRoadSlope())
+                + " | parcels " + blueprint.metrics().parcels()
+                + " | decorations " + blueprint.metrics().decorations());
+        lines.add("Intent: " + blueprint.nodes().size() + " nodes, " + blueprint.roads().size() + " roads, " + blueprint.parcels().size() + " parcels.");
+        if (this.dataManager != null) {
+            try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                    SELECT status, debug_path, message FROM terrain_blueprints
+                    WHERE floor_number = ? AND world_name = ? AND profile_version = ?
+                    """)) {
+                statement.setInt(1, floorNumber);
+                statement.setString(2, blueprint.worldName());
+                statement.setString(3, blueprint.profileVersion());
+                try (ResultSet result = statement.executeQuery()) {
+                    if (result.next()) {
+                        lines.add("Stored status: " + result.getString("status"));
+                        String path = result.getString("debug_path");
+                        if (path != null && !path.isBlank()) {
+                            lines.add("Debug maps: " + path);
+                        }
+                        String message = result.getString("message");
+                        if (message != null && !message.isBlank()) {
+                            lines.add("Blueprint message: " + message);
+                        }
+                    }
+                }
+            } catch (SQLException exception) {
+                lines.add("Blueprint status load failed: " + exception.getMessage());
+            }
+        }
+        return lines;
     }
 
     public TerrainGenerationStatus getGenerationStatus(int floorNumber) {
@@ -251,7 +378,7 @@ public class TerrainManager implements TerrainProvider {
         }
         String worldName = this.getWorldName(floorNumber);
         if (this.dataManager == null) {
-            return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.getTerrainProfile(floorNumber));
+            return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber));
         }
         try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
                 SELECT profile_version, status, total_chunks, generated_chunks, total_blocks, placed_blocks, started_at, completed_at, started_by, message
@@ -281,13 +408,16 @@ public class TerrainManager implements TerrainProvider {
         } catch (SQLException exception) {
             this.plugin.getLogger().warning("[CrownsTerrain] Could not load generation status: " + exception.getMessage());
         }
-        return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.getTerrainProfile(floorNumber));
+        return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber));
     }
 
     public List<String> getGenerationStatusLines(int floorNumber) {
         TerrainGenerationStatus status = this.getGenerationStatus(floorNumber);
         List<String> lines = new ArrayList<>();
         lines.add("Floor " + floorNumber + " world: " + status.worldName());
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            lines.addAll(this.getBlueprintStatusLines(floorNumber));
+        }
         lines.add("Status: " + status.status() + " | " + status.progressSummary());
         if (status.startedBy() != null && !status.startedBy().isBlank()) {
             lines.add("Started by: " + status.startedBy());
@@ -311,7 +441,7 @@ public class TerrainManager implements TerrainProvider {
                 """)) {
             statement.setInt(1, floorNumber);
             statement.setString(2, worldName);
-            statement.setString(3, this.getTerrainProfile(floorNumber));
+            statement.setString(3, this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber));
             statement.setString(4, status);
             statement.setInt(5, totalChunks);
             statement.setInt(6, generatedChunks);
@@ -344,7 +474,7 @@ public class TerrainManager implements TerrainProvider {
                 """)) {
             statement.setInt(1, floorNumber);
             statement.setString(2, worldName);
-            statement.setString(3, this.getTerrainProfile(floorNumber));
+            statement.setString(3, this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber));
             statement.setString(4, status);
             statement.setInt(5, totalChunks);
             statement.setInt(6, generatedChunks);
@@ -371,8 +501,28 @@ public class TerrainManager implements TerrainProvider {
         lines.add("Expected world: " + worldName + (floorNumber == 1 && this.isFreshWorldRequired(floorNumber) ? " | fresh world required" : ""));
         lines.add("Bundled templates loaded: " + this.structureTemplateManager.count());
         TerrainGenerationStatus generationStatus = this.getGenerationStatus(floorNumber);
-        if (this.isSetMapFloor(floorNumber)) {
+        if (this.isManagedGenerationFloor(floorNumber)) {
             lines.add("Generation: " + generationStatus.status() + " | " + generationStatus.progressSummary());
+        }
+        FloorBlueprint blueprint = null;
+        if (this.isHybridBlueprintFloor(floorNumber)) {
+            blueprint = this.getOrCreateBlueprint(floorNumber);
+            double minimumQa = this.plugin.getConfig().getDouble("terrain.floors." + floorNumber + ".qa.minimum-qa-score", 0.70D);
+            lines.add("Blueprint: " + blueprint.profileVersion() + " | hash " + blueprint.hash());
+            lines.add("Blueprint QA: " + String.format(Locale.ROOT, "%.2f", blueprint.metrics().qaScore())
+                    + " | road slope avg/max "
+                    + String.format(Locale.ROOT, "%.2f", blueprint.metrics().averageRoadSlope())
+                    + "/"
+                    + String.format(Locale.ROOT, "%.2f", blueprint.metrics().maxRoadSlope()));
+            lines.add(blueprint.metrics().qaScore() >= minimumQa
+                    ? "PASS: blueprint QA score meets threshold " + String.format(Locale.ROOT, "%.2f", minimumQa) + "."
+                    : "FAIL: blueprint QA score is below threshold " + String.format(Locale.ROOT, "%.2f", minimumQa) + ".");
+            lines.add(blueprint.roads().isEmpty()
+                    ? "FAIL: blueprint route graph has no roads."
+                    : "PASS: blueprint route graph has " + blueprint.roads().size() + " roads.");
+            lines.add(blueprint.parcels().size() >= this.plugin.getConfig().getInt("terrain.floors." + floorNumber + ".qa.thresholds.minimum-parcels", 7)
+                    ? "PASS: blueprint has parcel-based settlement planning."
+                    : "FAIL: blueprint has too few parcels for a readable settlement.");
         }
         List<TerrainPoint> villages = this.getVillages(floorNumber, worldName);
         TerrainPoint firstHaven = villages.stream()
@@ -382,7 +532,7 @@ public class TerrainManager implements TerrainProvider {
         lines.add("Villages: " + villages.size() + (firstHaven == null ? "" : " | First spawn: " + firstHaven.coordinateSummary()));
         lines.add("Persisted points: " + this.countPersistedPoints(floorNumber, worldName));
         if (world == null) {
-            lines.add(this.isSetMapFloor(floorNumber)
+            lines.add(this.isManagedGenerationFloor(floorNumber)
                     ? "FAIL: world is not loaded. Run /cterrain admin generate " + floorNumber + " first."
                     : "FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
             return lines;
@@ -406,10 +556,10 @@ public class TerrainManager implements TerrainProvider {
         lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "waystone"), this.theme(floorNumber).accent())
                 ? "PASS: waystone feature blocks are present."
                 : "FAIL: waystone feature blocks were not found.");
-        if (floorNumber == 1 && this.isSetMapFloor(floorNumber)) {
+        if (floorNumber == 1 && this.isManagedGenerationFloor(floorNumber)) {
             lines.add(generationStatus.readyForPlayers()
-                    ? "PASS: Floor 1 set-map generation is critical-ready."
-                    : "FAIL: Floor 1 set-map generation is not ready. Run /cterrain admin generate 1.");
+                    ? "PASS: Floor 1 managed route generation is critical-ready."
+                    : "FAIL: Floor 1 managed route generation is not ready. Run /cterrain admin generate 1.");
             lines.add(this.hasPointBlocks(world, this.getPoints(floorNumber, worldName, "landmark"), Material.CUT_COPPER)
                     ? "PASS: market square / civic anchor blocks are present."
                     : "FAIL: market square / civic anchor blocks were not found.");
@@ -425,6 +575,11 @@ public class TerrainManager implements TerrainProvider {
             lines.add(this.hasSetMapHouseBlocks(world, firstHaven)
                     ? "PASS: First Haven has large authored building blocks."
                     : "FAIL: First Haven large authored building blocks were not found.");
+            if (blueprint != null) {
+                lines.add(blueprint.metrics().decorations() >= this.plugin.getConfig().getInt("terrain.floors." + floorNumber + ".qa.thresholds.minimum-decorations", 40)
+                        ? "PASS: blueprint has enough wilderness support decoration candidates."
+                        : "FAIL: blueprint has too few wilderness support decoration candidates.");
+            }
             lines.add("Debug: if these fail, this world was likely loaded but never pregenerated with /cterrain admin generate 1.");
             return lines;
         }
@@ -518,6 +673,7 @@ public class TerrainManager implements TerrainProvider {
     public void reload() {
         this.plugin.reloadConfig();
         this.pointCache.clear();
+        this.blueprintCache.clear();
         this.structureTemplateManager.load();
     }
 
@@ -525,6 +681,80 @@ public class TerrainManager implements TerrainProvider {
         ConfigurationSection section = this.floorSection(floorNumber);
         String configuredName = section == null ? null : section.getString("theme");
         return TerrainTheme.forFloor(floorNumber, configuredName);
+    }
+
+    private String getBlueprintVersion(int floorNumber) {
+        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".blueprint-version", this.getTerrainProfile(floorNumber));
+    }
+
+    private long getBlueprintSeed(int floorNumber, String worldName) {
+        String path = "terrain.floors." + floorNumber + ".blueprint-seed";
+        if (this.plugin.getConfig().isSet(path)) {
+            return this.plugin.getConfig().getLong(path);
+        }
+        return TerrainLayout.layoutSeed(worldName, floorNumber);
+    }
+
+    private List<TerrainPoint> getBlueprintPoints(int floorNumber, String worldName, String type) {
+        FloorBlueprint blueprint = this.getOrCreateBlueprint(floorNumber);
+        String normalized = normalizeType(type);
+        List<TerrainPoint> points = new ArrayList<>();
+        for (FloorBlueprint.Node node : blueprint.nodes()) {
+            if (normalizeType(node.type()).equals(normalized)) {
+                points.add(this.getOrCreatePoint(node.toPoint(floorNumber, worldName)));
+            }
+        }
+        return points;
+    }
+
+    private void saveBlueprintMetadata(FloorBlueprint blueprint, String status, String debugPath, String message) {
+        if (this.dataManager == null) {
+            return;
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                INSERT OR REPLACE INTO terrain_blueprints
+                (floor_number, world_name, profile_version, seed, blueprint_hash, status, qa_score, generated_at, debug_path, message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """)) {
+            statement.setInt(1, blueprint.floor());
+            statement.setString(2, blueprint.worldName());
+            statement.setString(3, blueprint.profileVersion());
+            statement.setLong(4, blueprint.seed());
+            statement.setLong(5, blueprint.hash());
+            statement.setString(6, status == null ? "ready" : status);
+            statement.setDouble(7, blueprint.metrics().qaScore());
+            statement.setLong(8, System.currentTimeMillis());
+            statement.setString(9, debugPath == null ? "" : debugPath);
+            statement.setString(10, message == null ? "" : message);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not save blueprint metadata: " + exception.getMessage());
+        }
+    }
+
+    private void saveBlueprintMetadataIfMissing(FloorBlueprint blueprint) {
+        if (this.dataManager == null) {
+            return;
+        }
+        try (PreparedStatement statement = this.dataManager.getConnection().prepareStatement("""
+                INSERT OR IGNORE INTO terrain_blueprints
+                (floor_number, world_name, profile_version, seed, blueprint_hash, status, qa_score, generated_at, debug_path, message)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """)) {
+            statement.setInt(1, blueprint.floor());
+            statement.setString(2, blueprint.worldName());
+            statement.setString(3, blueprint.profileVersion());
+            statement.setLong(4, blueprint.seed());
+            statement.setLong(5, blueprint.hash());
+            statement.setString(6, "ready");
+            statement.setDouble(7, blueprint.metrics().qaScore());
+            statement.setLong(8, System.currentTimeMillis());
+            statement.setString(9, "");
+            statement.setString(10, "Blueprint precomputed and cached.");
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not save blueprint metadata: " + exception.getMessage());
+        }
     }
 
     private TerrainPoint getOrCreatePoint(TerrainPoint fallback) {
@@ -627,6 +857,21 @@ public class TerrainManager implements TerrainProvider {
                         started_by TEXT,
                         message TEXT,
                         PRIMARY KEY (floor_number, world_name)
+                    )
+                    """);
+            statement.executeUpdate("""
+                    CREATE TABLE IF NOT EXISTS terrain_blueprints (
+                        floor_number INTEGER NOT NULL,
+                        world_name TEXT NOT NULL,
+                        profile_version TEXT NOT NULL,
+                        seed INTEGER NOT NULL,
+                        blueprint_hash INTEGER NOT NULL,
+                        status TEXT NOT NULL,
+                        qa_score REAL NOT NULL DEFAULT 0,
+                        generated_at INTEGER NOT NULL,
+                        debug_path TEXT,
+                        message TEXT,
+                        PRIMARY KEY (floor_number, world_name, profile_version)
                     )
                     """);
         } catch (SQLException exception) {

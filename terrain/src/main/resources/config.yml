@@ -2,7 +2,7 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: crowns_floor_1_v4
+  floor-1-world: crowns_floor_1_v5
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true
@@ -13,18 +13,27 @@ terrain:
     arena-radius: 72
     spawn-safe-radius: 192
     structure-density: 1.0
-    placement-mode: set-map
+    placement-mode: hybrid-blueprint
   floors:
     1:
       theme: First Haven
       palette: haven
-      world: crowns_floor_1_v4
-      generation-mode: set-map
-      terrain-profile: first_haven_v4
+      world: crowns_floor_1_v5
+      generation-mode: hybrid-blueprint
+      terrain-profile: first_haven_v5
+      blueprint-version: first_haven_blueprint_v1
       fresh-world-required: true
       world-size: 16000
       structure-density: 1.25
       enabled-structures: [village, camp, landmark, waystone, road_marker, shrine, arena]
+      vanilla:
+        caves: true
+        mobs: true
+        structures: false
+        decorations: false
+      debug-maps:
+        enabled: true
+        size: 512
       pregeneration:
         mode: critical-route-first
         chunks-per-tick: 12
@@ -49,11 +58,18 @@ terrain:
         slope-supports: true
       qa:
         strict: true
+        minimum-qa-score: 0.70
         minimum-town-structures: 20
         require-road-network: true
         require-hydrology: true
         require-arena: true
         require-hero-landmark: true
+        thresholds:
+          average-road-slope: 0.85
+          max-road-slope: 2.40
+          minimum-biome-samples: 5
+          minimum-parcels: 7
+          minimum-decorations: 40
       blueprint-sets:
         first-haven-civic: [spawn_plaza, town_hall, fountain_plaza, notice_board, waystone, large_shrine]
         first-haven-residential: [haven_house, haven_house_tall, haven_house_garden, hillside_house, retaining_wall, switchback_stair]

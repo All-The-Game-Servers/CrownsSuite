@@ -29,8 +29,10 @@
 
 ## CrownsMMO / Terrain Relaunch Notes
 
-- CrownsTerrain `1.5.4` defaults Floor 1 terrain generation to the fresh set-map world `crowns_floor_1_v4`, not the server's existing `world`, `crowns_floor_1`, `crowns_floor_1_v2`, or `crowns_floor_1_v3`.
+- CrownsTerrain `1.6.0` defaults Floor 1 terrain generation to the fresh hybrid-blueprint world `crowns_floor_1_v5`, not the server's existing `world`, `crowns_floor_1`, `crowns_floor_1_v2`, `crowns_floor_1_v3`, or `crowns_floor_1_v4`.
+- Run `/cterrain admin blueprint 1` first to precompute deterministic Floor 1 intent.
+- Run `/cterrain admin debugmaps 1` to inspect the terrain QA maps before spending time in-game.
 - Run `/cterrain admin generate 1` before player testing, then wait for `/cterrain admin status 1` to show `critical-ready`.
-- Run `/cterrain verify floor 1` to confirm generation status plus physical First Haven, road, farm, shrine, waystone, camp, and arena blocks.
+- Run `/cterrain verify floor 1` to confirm blueprint QA plus physical First Haven, road, farm, shrine, waystone, camp, and arena blocks.
 - New adventurers can run `/cmmo start` to enter First Haven and begin the Floor 1 path.
 - MMO respawn routing is not part of the terrain relaunch. If a death sends a player elsewhere, use `/cmmo start` or `/cmmo floor 1` until the follow-up MMO integration patch.

@@ -71,6 +71,16 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
                     world == null ? NamedTextColor.RED : NamedTextColor.GREEN));
             return true;
         }
+        if (args.length >= 3 && args[1].equalsIgnoreCase("blueprint")) {
+            int floor = this.parseFloor(args, 2, 1);
+            this.plugin.getTerrainManager().prepareBlueprint(sender, floor);
+            return true;
+        }
+        if (args.length >= 3 && args[1].equalsIgnoreCase("debugmaps")) {
+            int floor = this.parseFloor(args, 2, 1);
+            this.plugin.getTerrainManager().generateDebugMaps(sender, floor);
+            return true;
+        }
         if (args.length >= 3 && args[1].equalsIgnoreCase("generate")) {
             int floor = this.parseFloor(args, 2, 1);
             this.plugin.getTerrainManager().startGeneration(sender, floor);
@@ -111,14 +121,14 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             this.sendAllPoints(sender, floor);
             return true;
         }
-        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|create|generate|status|cancel|regenerate|list|locate|tp>", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("Usage: /cterrain admin <reload|create|blueprint|debugmaps|generate|status|cancel|regenerate|list|locate|tp>", NamedTextColor.YELLOW));
         return true;
     }
 
     private void sendInfo(CommandSender sender) {
         sender.sendMessage(Component.text("CrownsTerrain", NamedTextColor.GREEN)
-                .append(Component.text(" provides set-map floors, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("Use /cterrain admin generate 1, /cterrain admin status 1, or /cterrain preview <floor>.", NamedTextColor.YELLOW));
+                .append(Component.text(" provides hybrid blueprint floors, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("Use /cterrain admin blueprint 1, /cterrain admin debugmaps 1, /cterrain admin generate 1, or /cterrain preview <floor>.", NamedTextColor.YELLOW));
         if (sender instanceof Player player) {
             this.plugin.getMenuManager().openHub(player);
         }
@@ -127,12 +137,20 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
     private void sendPreview(CommandSender sender, int floor) {
         String worldName = this.worldName(floor);
         sender.sendMessage(Component.text("Floor " + floor + " Theme: " + this.plugin.getTerrainManager().getFloorTheme(floor), NamedTextColor.AQUA));
+        String placement = this.plugin.getTerrainManager().isHybridBlueprintFloor(floor)
+                ? "hybrid blueprint"
+                : this.plugin.getTerrainManager().isSetMapFloor(floor) ? "set-map pregenerated" : "seeded-random";
         sender.sendMessage(Component.text("Profile: " + this.plugin.getTerrainManager().getTerrainProfile(floor)
                 + " | World size: " + this.plugin.getTerrainManager().getWorldSize(floor)
-                + " | Placement: " + (this.plugin.getTerrainManager().isSetMapFloor(floor) ? "set-map pregenerated" : "seeded-random"), NamedTextColor.GRAY));
+                + " | Placement: " + placement, NamedTextColor.GRAY));
         TerrainGenerationStatus status = this.plugin.getTerrainManager().getGenerationStatus(floor);
-        if (this.plugin.getTerrainManager().isSetMapFloor(floor)) {
+        if (this.plugin.getTerrainManager().isManagedGenerationFloor(floor)) {
             sender.sendMessage(Component.text("Generation: " + status.status() + " | " + status.progressSummary(), status.readyForPlayers() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+        }
+        if (this.plugin.getTerrainManager().isHybridBlueprintFloor(floor)) {
+            for (String line : this.plugin.getTerrainManager().getBlueprintStatusLines(floor)) {
+                sender.sendMessage(Component.text(line, NamedTextColor.DARK_AQUA));
+            }
         }
         if (this.plugin.getTerrainManager().isFreshWorldRequired(floor)) {
             sender.sendMessage(Component.text("Fresh world required: create/use '" + worldName + "'. Existing floor worlds are not overwritten.", NamedTextColor.YELLOW));
@@ -253,13 +271,14 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
             return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
-            return this.match(args[1], List.of("reload", "create", "generate", "status", "cancel", "regenerate", "locate", "list", "tp"));
+            return this.match(args[1], List.of("reload", "create", "blueprint", "debugmaps", "generate", "status", "cancel", "regenerate", "locate", "list", "tp"));
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("locate") || args[1].equalsIgnoreCase("tp"))) {
             return this.match(args[2], List.of("village", "camp", "landmark", "waystone", "road_marker", "shrine", "arena"));
         }
         if ((args.length == 2 && (args[0].equalsIgnoreCase("preview") || args[0].equalsIgnoreCase("villages")))
                 || (args.length == 3 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("list") || args[1].equalsIgnoreCase("generate") || args[1].equalsIgnoreCase("status") || args[1].equalsIgnoreCase("cancel")))
+                || (args.length == 3 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("blueprint") || args[1].equalsIgnoreCase("debugmaps")))
                 || (args.length == 4 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("locate") || args[1].equalsIgnoreCase("tp")))) {
             return this.match(args[args.length - 1], List.of("1", "2", "3"));
         }

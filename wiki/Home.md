@@ -69,7 +69,7 @@ The terrain identity layer for CrownsMMO floor worlds.
 - Safe/useful settlement design for future NPCs, shops, and quests
 - Optional provider layer so CrownsMMO can still run without it
 - Stable generated point metadata for CrownsMMO quest objectives
-- `1.5.4` pivots Floor 1 to the set-map world `crowns_floor_1_v4`, adds `/cterrain admin generate 1`, tracks generation status, blocks unready player teleports, and pregenerates the First Haven critical route before play.
+- `1.6.0` pivots Floor 1 to the hybrid-blueprint world `crowns_floor_1_v5`, adds `/cterrain admin blueprint 1` and `/cterrain admin debugmaps 1`, tracks generation status, blocks unready player teleports, and pregenerates the First Haven critical route before play.
 
 ## CrownsEconomy Overview
 

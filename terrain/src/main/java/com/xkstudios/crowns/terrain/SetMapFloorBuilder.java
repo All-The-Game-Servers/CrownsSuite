@@ -17,6 +17,14 @@ public final class SetMapFloorBuilder {
     private SetMapFloorBuilder() {
     }
 
+    public static List<ChunkCoord> criticalChunks(FloorBlueprint blueprint) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (FloorBlueprint.Node node : blueprint.nodes()) {
+            points.add(node.toPoint(blueprint.floor(), blueprint.worldName()));
+        }
+        return criticalChunks(points);
+    }
+
     public static List<ChunkCoord> criticalChunks(List<TerrainPoint> points) {
         Map<String, TerrainPoint> map = pointMap(points);
         Set<ChunkCoord> chunks = new LinkedHashSet<>();
@@ -41,6 +49,14 @@ public final class SetMapFloorBuilder {
         addRoadChunks(chunks, approach, arena, 4);
         addChunkDisk(chunks, waystone.x(), waystone.z(), 48);
         return List.copyOf(chunks);
+    }
+
+    public static List<BlockOperation> operations(TerrainTheme theme, FloorBlueprint blueprint) {
+        List<TerrainPoint> points = new ArrayList<>();
+        for (FloorBlueprint.Node node : blueprint.nodes()) {
+            points.add(node.toPoint(blueprint.floor(), blueprint.worldName()));
+        }
+        return operations(null, theme, points);
     }
 
     public static List<BlockOperation> operations(World world, TerrainTheme theme, List<TerrainPoint> points) {
@@ -100,7 +116,7 @@ public final class SetMapFloorBuilder {
 
     private static TerrainPoint point(Map<String, TerrainPoint> map, String key, String type, int x, int y, int z) {
         TerrainPoint point = map.get(key.toLowerCase().replace('-', '_'));
-        return point == null ? new TerrainPoint(1, "crowns_floor_1_v4", type, key, key, x, y, z) : point;
+        return point == null ? new TerrainPoint(1, "crowns_floor_1_v5", type, key, key, x, y, z) : point;
     }
 
     private static void addTownTerrain(List<BlockOperation> ops, TerrainPoint haven) {

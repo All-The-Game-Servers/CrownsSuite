@@ -151,7 +151,7 @@ mmo:
   floors:
     default-border-size: 16000
     generated-border-size: 8000
-    floor-1-world: crowns_floor_1_v4
+    floor-1-world: crowns_floor_1_v5
     generated-world-prefix: crowns_floor_
     boss-clear-combat-xp: 80
     mob-scaling:
@@ -161,7 +161,7 @@ mmo:
       note: "Foundation hook for later CrownsMMO smithing/resource progression."
     list:
       1:
-        world: crowns_floor_1_v4
+        world: crowns_floor_1_v5
         environment: NORMAL
         border-size: 16000
         required-floor: 1

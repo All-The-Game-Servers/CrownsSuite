@@ -20,9 +20,9 @@ public class TerrainMenuManager {
 
     public void openHub(Player player) {
         Inventory inventory = CrownsMenuHolder.create("terrain-hub", 54, Component.text("CrownsTerrain", NamedTextColor.GREEN));
-        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Set-Map Floor Generation", NamedTextColor.GREEN, List.of(
-                Component.text("Admins pregenerate floor routes before play.", NamedTextColor.GRAY),
-                Component.text("CrownsMMO still owns progression and combat.", NamedTextColor.DARK_GRAY)
+        inventory.setItem(10, CrownsAPI.getSuiteGui().info(Material.GRASS_BLOCK, "Hybrid Blueprint Generation", NamedTextColor.GREEN, List.of(
+                Component.text("Admins precompute intent, debug maps, and route chunks.", NamedTextColor.GRAY),
+                Component.text("Chunk rendering stays pure and Paper-safe.", NamedTextColor.DARK_GRAY)
         ), "lowlight/terrain/hub"));
         inventory.setItem(12, CrownsAPI.getSuiteGui().info(Material.OAK_DOOR, "Custom Villages", NamedTextColor.GOLD, List.of(
                 Component.text("Code-authored floor settlements.", NamedTextColor.GRAY),
@@ -46,8 +46,15 @@ public class TerrainMenuManager {
             lore.add(Component.text("Theme: " + this.plugin.getTerrainManager().getFloorTheme(floor), NamedTextColor.GRAY));
             lore.add(Component.text("Profile: " + this.plugin.getTerrainManager().getTerrainProfile(floor), NamedTextColor.DARK_GRAY));
             TerrainGenerationStatus status = this.plugin.getTerrainManager().getGenerationStatus(floor);
-            if (this.plugin.getTerrainManager().isSetMapFloor(floor)) {
+            if (this.plugin.getTerrainManager().isManagedGenerationFloor(floor)) {
                 lore.add(Component.text("Generation: " + status.status(), status.readyForPlayers() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+            }
+            if (this.plugin.getTerrainManager().isHybridBlueprintFloor(floor)) {
+                for (String line : this.plugin.getTerrainManager().getBlueprintStatusLines(floor)) {
+                    if (line.startsWith("Blueprint:") || line.startsWith("Metrics:")) {
+                        lore.add(Component.text(line, NamedTextColor.DARK_AQUA));
+                    }
+                }
             }
             lore.add(Component.text("World size: " + this.plugin.getTerrainManager().getWorldSize(floor) + " x " + this.plugin.getTerrainManager().getWorldSize(floor), NamedTextColor.GRAY));
             lore.add(Component.text("Villages: " + this.plugin.getTerrainManager().getVillages(floor, worldName).size(), NamedTextColor.YELLOW));

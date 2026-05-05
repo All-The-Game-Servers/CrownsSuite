@@ -6,7 +6,7 @@ It is built primarily for CrownsMMO floor worlds: CrownsMMO owns progression, bo
 
 ## What It Adds
 
-- Set-map floor generation for CrownsMMO worlds
+- Hybrid blueprint floor generation for CrownsMMO worlds
 - Floor-themed terrain palettes
 - Custom code-authored villages
 - Camps, road markers, waystones, and starter shrines
@@ -40,7 +40,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Relaunch default Floor 1 world is `crowns_floor_1_v4`, so existing survival `world` and older Crowns floor worlds are not overwritten.
+- Current relaunch default Floor 1 world is `crowns_floor_1_v5`, so existing survival `world` and older Crowns floor worlds are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -61,6 +61,8 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain villages <floor>`
 - `/cterrain verify floor <floor>`
 - `/cterrain admin create <floor>`
+- `/cterrain admin blueprint <floor>`
+- `/cterrain admin debugmaps <floor>`
 - `/cterrain admin generate <floor>`
 - `/cterrain admin status <floor>`
 - `/cterrain admin cancel <floor>`
@@ -154,3 +156,15 @@ CrownsTerrain `1.5.4` pivots Floor 1 to a code-authored set map at `crowns_floor
 - The generated route includes First Haven, market square, farm gate, starter camp, starter shrine, first waystone, north road, arena approach, and First Gate arena.
 - `/cterrain verify floor 1` now checks generation status plus physical blocks for the set-map town, farms, roads, shrine, waystone, camp, and arena.
 - This release keeps old worlds untouched; staff should test using the fresh `crowns_floor_1_v4` world.
+
+## 1.6.0 Hybrid Blueprint Generator
+
+CrownsTerrain `1.6.0` moves Floor 1 to the fresh hybrid route-first world `crowns_floor_1_v5`.
+
+- `/cterrain admin blueprint 1` precomputes immutable floor intent from the seed before chunks render.
+- `/cterrain admin debugmaps 1` writes height, slope, moisture, biome, roads, parcels, landmarks, and QA PNGs under the plugin data folder.
+- `/cterrain admin generate 1` ensures the blueprint exists, creates/loads `crowns_floor_1_v5`, and pregenerates the critical route before players arrive.
+- The chunk generator reads only immutable blueprint data and local coordinates. It does not do world/chunk lookups during generation.
+- The authored spine remains First Haven, market square, farm gate, starter camp, starter shrine, first waystone, arena approach, and First Gate arena.
+- Procedural support now belongs around that spine: macro terrain, moisture/biome variation, river masks, road corridors, parcels, and jittered wilderness decoration candidates.
+- `/cterrain verify floor 1` checks both blueprint QA metrics and physical world evidence before staff treat the floor as release-ready.
