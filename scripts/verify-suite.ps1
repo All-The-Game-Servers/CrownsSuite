@@ -13,8 +13,8 @@ $modules = @(
     @{ Name = "admin"; Jar = "CrownsAdmin"; Version = "1.4.0"; Dependencies = @("api") },
     @{ Name = "events"; Jar = "CrownsEvents"; Version = "1.4.0"; Dependencies = @("api") },
     @{ Name = "drugs"; Jar = "CrownsDrugs"; Version = "1.4.0"; Dependencies = @("api") },
-    @{ Name = "mmo"; Jar = "CrownsMMO"; Version = "1.7.0"; Dependencies = @("api") },
-    @{ Name = "terrain"; Jar = "CrownsTerrain"; Version = "1.7.0"; Dependencies = @("api") }
+    @{ Name = "mmo"; Jar = "CrownsMMO"; Version = "1.8.0"; Dependencies = @("api") },
+    @{ Name = "terrain"; Jar = "CrownsTerrain"; Version = "1.8.0"; Dependencies = @("api") }
 )
 
 function Get-DependencyClasspath {

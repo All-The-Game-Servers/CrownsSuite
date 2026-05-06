@@ -3,6 +3,7 @@ package com.xkstudios.crowns.mmo;
 import com.xkstudios.crowns.CrownsPlugin;
 import com.xkstudios.crowns.api.CrownsAPI;
 import com.xkstudios.crowns.api.EconomyProvider;
+import com.xkstudios.crowns.api.FloorRuntimeSnapshot;
 import com.xkstudios.crowns.api.MmoProvider;
 import com.xkstudios.crowns.data.DataManager;
 import java.sql.PreparedStatement;
@@ -368,9 +369,10 @@ public class MmoManager implements MmoProvider {
 
     @Override
     public String getSystemStatusSummary() {
-        String terrain = CrownsAPI.getTerrain() == null
+        FloorRuntimeSnapshot floorRuntime = CrownsAPI.getFloorRuntime() == null ? null : CrownsAPI.getFloorRuntime().getFloorRuntime(1);
+        String terrain = floorRuntime == null
                 ? "Terrain: missing"
-                : "Terrain: " + CrownsAPI.getTerrain().getFloorReadinessSummary(1);
+                : "Floor 1: " + floorRuntime.state() + " (" + floorRuntime.summary() + ")";
         String economy = CrownsAPI.getEconomy() == null
                 ? "Economy: missing"
                 : "Economy: " + CrownsAPI.getEconomy().getMarketActivitySummary();

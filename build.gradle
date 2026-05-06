@@ -4,8 +4,8 @@ ext.crownsModuleVersions = [
         admin  : '1.4.0',
         events : '1.4.0',
         drugs  : '1.4.0',
-        mmo    : '1.7.0',
-        terrain: '1.7.0'
+        mmo    : '1.8.0',
+        terrain: '1.8.0'
 ]
 
 ext.crownsJarNames = [

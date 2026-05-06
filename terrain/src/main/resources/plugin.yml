@@ -1,5 +1,5 @@
 name: CrownsTerrain
-version: 1.7.0
+version: 1.8.0
 main: com.xkstudios.crowns.terrain.CrownsTerrainPlugin
 api-version: "1.21"
 authors: [XKStudios]

@@ -1,6 +1,6 @@
 key: mmo
 name: CrownsMMO
-version: 1.7.0
+version: 1.8.0
 required-api-version: 1.4.0
 required-dependencies:
   - CrownsAPI
@@ -17,6 +17,7 @@ provided-services:
   - skills
   - parties
   - guilds
+  - floor-runtime-consumer
 health-checks:
   - floor-manager
   - quest-manager

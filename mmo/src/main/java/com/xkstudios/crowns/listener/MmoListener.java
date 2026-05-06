@@ -33,6 +33,7 @@ import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -49,6 +50,7 @@ public class MmoListener implements Listener {
         if (this.plugin.getConfig().getBoolean("mmo.onboarding.start-message-on-join", true)) {
             player.sendMessage(Component.text("CrownsMMO has relaunched. Use /cmmo start to begin at First Haven.", NamedTextColor.GOLD));
         }
+        this.plugin.getFloorManager().handleReconnect(player);
         if (!this.plugin.getConfig().getBoolean("mmo.onboarding.teleport-on-first-join", true)) {
             return;
         }
@@ -63,6 +65,14 @@ public class MmoListener implements Listener {
                 this.plugin.getFloorManager().startPlayer(player);
             }
         }, 40L);
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event) {
+        var location = this.plugin.getFloorManager().runtimeRespawnLocation(event.getPlayer());
+        if (location != null) {
+            event.setRespawnLocation(location);
+        }
     }
 
     @EventHandler

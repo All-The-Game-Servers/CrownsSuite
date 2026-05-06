@@ -1,6 +1,6 @@
 key: terrain
 name: CrownsTerrain
-version: 1.7.0
+version: 1.8.0
 required-api-version: 1.4.0
 required-dependencies:
   - CrownsAPI
@@ -8,6 +8,7 @@ optional-dependencies:
   - CrownsMMO
 provided-services:
   - terrain
+  - floor-runtime
   - floor-readiness
   - blueprints
   - debug-maps

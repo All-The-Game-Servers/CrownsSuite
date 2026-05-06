@@ -71,7 +71,7 @@ The terrain identity layer for CrownsMMO floor worlds.
 - Safe/useful settlement design for future NPCs, shops, and quests
 - Optional provider layer so CrownsMMO can still run without it
 - Stable generated point metadata for CrownsMMO quest objectives
-- `1.7.0` pivots Floor 1 to the hybrid-engine world `crowns_floor_1_v6`, writes blueprint artifacts/debug maps/scores, tracks generation readiness, blocks unready player teleports, and pregenerates the First Haven critical route before play.
+- `1.8.0` adds the paired Floor Runtime Platform with Terrain-owned runtime state, anchors, QA lines, repair steps, and MMO-safe start/respawn/reconnect routing.
 
 ## CrownsEconomy Overview
 

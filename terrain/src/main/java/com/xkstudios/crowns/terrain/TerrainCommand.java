@@ -1,6 +1,7 @@
 package com.xkstudios.crowns.terrain;
 
 import com.xkstudios.crowns.api.TerrainPoint;
+import com.xkstudios.crowns.api.FloorRuntimeSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -43,6 +44,9 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         }
         if (args[0].equalsIgnoreCase("admin")) {
             return this.handleAdmin(sender, args);
+        }
+        if (args[0].equalsIgnoreCase("floor")) {
+            return this.handleFloor(sender, args);
         }
         if (sender instanceof Player player) {
             this.plugin.getMenuManager().openHub(player);
@@ -125,6 +129,34 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleFloor(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("crowns.terrain.admin") && !sender.isOp()) {
+            sender.sendMessage(Component.text("You do not have permission to use terrain floor operations.", NamedTextColor.RED));
+            return true;
+        }
+        if (args.length < 3) {
+            sender.sendMessage(Component.text("Usage: /cterrain floor <status|repair|anchors|pregenerate|qa> <floor> [critical]", NamedTextColor.YELLOW));
+            return true;
+        }
+        String action = args[1].toLowerCase();
+        int floor = this.parseFloor(args, 2, 1);
+        switch (action) {
+            case "status" -> this.sendRuntimeStatus(sender, floor);
+            case "repair" -> this.sendRuntimeRepair(sender, floor);
+            case "anchors" -> this.sendRuntimeAnchors(sender, floor);
+            case "pregenerate" -> {
+                String mode = args.length >= 4 ? args[3].toLowerCase() : "critical";
+                if (!mode.equals("critical")) {
+                    sender.sendMessage(Component.text("Only critical-route pregeneration is supported in 1.8.0.", NamedTextColor.YELLOW));
+                }
+                this.plugin.getTerrainManager().startGeneration(sender, floor);
+            }
+            case "qa" -> this.sendVerification(sender, floor);
+            default -> sender.sendMessage(Component.text("Usage: /cterrain floor <status|repair|anchors|pregenerate|qa> <floor> [critical]", NamedTextColor.YELLOW));
+        }
+        return true;
+    }
+
     private void sendInfo(CommandSender sender) {
         sender.sendMessage(Component.text("CrownsTerrain", NamedTextColor.GREEN)
                 .append(Component.text(" provides hybrid route-first floor engine generation, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
@@ -175,6 +207,35 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         for (String line : this.plugin.getTerrainManager().verifyFloor(floor)) {
             NamedTextColor color = line.startsWith("PASS") ? NamedTextColor.GREEN : line.startsWith("FAIL") ? NamedTextColor.RED : NamedTextColor.GRAY;
             sender.sendMessage(Component.text("- " + line, color));
+        }
+    }
+
+    private void sendRuntimeStatus(CommandSender sender, int floor) {
+        FloorRuntimeSnapshot snapshot = this.plugin.getTerrainManager().getFloorRuntime(floor);
+        sender.sendMessage(Component.text("Floor " + floor + " Runtime", NamedTextColor.GOLD));
+        sender.sendMessage(Component.text("World: " + snapshot.worldName() + " | Profile: " + snapshot.profileVersion(), NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("State: " + snapshot.state() + " | Player ready: " + snapshot.playerReady() + " | Safe ready: " + snapshot.safeReady(),
+                snapshot.safeReady() ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text(snapshot.summary(), NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("Anchors: " + snapshot.anchors().size() + " | QA lines: " + snapshot.qaLines().size(), NamedTextColor.DARK_AQUA));
+        if (!snapshot.safeReady()) {
+            sender.sendMessage(Component.text("Repair: " + String.join(" -> ", snapshot.repairSteps()), NamedTextColor.YELLOW));
+        }
+    }
+
+    private void sendRuntimeRepair(CommandSender sender, int floor) {
+        FloorRuntimeSnapshot snapshot = this.plugin.getTerrainManager().getFloorRuntime(floor);
+        sender.sendMessage(Component.text("Floor " + floor + " Repair Steps", NamedTextColor.GOLD));
+        for (String step : snapshot.repairSteps()) {
+            sender.sendMessage(Component.text("- " + step, NamedTextColor.YELLOW));
+        }
+    }
+
+    private void sendRuntimeAnchors(CommandSender sender, int floor) {
+        FloorRuntimeSnapshot snapshot = this.plugin.getTerrainManager().getFloorRuntime(floor);
+        sender.sendMessage(Component.text("Floor " + floor + " Runtime Anchors", NamedTextColor.GOLD));
+        for (TerrainPoint anchor : snapshot.anchors()) {
+            sender.sendMessage(Component.text("- [" + anchor.type().replace('_', ' ') + "] " + anchor.displayName() + " [" + anchor.key() + "]: " + anchor.coordinateSummary(), NamedTextColor.GRAY));
         }
     }
 
@@ -268,7 +329,16 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin"));
+            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin", "floor"));
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("floor")) {
+            return this.match(args[1], List.of("status", "repair", "anchors", "pregenerate", "qa"));
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("floor")) {
+            return this.match(args[2], List.of("1", "2", "3"));
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("floor") && args[1].equalsIgnoreCase("pregenerate")) {
+            return this.match(args[3], List.of("critical"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
             return this.match(args[1], List.of("reload", "create", "blueprint", "debugmaps", "generate", "status", "cancel", "regenerate", "locate", "list", "tp"));

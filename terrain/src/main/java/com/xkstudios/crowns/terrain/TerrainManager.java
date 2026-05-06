@@ -1,6 +1,8 @@
 package com.xkstudios.crowns.terrain;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.FloorRuntimeProvider;
+import com.xkstudios.crowns.api.FloorRuntimeSnapshot;
 import com.xkstudios.crowns.api.TerrainPoint;
 import com.xkstudios.crowns.api.TerrainProvider;
 import com.xkstudios.crowns.data.DataManager;
@@ -23,7 +25,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.WorldCreator;
 
-public class TerrainManager implements TerrainProvider {
+public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
     private final CrownsTerrainPlugin plugin;
     private final DataManager dataManager;
     private final StructureTemplateManager structureTemplateManager;
@@ -280,6 +282,71 @@ public class TerrainManager implements TerrainProvider {
         String message = status.message() == null || status.message().isBlank() ? "" : " " + status.message();
         return "Floor " + floorNumber + " " + status.status().toLowerCase(Locale.ROOT).replace('_', '-') + " in "
                 + status.worldName() + ": " + status.progressSummary() + "." + message;
+    }
+
+    @Override
+    public FloorRuntimeSnapshot getFloorRuntime(int floorNumber) {
+        String worldName = this.getWorldName(floorNumber);
+        TerrainGenerationStatus status = this.getGenerationStatus(floorNumber);
+        List<TerrainPoint> anchors = this.runtimeAnchors(floorNumber, worldName);
+        List<String> qaLines = this.isManagedGenerationFloor(floorNumber) ? this.verifyFloor(floorNumber) : List.of("PASS: unmanaged floor treated as ready.");
+        boolean qaPasses = qaLines.stream().noneMatch(line -> line.startsWith("FAIL"));
+        boolean safeReady = status.readyForPlayers() && qaPasses && this.hasRequiredRuntimeAnchors(anchors);
+        String summary = this.getFloorReadinessSummary(floorNumber);
+        return new FloorRuntimeSnapshot(
+                floorNumber,
+                worldName,
+                this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber),
+                safeReady ? "SAFE_READY" : status.status(),
+                status.readyForPlayers(),
+                safeReady,
+                summary,
+                this.runtimeRepairSteps(floorNumber),
+                anchors,
+                qaLines
+        );
+    }
+
+    private List<TerrainPoint> runtimeAnchors(int floorNumber, String worldName) {
+        List<TerrainPoint> anchors = new ArrayList<>();
+        anchors.addAll(this.getPoints(floorNumber, worldName, "village"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "landmark"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "road_marker"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "camp"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "shrine"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "waystone"));
+        anchors.addAll(this.getPoints(floorNumber, worldName, "arena"));
+        return anchors;
+    }
+
+    private boolean hasRequiredRuntimeAnchors(List<TerrainPoint> anchors) {
+        return this.hasAnchor(anchors, "first-haven", "village")
+                && this.hasAnchor(anchors, "starter-camp", "camp")
+                && this.hasAnchor(anchors, "starter-shrine", "shrine")
+                && this.hasAnchor(anchors, "first-waystone", "waystone")
+                && this.hasAnchor(anchors, "first-gate-arena", "arena");
+    }
+
+    private boolean hasAnchor(List<TerrainPoint> anchors, String preferredKey, String fallbackType) {
+        for (TerrainPoint anchor : anchors) {
+            if (anchor.key().equalsIgnoreCase(preferredKey) || normalizeType(anchor.type()).equals(normalizeType(fallbackType))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> runtimeRepairSteps(int floorNumber) {
+        if (!this.isManagedGenerationFloor(floorNumber)) {
+            return List.of("This floor is not managed by CrownsTerrain. Check its normal world configuration.");
+        }
+        return List.of(
+                "/cterrain admin blueprint " + floorNumber,
+                "/cterrain admin debugmaps " + floorNumber,
+                "/cterrain floor pregenerate " + floorNumber + " critical",
+                "/cterrain floor qa " + floorNumber,
+                "/cterrain verify floor " + floorNumber
+        );
     }
 
     public boolean isManagedGenerationFloor(int floorNumber) {

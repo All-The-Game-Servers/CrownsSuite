@@ -39,7 +39,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "resource-pack", "inbox")
+                List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")
         ), this::apiHealth);
         CrownsAPI.setPlayerDataProvider(new PlayerDataProvider() {
             @Override
@@ -72,6 +72,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setEconomyLedgerProvider(null);
         CrownsAPI.setEventsProvider(null);
         CrownsAPI.setMmoProvider(null);
+        CrownsAPI.setFloorRuntimeProvider(null);
         CrownsAPI.setInboxProvider(null);
         CrownsAPI.setPlayerDataProvider(null);
         CrownsAPI.setDataManager(null);
@@ -113,7 +114,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "resource-pack", "inbox")
+                List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")
         );
         if (!databaseOnline) {
             return ModuleHealth.of(descriptor, ServiceState.FAILED, "Core API services are unavailable.", warnings);

@@ -7,6 +7,8 @@ mmo:
     start-message-on-join: true
     teleport-on-first-join: true
     start-floor: 1
+  floor-runtime:
+    return-to-floor-on-join: true
   exploration:
     track-biome-discoveries: false
   parties:

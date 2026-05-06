@@ -76,6 +76,11 @@ CrownsMMO asks CrownsAPI whether a terrain provider is installed when it creates
 - `/cterrain admin list <floor>`
 - `/cterrain admin reload`
 - `/cterrain admin regenerate <floor>` explains the guarded manual reset process and does not delete worlds.
+- `/cterrain floor status <floor>`
+- `/cterrain floor repair <floor>`
+- `/cterrain floor anchors <floor>`
+- `/cterrain floor pregenerate <floor> critical`
+- `/cterrain floor qa <floor>`
 
 ## First Release Direction
 
@@ -181,3 +186,20 @@ CrownsTerrain `1.7.0` moves Floor 1 to the fresh hybrid-engine world `crowns_flo
 - `/cterrain admin generate 1` pregenerates the critical route before players arrive.
 - Normal player teleports remain blocked until Floor 1 reaches `CRITICAL_READY` or better.
 - `TerrainProvider` remains compatible for CrownsMMO quests, boss arenas, waystones, shrines, camps, road markers, landmarks, and villages.
+
+## 1.8.0 Floor Runtime Platform
+
+CrownsTerrain `1.8.0` becomes the runtime owner for managed MMO floor readiness.
+
+- Terrain exposes Floor 1 state through CrownsAPI's `FloorRuntimeProvider`.
+- Runtime snapshots include readiness state, safe-ready status, QA lines, repair steps, and known anchors.
+- New floor commands wrap the most important setup and diagnosis flow:
+  - `/cterrain floor status 1`
+  - `/cterrain floor repair 1`
+  - `/cterrain floor anchors 1`
+  - `/cterrain floor pregenerate 1 critical`
+  - `/cterrain floor qa 1`
+- CrownsMMO uses runtime anchors for `/cmmo start`, floor teleports, respawn routing, and reconnect recovery.
+- Terrain health now warns the suite when Floor 1 is not safe for players, so admins can catch broken setup before launch.
+
+The goal of `1.8.0` is not to expand every part of Floor 1. It locks down the vertical slice: First Haven, road route, starter camp, shrine, waystone, farm route, arena approach, and First Gate arena must be ready before normal MMO entry feels safe.

@@ -19,6 +19,7 @@ public final class CrownsAPI {
     private static EventsProvider eventsProvider;
     private static MmoProvider mmoProvider;
     private static TerrainProvider terrainProvider;
+    private static FloorRuntimeProvider floorRuntimeProvider;
     private static DataManager dataManager;
     private static SuiteGuiManager suiteGuiManager;
     private static ResourcePackService resourcePackService;
@@ -32,13 +33,13 @@ public final class CrownsAPI {
     private static final List<SuiteActivityListener> activityListeners = new CopyOnWriteArrayList<>();
 
     static {
-        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "1.4.0", List.of(), List.of(), List.of("data", "gui", "modules", "resource-pack")));
+        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "1.4.0", List.of(), List.of(), List.of("data", "gui", "modules", "floor-runtime", "resource-pack")));
         registerExpectedModule(new ModuleDescriptor("economy", "CrownsEconomy", "CrownsEconomy", "unknown", "1.4.0", List.of("CrownsAPI"), List.of(), List.of("economy", "market-activity")));
         registerExpectedModule(new ModuleDescriptor("admin", "CrownsAdmin", "CrownsAdmin", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("moderation", "analytics")));
         registerExpectedModule(new ModuleDescriptor("events", "CrownsEvents", "CrownsEvents", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("events", "activity-hooks")));
         registerExpectedModule(new ModuleDescriptor("drugs", "CrownsDrugs", "CrownsDrugs", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("drugs")));
-        registerExpectedModule(new ModuleDescriptor("mmo", "CrownsMMO", "CrownsMMO", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"), List.of("mmo")));
-        registerExpectedModule(new ModuleDescriptor("terrain", "CrownsTerrain", "CrownsTerrain", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEvents"), List.of("terrain")));
+        registerExpectedModule(new ModuleDescriptor("mmo", "CrownsMMO", "CrownsMMO", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"), List.of("mmo", "floor-runtime-consumer")));
+        registerExpectedModule(new ModuleDescriptor("terrain", "CrownsTerrain", "CrownsTerrain", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEvents"), List.of("terrain", "floor-runtime")));
     }
 
     private CrownsAPI() {
@@ -98,6 +99,14 @@ public final class CrownsAPI {
 
     public static TerrainProvider getTerrain() {
         return terrainProvider;
+    }
+
+    public static void setFloorRuntimeProvider(FloorRuntimeProvider provider) {
+        floorRuntimeProvider = provider;
+    }
+
+    public static FloorRuntimeProvider getFloorRuntime() {
+        return floorRuntimeProvider;
     }
 
     public static void setDataManager(DataManager manager) {

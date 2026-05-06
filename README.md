@@ -2,7 +2,7 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO and CrownsTerrain currently remain on their own `1.7.0` Floor 1 relaunch line.
+`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO and CrownsTerrain are now on their paired `1.8.0` Floor Runtime Platform line.
 
 It currently includes:
 
@@ -25,8 +25,8 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsAdmin-1.4.0.jar`
 - `CrownsEvents-1.4.0.jar`
 - `CrownsDrugs-1.4.0.jar`
-- `CrownsMMO-1.7.0.jar`
-- `CrownsTerrain-1.7.0.jar`
+- `CrownsMMO-1.8.0.jar`
+- `CrownsTerrain-1.8.0.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -72,6 +72,7 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - `CrownsEvents`: exposes suite activity summaries so live events can react to MMO, economy, and future ceremony hooks.
 - `CrownsMMO`: adds `/cmmo status` and blocks normal entry into unready managed terrain floors with clear admin fix steps.
 - `CrownsTerrain`: reports Floor 1 readiness through the shared TerrainProvider so MMO and Admin surfaces can diagnose generation state.
+- `CrownsTerrain + CrownsMMO`: adds the shared FloorRuntimeProvider contract, Terrain-owned runtime anchors/QA/repair steps, MMO-safe floor entry, respawn routing, and reconnect routing.
 - `downloads`: the verification script packages only current jars and refreshes checksums.
 
 ## 1.3.0 Highlights
@@ -121,6 +122,13 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - Blocks normal player teleports into unready managed floors until generation reaches `CRITICAL_READY`.
 - CrownsMMO falls back to normal world creation and non-terrain quest behavior when CrownsTerrain is not installed.
 
+## CrownsTerrain + CrownsMMO 1.8.0
+
+- Adds a shared Floor Runtime Platform so Terrain owns floor state, anchors, QA lines, repair steps, and safe readiness.
+- Adds `/cterrain floor status 1`, `/cterrain floor repair 1`, `/cterrain floor anchors 1`, `/cterrain floor pregenerate 1 critical`, and `/cterrain floor qa 1`.
+- Updates `/cmmo status` to show Floor Runtime state and repair steps when Floor 1 is blocked.
+- Routes `/cmmo start`, `/cmmo floor 1`, respawns, and reconnects through safe Floor Runtime anchors when CrownsTerrain is installed and ready.
+
 ## Resource Pack 1.5.0
 
 - Full Dark Arcane redraw for the suite branding pack.
@@ -130,6 +138,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.3.0`; CrownsMMO is `1.7.0` and CrownsTerrain is `1.7.0`.
+- Suite-core plugin versions are currently aligned to `1.4.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.0`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

@@ -2,6 +2,8 @@ package com.xkstudios.crowns.mmo.floor;
 
 import com.xkstudios.crowns.CrownsPlugin;
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.FloorRuntimeProvider;
+import com.xkstudios.crowns.api.FloorRuntimeSnapshot;
 import com.xkstudios.crowns.api.TerrainPoint;
 import com.xkstudios.crowns.api.TerrainProvider;
 import com.xkstudios.crowns.data.DataManager;
@@ -141,11 +143,17 @@ public class MmoFloorManager {
             player.sendMessage(Component.text(this.formatUnlockLine(player, floorNumber), NamedTextColor.RED));
             return false;
         }
+        FloorRuntimeSnapshot runtime = this.runtimeSnapshot(floorNumber);
+        if (runtime != null && !runtime.safeReady()) {
+            player.sendMessage(Component.text("Floor " + floorNumber + " is not ready for normal player entry yet.", NamedTextColor.RED));
+            player.sendMessage(Component.text(runtime.summary(), NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Staff fix: " + String.join(" -> ", runtime.repairSteps()), NamedTextColor.GRAY));
+            return false;
+        }
         TerrainProvider terrain = CrownsAPI.getTerrain();
-        if (terrain != null && !terrain.isFloorReadyForPlayers(floorNumber)) {
+        if (runtime == null && terrain != null && !terrain.isFloorReadyForPlayers(floorNumber)) {
             player.sendMessage(Component.text("Floor " + floorNumber + " is not ready for normal player entry yet.", NamedTextColor.RED));
             player.sendMessage(Component.text(terrain.getFloorReadinessSummary(floorNumber), NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("Staff fix: /cterrain admin blueprint " + floorNumber + ", /cterrain admin debugmaps " + floorNumber + ", /cterrain admin generate " + floorNumber + ", then /cterrain verify floor " + floorNumber + ".", NamedTextColor.GRAY));
             return false;
         }
         World world = this.ensureWorld(floor);
@@ -522,6 +530,44 @@ public class MmoFloorManager {
         return true;
     }
 
+    public Location runtimeRespawnLocation(Player player) {
+        if (player == null) {
+            return null;
+        }
+        MmoFloor floor = this.getFloor(player.getWorld());
+        if (floor == null) {
+            return null;
+        }
+        FloorRuntimeSnapshot runtime = this.runtimeSnapshot(floor.number());
+        if (runtime != null && !runtime.safeReady()) {
+            return null;
+        }
+        World world = this.ensureWorld(floor);
+        return world == null ? null : this.spawnLocation(floor, world);
+    }
+
+    public void handleReconnect(Player player) {
+        if (player == null || !this.plugin.getConfig().getBoolean("mmo.floor-runtime.return-to-floor-on-join", true)) {
+            return;
+        }
+        if (!this.plugin.getMmoManager().hasWorldProgress(player.getUniqueId(), "onboarding:first_haven_start")) {
+            return;
+        }
+        if (this.getFloor(player.getWorld()) != null) {
+            return;
+        }
+        MmoFloor floor = this.floors.get(1);
+        FloorRuntimeSnapshot runtime = this.runtimeSnapshot(1);
+        if (floor == null || runtime == null || !runtime.safeReady()) {
+            return;
+        }
+        Bukkit.getScheduler().runTaskLater(this.plugin, () -> {
+            if (player.isOnline() && this.getFloor(player.getWorld()) == null) {
+                this.teleportToFloor(player, 1);
+            }
+        }, 20L);
+    }
+
     private void applyFirstHavenSpawn(MmoFloor floor, World world) {
         Location spawn = this.firstHavenSpawn(floor, world);
         if (spawn != null) {
@@ -530,6 +576,13 @@ public class MmoFloorManager {
     }
 
     private Location firstHavenSpawn(MmoFloor floor, World world) {
+        FloorRuntimeSnapshot runtime = this.runtimeSnapshot(floor.number());
+        TerrainPoint runtimeAnchor = runtime == null ? null : runtime.anchor("first-haven");
+        if (runtimeAnchor != null) {
+            world.getChunkAt(runtimeAnchor.x() >> 4, runtimeAnchor.z() >> 4).load(true);
+            int y = Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(runtimeAnchor.x(), runtimeAnchor.z()) + 1);
+            return new Location(world, runtimeAnchor.x() + 0.5D, y, runtimeAnchor.z() + 0.5D, 0.0F, 0.0F);
+        }
         TerrainProvider terrain = CrownsAPI.getTerrain();
         if (terrain == null) {
             return null;
@@ -544,6 +597,11 @@ public class MmoFloorManager {
         world.getChunkAt(point.x() >> 4, point.z() >> 4).load(true);
         int y = Math.max(world.getMinHeight() + 2, world.getHighestBlockYAt(point.x(), point.z()) + 1);
         return new Location(world, point.x() + 0.5D, y, point.z() + 0.5D, 0.0F, 0.0F);
+    }
+
+    private FloorRuntimeSnapshot runtimeSnapshot(int floorNumber) {
+        FloorRuntimeProvider runtimeProvider = CrownsAPI.getFloorRuntime();
+        return runtimeProvider == null ? null : runtimeProvider.getFloorRuntime(floorNumber);
     }
 
     private Location ensureBossLocation(MmoFloor floor) {

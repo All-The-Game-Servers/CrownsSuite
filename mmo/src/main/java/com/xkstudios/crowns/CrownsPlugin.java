@@ -1,6 +1,7 @@
 package com.xkstudios.crowns;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import com.xkstudios.crowns.api.FloorRuntimeSnapshot;
 import com.xkstudios.crowns.api.ModuleDescriptor;
 import com.xkstudios.crowns.api.ModuleHealth;
 import com.xkstudios.crowns.api.ServiceState;
@@ -61,7 +62,7 @@ public class CrownsPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"),
-                List.of("mmo", "floors", "quests", "skills", "parties", "guilds")
+                List.of("mmo", "floors", "quests", "skills", "parties", "guilds", "floor-runtime-consumer")
         ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "mmo",
@@ -129,7 +130,7 @@ public class CrownsPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"),
-                List.of("mmo", "floors", "quests", "skills", "parties", "guilds")
+                List.of("mmo", "floors", "quests", "skills", "parties", "guilds", "floor-runtime-consumer")
         );
         List<String> warnings = new java.util.ArrayList<>();
         if (this.mmoManager == null || this.floorManager == null || this.questManager == null) {
@@ -138,8 +139,13 @@ public class CrownsPlugin extends JavaPlugin {
         TerrainProvider terrain = CrownsAPI.getTerrain();
         if (terrain == null) {
             warnings.add("CrownsTerrain is missing; Floor 1 uses fallback world generation and route checks are unavailable.");
-        } else if (!terrain.isFloorReadyForPlayers(1)) {
-            warnings.add("Floor 1 is not player-ready: " + terrain.getFloorReadinessSummary(1));
+        } else if (CrownsAPI.getFloorRuntime() == null) {
+            warnings.add("CrownsTerrain did not expose the FloorRuntimeProvider contract.");
+        } else {
+            FloorRuntimeSnapshot floorRuntime = CrownsAPI.getFloorRuntime().getFloorRuntime(1);
+            if (!floorRuntime.safeReady()) {
+                warnings.add("Floor 1 is not SAFE_READY: " + floorRuntime.summary());
+            }
         }
         if (CrownsAPI.getEconomy() == null) {
             warnings.add("CrownsEconomy is missing; quest currency rewards and trade hooks are skipped.");

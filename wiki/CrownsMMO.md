@@ -176,6 +176,19 @@ Staff commands:
 - `/cmmo admin quest debug <player>`
 - `/cmmo admin quest inspect <player>`
 
+## 1.8.0 Floor Runtime Platform
+
+CrownsMMO `1.8.0` connects floor gameplay to the new CrownsTerrain runtime contract instead of blindly teleporting players into whatever world exists.
+
+- `/cmmo status` now reports whether Floor 1 is safe, blocked, degraded, or missing Terrain runtime data.
+- `/cmmo start` and `/cmmo floor 1` use CrownsTerrain runtime anchors when the floor is `SAFE_READY`.
+- Normal player entry is blocked when Terrain says the floor is not ready, with clear admin repair steps.
+- Death respawns inside MMO floors are redirected to the safe Floor 1 anchor when CrownsTerrain is installed and ready.
+- Reconnect handling can return onboarded players to Floor 1 when they join outside a managed MMO floor.
+- CrownsMMO still degrades safely if CrownsTerrain is missing, but that fallback is clearly labeled as degraded mode.
+
+Staff should use `/cterrain floor status 1`, `/cterrain floor anchors 1`, `/cterrain floor pregenerate 1 critical`, and `/cterrain floor qa 1` to prepare and diagnose Floor 1 before sending players through `/cmmo start`.
+
 ## Season 2 Direction
 
 CrownsMMO is intended for Season 2 rather than as a mid-season replacement.

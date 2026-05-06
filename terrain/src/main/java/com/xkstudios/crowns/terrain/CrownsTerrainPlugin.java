@@ -21,6 +21,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         this.menuManager = new TerrainMenuManager(this);
         this.terrainManager.initialize();
         CrownsAPI.setTerrainProvider(this.terrainManager);
+        CrownsAPI.setFloorRuntimeProvider(this.terrainManager);
         CrownsAPI.registerModule(new ModuleDescriptor(
                 "terrain",
                 "CrownsTerrain",
@@ -29,7 +30,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-readiness", "blueprints", "debug-maps")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps")
         ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "terrain",
@@ -60,6 +61,9 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         if (CrownsAPI.getTerrain() == this.terrainManager) {
             CrownsAPI.setTerrainProvider(null);
         }
+        if (CrownsAPI.getFloorRuntime() == this.terrainManager) {
+            CrownsAPI.setFloorRuntimeProvider(null);
+        }
         CrownsAPI.unregisterModule("terrain");
     }
 
@@ -80,13 +84,13 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-readiness", "blueprints", "debug-maps")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps")
         );
         List<String> warnings = new java.util.ArrayList<>();
         if (this.terrainManager == null) {
             warnings.add("TerrainManager is not initialized.");
-        } else if (!this.terrainManager.isFloorReadyForPlayers(1)) {
-            warnings.add("Floor 1 is not ready for players: " + this.terrainManager.getFloorReadinessSummary(1));
+        } else if (!this.terrainManager.getFloorRuntime(1).safeReady()) {
+            warnings.add("Floor 1 is not SAFE_READY: " + this.terrainManager.getFloorRuntime(1).summary());
         }
         String summary = this.terrainManager == null
                 ? "Terrain provider unavailable."

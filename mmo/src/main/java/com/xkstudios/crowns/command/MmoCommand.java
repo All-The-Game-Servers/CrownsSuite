@@ -277,6 +277,13 @@ public class MmoCommand implements TabExecutor {
         } else {
             sender.sendMessage("Terrain Floor 1: " + CrownsAPI.getTerrain().getFloorReadinessSummary(1));
         }
+        if (CrownsAPI.getFloorRuntime() != null) {
+            var runtime = CrownsAPI.getFloorRuntime().getFloorRuntime(1);
+            sender.sendMessage("Floor Runtime: " + runtime.state() + " | safe ready: " + runtime.safeReady());
+            if (!runtime.safeReady()) {
+                sender.sendMessage("Repair: " + String.join(" -> ", runtime.repairSteps()));
+            }
+        }
         for (ModuleHealth health : CrownsAPI.getModuleHealth()) {
             if (List.of("terrain", "economy", "events", "admin", "drugs").contains(health.descriptor().key())) {
                 sender.sendMessage("- " + health.descriptor().displayName() + ": " + health.state() + " | " + health.summary());

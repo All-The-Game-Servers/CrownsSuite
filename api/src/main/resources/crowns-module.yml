@@ -8,6 +8,7 @@ provided-services:
   - data
   - gui
   - modules
+  - floor-runtime
   - resource-pack
   - inbox
 health-checks:
