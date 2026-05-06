@@ -45,6 +45,9 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("admin")) {
             return this.handleAdmin(sender, args);
         }
+        if (args[0].equalsIgnoreCase("structure")) {
+            return this.handleStructure(sender, args);
+        }
         if (args[0].equalsIgnoreCase("floor")) {
             return this.handleFloor(sender, args);
         }
@@ -129,6 +132,46 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleStructure(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("crowns.terrain.admin") && !sender.isOp()) {
+            sender.sendMessage(Component.text("You do not have permission to use terrain structure tools.", NamedTextColor.RED));
+            return true;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(Component.text("Usage: /cterrain structure <list|info|reload|folder> [key]", NamedTextColor.YELLOW));
+            return true;
+        }
+        StructureTemplateManager templates = this.plugin.getTerrainManager().structureTemplateManager();
+        switch (args[1].toLowerCase()) {
+            case "list" -> {
+                sender.sendMessage(Component.text("CrownsTerrain Structures", NamedTextColor.GOLD));
+                sender.sendMessage(Component.text("Loaded: " + templates.count() + " | Bundled: " + templates.bundledCount() + " | Custom: " + templates.customCount(), NamedTextColor.GRAY));
+                sender.sendMessage(Component.text(String.join(", ", templates.keys()), NamedTextColor.DARK_AQUA));
+            }
+            case "info" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Usage: /cterrain structure info <key>", NamedTextColor.YELLOW));
+                    return true;
+                }
+                StructureTemplate template = templates.get(args[2]);
+                if (template == null) {
+                    sender.sendMessage(Component.text("Unknown structure '" + args[2] + "'. Use /cterrain structure list.", NamedTextColor.RED));
+                    return true;
+                }
+                sender.sendMessage(Component.text("Structure: " + template.key(), NamedTextColor.GOLD));
+                sender.sendMessage(Component.text("Size: " + template.sizeSummary(), NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("Anchor: " + template.anchorX() + ", " + template.anchorY() + ", " + template.anchorZ(), NamedTextColor.GRAY));
+            }
+            case "reload" -> {
+                this.plugin.getTerrainManager().reload();
+                sender.sendMessage(Component.text("CrownsTerrain structures reloaded. Custom templates: " + templates.customTemplateFolder().getAbsolutePath(), NamedTextColor.GREEN));
+            }
+            case "folder" -> sender.sendMessage(Component.text("Custom structure folder: " + templates.customTemplateFolder().getAbsolutePath(), NamedTextColor.YELLOW));
+            default -> sender.sendMessage(Component.text("Usage: /cterrain structure <list|info|reload|folder> [key]", NamedTextColor.YELLOW));
+        }
+        return true;
+    }
+
     private boolean handleFloor(CommandSender sender, String[] args) {
         if (!sender.hasPermission("crowns.terrain.admin") && !sender.isOp()) {
             sender.sendMessage(Component.text("You do not have permission to use terrain floor operations.", NamedTextColor.RED));
@@ -161,6 +204,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("CrownsTerrain", NamedTextColor.GREEN)
                 .append(Component.text(" provides hybrid route-first floor engine generation, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("Use /cterrain admin blueprint 1, /cterrain admin debugmaps 1, /cterrain admin generate 1, or /cterrain preview <floor>.", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("Use /cterrain structure folder for custom converter output, then /cterrain structure reload.", NamedTextColor.DARK_AQUA));
         if (sender instanceof Player player) {
             this.plugin.getMenuManager().openHub(player);
         }
@@ -329,7 +373,13 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin", "floor"));
+            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin", "floor", "structure"));
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("structure")) {
+            return this.match(args[1], List.of("list", "info", "reload", "folder"));
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("structure") && args[1].equalsIgnoreCase("info")) {
+            return this.match(args[2], this.plugin.getTerrainManager().structureTemplateManager().keys());
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("floor")) {
             return this.match(args[1], List.of("status", "repair", "anchors", "pregenerate", "qa"));

@@ -57,3 +57,10 @@
 - New adventurers can run `/cmmo start` to enter First Haven and begin the Floor 1 path.
 - Use `/cterrain floor status 1`, `/cterrain floor anchors 1`, and `/cterrain floor qa 1` for the new Floor Runtime Platform checks.
 - CrownsMMO `1.8.0` routes `/cmmo start`, `/cmmo floor 1`, floor deaths, and reconnect recovery through safe CrownsTerrain runtime anchors once Floor 1 is ready.
+
+## CrownsTerrain Structure Pipeline
+
+- Use `tools/terrain/vox_to_ctpl.py` to convert MagicaVoxel `.vox` files into CrownsTerrain `.ctpl` templates.
+- Use `tools/terrain/blender_export_blocks.py` and `tools/terrain/json_to_ctpl.py` for Blender cube/block scenes.
+- Copy finished `.ctpl` files into the folder shown by `/cterrain structure folder`.
+- Run `/cterrain structure reload`, then confirm with `/cterrain structure list` and `/cterrain structure info <key>`.

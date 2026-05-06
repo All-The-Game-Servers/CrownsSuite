@@ -1,11 +1,15 @@
 package com.xkstudios.crowns.terrain;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +31,8 @@ public final class StructureTemplateManager {
 
     private final CrownsTerrainPlugin plugin;
     private final Map<String, StructureTemplate> templates = new HashMap<>();
+    private int bundledCount;
+    private int customCount;
 
     public StructureTemplateManager(CrownsTerrainPlugin plugin) {
         this.plugin = plugin;
@@ -34,6 +40,8 @@ public final class StructureTemplateManager {
 
     public void load() {
         this.templates.clear();
+        this.bundledCount = 0;
+        this.customCount = 0;
         for (String key : BUNDLED_TEMPLATES) {
             String path = "structures/" + key + ".ctpl";
             try (InputStream stream = this.plugin.getResource(path)) {
@@ -43,10 +51,12 @@ public final class StructureTemplateManager {
                 }
                 StructureTemplate template = this.parse(stream, key);
                 this.templates.put(template.key(), template);
+                this.bundledCount++;
             } catch (IOException | IllegalArgumentException exception) {
                 this.plugin.getLogger().warning("[CrownsTerrain] Could not load structure template '" + key + "': " + exception.getMessage());
             }
         }
+        this.loadCustomTemplates();
     }
 
     public StructureTemplate get(String key) {
@@ -55,6 +65,50 @@ public final class StructureTemplateManager {
 
     public int count() {
         return this.templates.size();
+    }
+
+    public int bundledCount() {
+        return this.bundledCount;
+    }
+
+    public int customCount() {
+        return this.customCount;
+    }
+
+    public File customTemplateFolder() {
+        return new File(this.plugin.getDataFolder(), "structures");
+    }
+
+    public List<String> keys() {
+        return this.templates.keySet().stream().sorted().toList();
+    }
+
+    public Collection<StructureTemplate> templates() {
+        return this.templates.values().stream()
+                .sorted(Comparator.comparing(StructureTemplate::key))
+                .toList();
+    }
+
+    private void loadCustomTemplates() {
+        File folder = this.customTemplateFolder();
+        if (!folder.exists() && !folder.mkdirs()) {
+            this.plugin.getLogger().warning("[CrownsTerrain] Could not create custom structure folder: " + folder.getAbsolutePath());
+            return;
+        }
+        File[] files = folder.listFiles((dir, name) -> name.toLowerCase(Locale.ROOT).endsWith(".ctpl"));
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            try (InputStream stream = new FileInputStream(file)) {
+                String fallbackKey = file.getName().substring(0, file.getName().length() - ".ctpl".length()).toLowerCase(Locale.ROOT);
+                StructureTemplate template = this.parse(stream, fallbackKey);
+                this.templates.put(template.key(), template);
+                this.customCount++;
+            } catch (IOException | IllegalArgumentException exception) {
+                this.plugin.getLogger().warning("[CrownsTerrain] Could not load custom structure template '" + file.getName() + "': " + exception.getMessage());
+            }
+        }
     }
 
     private StructureTemplate parse(InputStream stream, String fallbackKey) throws IOException {

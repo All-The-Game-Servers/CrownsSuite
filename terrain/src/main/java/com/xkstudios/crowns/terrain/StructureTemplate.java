@@ -65,6 +65,26 @@ public final class StructureTemplate {
         return this.blocks;
     }
 
+    public int width() {
+        return this.maxX - this.minX + 1;
+    }
+
+    public int height() {
+        return this.maxY - this.minY + 1;
+    }
+
+    public int depth() {
+        return this.maxZ - this.minZ + 1;
+    }
+
+    public int blockCount() {
+        return this.blocks.size();
+    }
+
+    public String sizeSummary() {
+        return this.width() + "x" + this.height() + "x" + this.depth() + " (" + this.blockCount() + " blocks)";
+    }
+
     public List<int[]> footprint(int rotation) {
         List<int[]> points = new ArrayList<>();
         for (int x = this.minX; x <= this.maxX; x++) {

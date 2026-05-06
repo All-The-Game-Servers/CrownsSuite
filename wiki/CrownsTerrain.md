@@ -203,3 +203,16 @@ CrownsTerrain `1.8.0` becomes the runtime owner for managed MMO floor readiness.
 - Terrain health now warns the suite when Floor 1 is not safe for players, so admins can catch broken setup before launch.
 
 The goal of `1.8.0` is not to expand every part of Floor 1. It locks down the vertical slice: First Haven, road route, starter camp, shrine, waystone, farm route, arena approach, and First Gate arena must be ready before normal MMO entry feels safe.
+
+## 1.8.1 Structure Converter Pipeline
+
+CrownsTerrain `1.8.1` adds the first usable bridge between external block-art tools and the plugin's floor renderer.
+
+- Custom `.ctpl` templates can be dropped into `plugins/CrownsTerrain/structures`.
+- Custom templates load alongside bundled templates and can override bundled keys for rapid replacement.
+- `/cterrain structure folder` shows the exact server folder to copy converter output into.
+- `/cterrain structure reload` reloads config, points, blueprints, bundled templates, and custom templates.
+- `/cterrain structure list` and `/cterrain structure info <key>` help confirm that a converted structure loaded correctly.
+- Repo tools under `tools/terrain` convert MagicaVoxel `.vox` and Blender-style block JSON into `.ctpl`.
+
+This is the start of the authored-map workflow: build structures with voxel/block tools, convert them, load them into CrownsTerrain, then use them as high-quality pieces for First Haven, roads, camps, shrines, arenas, and future floor zones.

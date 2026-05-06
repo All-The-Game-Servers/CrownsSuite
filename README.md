@@ -2,7 +2,7 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO and CrownsTerrain are now on their paired `1.8.0` Floor Runtime Platform line.
+`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.1` with the first custom structure converter pipeline.
 
 It currently includes:
 
@@ -26,7 +26,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsEvents-1.4.0.jar`
 - `CrownsDrugs-1.4.0.jar`
 - `CrownsMMO-1.8.0.jar`
-- `CrownsTerrain-1.8.0.jar`
+- `CrownsTerrain-1.8.1.jar`
 - `CrownsSuite-ResourcePack-1.5.0.zip`
 - `CrownsSuite-ResourcePack-1.5.0.sha1`
 
@@ -129,6 +129,13 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - Updates `/cmmo status` to show Floor Runtime state and repair steps when Floor 1 is blocked.
 - Routes `/cmmo start`, `/cmmo floor 1`, respawns, and reconnects through safe Floor Runtime anchors when CrownsTerrain is installed and ready.
 
+## CrownsTerrain 1.8.1
+
+- Adds the first custom structure pipeline for authored floor-map pieces.
+- Loads custom `.ctpl` templates from `plugins/CrownsTerrain/structures` in addition to bundled templates.
+- Adds `/cterrain structure list`, `/cterrain structure info <key>`, `/cterrain structure folder`, and `/cterrain structure reload`.
+- Adds converter scripts under `tools/terrain` for MagicaVoxel `.vox`, Blender block JSON, and Blender cube-scene export.
+
 ## Resource Pack 1.5.0
 
 - Full Dark Arcane redraw for the suite branding pack.
@@ -138,6 +145,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.4.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.0`.
+- Suite-core plugin versions are currently aligned to `1.4.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.1`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

@@ -787,6 +787,10 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         }
     }
 
+    public StructureTemplateManager structureTemplateManager() {
+        return this.structureTemplateManager;
+    }
+
     public void reload() {
         this.plugin.reloadConfig();
         this.pointCache.clear();
