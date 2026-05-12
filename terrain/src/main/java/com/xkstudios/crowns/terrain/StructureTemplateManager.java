@@ -14,7 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 
 public final class StructureTemplateManager {
     private static final List<String> BUNDLED_TEMPLATES = List.of(
@@ -119,7 +121,7 @@ public final class StructureTemplateManager {
         boolean inPalette = false;
         boolean inLayers = false;
         int y = 0;
-        Map<Character, Material> palette = new HashMap<>();
+        Map<Character, BlockData> palette = new HashMap<>();
         List<StructureTemplate.BlockEntry> blocks = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))) {
             String line;
@@ -156,9 +158,9 @@ public final class StructureTemplateManager {
                     int equals = trimmed.indexOf('=');
                     if (equals > 0) {
                         char symbol = trimmed.charAt(0);
-                        Material material = Material.matchMaterial(trimmed.substring(equals + 1).trim());
-                        if (material != null) {
-                            palette.put(symbol, material);
+                        BlockData blockData = parseBlockData(trimmed.substring(equals + 1).trim());
+                        if (blockData != null) {
+                            palette.put(symbol, blockData);
                         }
                     }
                     continue;
@@ -174,9 +176,9 @@ public final class StructureTemplateManager {
                         if (symbol == '.') {
                             continue;
                         }
-                        Material material = palette.get(symbol);
-                        if (material != null && material != Material.AIR) {
-                            blocks.add(new StructureTemplate.BlockEntry(x, y, z, material));
+                        BlockData blockData = palette.get(symbol);
+                        if (blockData != null && blockData.getMaterial() != Material.AIR) {
+                            blocks.add(new StructureTemplate.BlockEntry(x, y, z, blockData.getMaterial(), blockData));
                         }
                     }
                     z++;
@@ -184,5 +186,21 @@ public final class StructureTemplateManager {
             }
         }
         return new StructureTemplate(key, anchorX, anchorY, anchorZ, blocks);
+    }
+
+    private static BlockData parseBlockData(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String trimmed = value.trim();
+        Material material = Material.matchMaterial(trimmed);
+        if (material != null) {
+            return Bukkit.createBlockData(material);
+        }
+        try {
+            return Bukkit.createBlockData(trimmed);
+        } catch (IllegalArgumentException exception) {
+            return null;
+        }
     }
 }

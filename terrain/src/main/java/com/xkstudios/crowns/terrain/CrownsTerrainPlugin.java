@@ -13,12 +13,14 @@ import java.util.List;
 public class CrownsTerrainPlugin extends JavaPlugin {
     private TerrainManager terrainManager;
     private TerrainMenuManager menuManager;
+    private TerrainStudioManager studioManager;
 
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
         this.terrainManager = new TerrainManager(this);
         this.menuManager = new TerrainMenuManager(this);
+        this.studioManager = new TerrainStudioManager(this);
         this.terrainManager.initialize();
         CrownsAPI.setTerrainProvider(this.terrainManager);
         CrownsAPI.setFloorRuntimeProvider(this.terrainManager);
@@ -30,7 +32,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "structure-pipeline", "structure-studio")
         ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "terrain",
@@ -49,6 +51,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         }
         Bukkit.getPluginManager().registerEvents(new TerrainMenuListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TerrainSafetyListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new TerrainStudioListener(this), this);
         this.getLogger().info("CrownsTerrain enabled with hybrid route-first floor engine support.");
     }
 
@@ -75,6 +78,10 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         return this.menuManager;
     }
 
+    public TerrainStudioManager getStudioManager() {
+        return this.studioManager;
+    }
+
     private ModuleHealth moduleHealth() {
         ModuleDescriptor descriptor = new ModuleDescriptor(
                 "terrain",
@@ -84,7 +91,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "structure-pipeline", "structure-studio")
         );
         List<String> warnings = new java.util.ArrayList<>();
         if (this.terrainManager == null) {

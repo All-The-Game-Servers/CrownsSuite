@@ -124,7 +124,7 @@ public final class StructurePlacement {
             if (blockWorldX == worldX && blockWorldZ == worldZ) {
                 int y = this.baseY + block.y() - this.template.anchorY();
                 if (y >= chunkData.getMinHeight() && y < maxY) {
-                    chunkData.setBlock(localX, y, localZ, block.material());
+                    chunkData.setBlock(localX, y, localZ, block.blockData());
                 }
             }
         }

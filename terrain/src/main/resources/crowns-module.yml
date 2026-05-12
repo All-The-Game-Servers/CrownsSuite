@@ -1,6 +1,6 @@
 key: terrain
 name: CrownsTerrain
-version: 1.8.1
+version: 1.8.2
 required-api-version: 1.4.0
 required-dependencies:
   - CrownsAPI
@@ -13,6 +13,7 @@ provided-services:
   - blueprints
   - debug-maps
   - structure-pipeline
+  - structure-studio
 health-checks:
   - terrain-manager
   - floor-readiness

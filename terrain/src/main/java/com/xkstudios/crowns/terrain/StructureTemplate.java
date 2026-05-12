@@ -2,7 +2,9 @@ package com.xkstudios.crowns.terrain;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.data.BlockData;
 
 public final class StructureTemplate {
     private final String key;
@@ -104,6 +106,18 @@ public final class StructureTemplate {
         };
     }
 
-    public record BlockEntry(int x, int y, int z, Material material) {
+    public record BlockEntry(int x, int y, int z, Material material, BlockData blockData) {
+        public BlockEntry(int x, int y, int z, Material material) {
+            this(x, y, z, material, Bukkit.createBlockData(material));
+        }
+
+        public BlockEntry {
+            if (blockData == null) {
+                blockData = Bukkit.createBlockData(material == null ? Material.STONE : material);
+            }
+            if (material == null) {
+                material = blockData.getMaterial();
+            }
+        }
     }
 }

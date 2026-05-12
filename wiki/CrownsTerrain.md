@@ -216,3 +216,14 @@ CrownsTerrain `1.8.1` adds the first usable bridge between external block-art to
 - Repo tools under `tools/terrain` convert MagicaVoxel `.vox` and Blender-style block JSON into `.ctpl`.
 
 This is the start of the authored-map workflow: build structures with voxel/block tools, convert them, load them into CrownsTerrain, then use them as high-quality pieces for First Haven, roads, camps, shrines, arenas, and future floor zones.
+
+## 1.8.2 Structure Studio
+
+CrownsTerrain `1.8.2` adds in-game structure authoring tools on top of the `.ctpl` pipeline.
+
+- `/cterrain studio wand` gives admins a selection wand.
+- `/cterrain studio pos1` and `/cterrain studio pos2` set capture corners from the player's current block.
+- `/cterrain studio capture <key>` saves non-air blocks as `plugins/CrownsTerrain/structures/<key>.ctpl`.
+- `/cterrain studio preview <key> [rotation] [seconds]` shows player-only ghost blocks and clears them automatically.
+- `/cterrain studio place <key> [rotation]` stages real placement, and `/cterrain studio confirm` writes blocks.
+- `.ctpl` palettes now support Bukkit BlockData strings, so captured stairs, slabs, fences, trapdoors, panes, and lantern states are preserved where Paper exposes them.

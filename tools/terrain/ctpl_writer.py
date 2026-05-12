@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 
 
-SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!$%&()*+,-/:;<=>?@[]^_{|}~"
+SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!$%&()*+,-/:;<>?@[]^_{|}~"
 
 
 @dataclass(frozen=True)
@@ -78,4 +78,3 @@ def write_ctpl(path: Path, key: str, blocks: list[Block], anchor: tuple[int, int
             for z in range(0, max_z + 1):
                 row = [layer.get((x, z), ".") for x in range(0, max_x + 1)]
                 handle.write("".join(row) + "\n")
-

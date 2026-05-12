@@ -48,6 +48,9 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         if (args[0].equalsIgnoreCase("structure")) {
             return this.handleStructure(sender, args);
         }
+        if (args[0].equalsIgnoreCase("studio")) {
+            return this.handleStudio(sender, args);
+        }
         if (args[0].equalsIgnoreCase("floor")) {
             return this.handleFloor(sender, args);
         }
@@ -172,6 +175,52 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleStudio(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("crowns.terrain.admin") && !sender.isOp()) {
+            sender.sendMessage(Component.text("You do not have permission to use Structure Studio.", NamedTextColor.RED));
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("Structure Studio commands are player-only.", NamedTextColor.RED));
+            return true;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(Component.text("Usage: /cterrain studio <wand|pos1|pos2|capture|preview|place|confirm|cancel>", NamedTextColor.YELLOW));
+            return true;
+        }
+        TerrainStudioManager studio = this.plugin.getStudioManager();
+        switch (args[1].toLowerCase()) {
+            case "wand" -> studio.giveWand(player);
+            case "pos1" -> studio.setPosition(player, 1, player.getLocation());
+            case "pos2" -> studio.setPosition(player, 2, player.getLocation());
+            case "capture" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Usage: /cterrain studio capture <key>", NamedTextColor.YELLOW));
+                    return true;
+                }
+                studio.capture(player, args[2]);
+            }
+            case "preview" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Usage: /cterrain studio preview <key> [rotation] [seconds]", NamedTextColor.YELLOW));
+                    return true;
+                }
+                studio.preview(player, args[2], this.parseOptionalInt(args, 3, 0), this.parseOptionalInt(args, 4, 10));
+            }
+            case "place" -> {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("Usage: /cterrain studio place <key> [rotation]", NamedTextColor.YELLOW));
+                    return true;
+                }
+                studio.place(player, args[2], this.parseOptionalInt(args, 3, 0));
+            }
+            case "confirm" -> studio.confirm(player);
+            case "cancel" -> studio.cancel(player);
+            default -> sender.sendMessage(Component.text("Usage: /cterrain studio <wand|pos1|pos2|capture|preview|place|confirm|cancel>", NamedTextColor.YELLOW));
+        }
+        return true;
+    }
+
     private boolean handleFloor(CommandSender sender, String[] args) {
         if (!sender.hasPermission("crowns.terrain.admin") && !sender.isOp()) {
             sender.sendMessage(Component.text("You do not have permission to use terrain floor operations.", NamedTextColor.RED));
@@ -204,7 +253,7 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("CrownsTerrain", NamedTextColor.GREEN)
                 .append(Component.text(" provides hybrid route-first floor engine generation, pregeneration, landmarks, and arena locations.", NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("Use /cterrain admin blueprint 1, /cterrain admin debugmaps 1, /cterrain admin generate 1, or /cterrain preview <floor>.", NamedTextColor.YELLOW));
-        sender.sendMessage(Component.text("Use /cterrain structure folder for custom converter output, then /cterrain structure reload.", NamedTextColor.DARK_AQUA));
+        sender.sendMessage(Component.text("Use /cterrain structure folder for converter output, or /cterrain studio wand to capture/place structures in-game.", NamedTextColor.DARK_AQUA));
         if (sender instanceof Player player) {
             this.plugin.getMenuManager().openHub(player);
         }
@@ -370,16 +419,39 @@ public class TerrainCommand implements CommandExecutor, TabCompleter {
         return this.plugin.getTerrainManager().getWorldName(floor);
     }
 
+    private int parseOptionalInt(String[] args, int index, int fallback) {
+        if (args.length <= index) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(args[index]);
+        } catch (NumberFormatException exception) {
+            return fallback;
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin", "floor", "structure"));
+            return this.match(args[0], List.of("info", "preview", "villages", "verify", "admin", "floor", "structure", "studio"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("structure")) {
             return this.match(args[1], List.of("list", "info", "reload", "folder"));
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("structure") && args[1].equalsIgnoreCase("info")) {
             return this.match(args[2], this.plugin.getTerrainManager().structureTemplateManager().keys());
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("studio")) {
+            return this.match(args[1], List.of("wand", "pos1", "pos2", "capture", "preview", "place", "confirm", "cancel"));
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("studio") && (args[1].equalsIgnoreCase("preview") || args[1].equalsIgnoreCase("place"))) {
+            return this.match(args[2], this.plugin.getTerrainManager().structureTemplateManager().keys());
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("studio") && (args[1].equalsIgnoreCase("preview") || args[1].equalsIgnoreCase("place"))) {
+            return this.match(args[3], List.of("0", "1", "2", "3"));
+        }
+        if (args.length == 5 && args[0].equalsIgnoreCase("studio") && args[1].equalsIgnoreCase("preview")) {
+            return this.match(args[4], List.of("5", "10", "20", "30"));
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("floor")) {
             return this.match(args[1], List.of("status", "repair", "anchors", "pregenerate", "qa"));

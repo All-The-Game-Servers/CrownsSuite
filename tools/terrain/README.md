@@ -16,13 +16,13 @@ This folder contains offline converters for turning authored voxel/block work in
 Convert MagicaVoxel:
 
 ```powershell
-python tools\terrain\vox_to_ctpl.py D:\CrownsSuiteTools\Projects\first_haven_house.vox D:\CrownsSuiteTools\Exports\first_haven_house.ctpl
+py tools\terrain\vox_to_ctpl.py D:\CrownsSuiteTools\Projects\first_haven_house.vox D:\CrownsSuiteTools\Exports\first_haven_house.ctpl
 ```
 
 Convert block JSON:
 
 ```powershell
-python tools\terrain\json_to_ctpl.py D:\CrownsSuiteTools\Exports\first_haven_house.json D:\CrownsSuiteTools\Exports\first_haven_house.ctpl
+py tools\terrain\json_to_ctpl.py D:\CrownsSuiteTools\Exports\first_haven_house.json D:\CrownsSuiteTools\Exports\first_haven_house.ctpl
 ```
 
 Export from Blender:
@@ -36,4 +36,3 @@ Export from Blender:
 - `.ctpl` is the current CrownsTerrain template format: key, anchor, palette, and stacked layers.
 - The plugin now loads bundled templates plus custom templates from `plugins/CrownsTerrain/structures`.
 - Custom templates can override bundled keys, which is useful for replacing prototype structures without rebuilding the jar.
-

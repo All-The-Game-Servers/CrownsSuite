@@ -60,7 +60,8 @@
 
 ## CrownsTerrain Structure Pipeline
 
-- Use `tools/terrain/vox_to_ctpl.py` to convert MagicaVoxel `.vox` files into CrownsTerrain `.ctpl` templates.
+- Use `py tools/terrain/vox_to_ctpl.py` to convert MagicaVoxel `.vox` files into CrownsTerrain `.ctpl` templates.
 - Use `tools/terrain/blender_export_blocks.py` and `tools/terrain/json_to_ctpl.py` for Blender cube/block scenes.
 - Copy finished `.ctpl` files into the folder shown by `/cterrain structure folder`.
 - Run `/cterrain structure reload`, then confirm with `/cterrain structure list` and `/cterrain structure info <key>`.
+- Use `/cterrain studio wand` to select Creative builds in-game, `/cterrain studio capture <key>` to save them as `.ctpl`, and `/cterrain studio preview/place/confirm` to test them safely.
