@@ -47,8 +47,20 @@ public class EventItemFactory {
         return new ArrayList<>(this.relicDefinitions(this.activeEventKey()).values());
     }
 
+    public List<RelicDefinition> getRelics(String eventKey) {
+        return new ArrayList<>(this.relicDefinitions(eventKey).values());
+    }
+
     public List<CraftMaterialDefinition> getCraftMaterials() {
         return new ArrayList<>(this.craftMaterialDefinitions(this.activeEventKey()).values());
+    }
+
+    public List<CraftMaterialDefinition> getCraftMaterials(String eventKey) {
+        return new ArrayList<>(this.craftMaterialDefinitions(eventKey).values());
+    }
+
+    public List<RewardItemDefinition> getRewardItems(String eventKey) {
+        return new ArrayList<>(this.rewardDefinitions(eventKey).values());
     }
 
     public ItemStack createRelic(String key, int amount) {

@@ -1,6 +1,7 @@
 package com.xkstudios.crowns.event;
 
 import com.xkstudios.crowns.CrownsPlugin;
+import com.xkstudios.crowns.api.CrownsAPI;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -114,6 +115,110 @@ public class EventManager {
         return END_EVENT_KEY;
     }
 
+    public List<String> getSupportedEventKeys() {
+        return List.of(NETHER_EVENT_KEY, END_EVENT_KEY);
+    }
+
+    public String normalizeEventKey(String eventKey) {
+        if (eventKey == null || eventKey.isBlank()) {
+            return null;
+        }
+        String normalized = eventKey.trim().toLowerCase(Locale.ROOT);
+        if (normalized.equals("nether") || normalized.equals("nether-week")) {
+            return NETHER_EVENT_KEY;
+        }
+        if (normalized.equals("end") || normalized.equals("endfall") || normalized.equals("endfall-week")) {
+            return END_EVENT_KEY;
+        }
+        if (normalized.equals(NETHER_EVENT_KEY) || normalized.equals(END_EVENT_KEY)) {
+            return normalized;
+        }
+        return null;
+    }
+
+    public boolean activateEvent(String eventKey) {
+        String normalized = this.normalizeEventKey(eventKey);
+        if (normalized == null || !this.plugin.getConfig().getBoolean("events." + normalized + ".enabled", true)) {
+            return false;
+        }
+        this.saveState();
+        this.plugin.getConfig().set("events.active-event", normalized);
+        this.plugin.saveConfig();
+        this.clearBossBar();
+        this.ensureStateRow();
+        this.loadState();
+        this.syncMilestones();
+        this.syncDimensionLock();
+        this.updateBossBarViewers();
+        return true;
+    }
+
+    public boolean scheduleEvent(String eventKey, String input) {
+        return this.activateEvent(eventKey) && this.scheduleFromInput(input);
+    }
+
+    public boolean startEvent(String eventKey) {
+        if (!this.activateEvent(eventKey)) {
+            return false;
+        }
+        this.forceStart();
+        return true;
+    }
+
+    public boolean endEvent(String eventKey) {
+        return this.activateEvent(eventKey) && this.endNow();
+    }
+
+    public List<String> dryRun(String eventKey) {
+        String normalized = this.normalizeEventKey(eventKey);
+        if (normalized == null) {
+            return List.of("Unknown event key: " + eventKey);
+        }
+        List<String> lines = new ArrayList<>();
+        boolean active = normalized.equalsIgnoreCase(this.getActiveEventKey());
+        lines.add("Event: " + this.getTitle(normalized) + " (" + normalized + ")");
+        lines.add("Enabled: " + this.plugin.getConfig().getBoolean("events." + normalized + ".enabled", true));
+        lines.add("Currently active: " + active);
+        lines.add("State: " + (active ? this.state.name() : this.getStoredStateLabel(normalized)));
+        lines.add("Schedule: " + this.plugin.getConfig().getString("events." + normalized + ".start-time", "not set"));
+        lines.add("Duration: " + this.plugin.getConfig().getInt("events." + normalized + ".duration-days", 7) + " day(s)");
+        lines.add("Dimension lock: " + (this.isDimensionLockEnabled(normalized) ? this.dimensionLockKey(normalized) + "=" + this.plugin.getConfig().getBoolean(this.dimensionLockKey(normalized), true) : "disabled"));
+        lines.add("Relics: " + this.itemFactory.getRelics(normalized).size());
+        lines.add("Reward items: " + this.itemFactory.getRewardItems(normalized).size());
+        lines.add("Personal rewards: " + this.getConfiguredRewards(normalized).size());
+        lines.add("Milestones: " + this.getConfiguredMilestones(normalized).size());
+        lines.add("Economy rewards: " + (CrownsAPI.getEconomy() == null ? "degraded (CrownsEconomy missing)" : "ready"));
+        List<String> warnings = new ArrayList<>();
+        if (!this.plugin.getConfig().getBoolean("events." + normalized + ".enabled", true)) {
+            warnings.add("Event is disabled in config.");
+        }
+        if (this.itemFactory.getRelics(normalized).isEmpty()) {
+            warnings.add("No relic definitions are available.");
+        }
+        if (this.getConfiguredRewards(normalized).isEmpty()) {
+            warnings.add("No personal rewards are available.");
+        }
+        if (this.getConfiguredMilestones(normalized).isEmpty()) {
+            warnings.add("No milestones are available.");
+        }
+        long blankModels = this.itemFactory.getRelics(normalized).stream().filter(relic -> relic.modelPath() == null || relic.modelPath().isBlank()).count()
+                + this.itemFactory.getRewardItems(normalized).stream().filter(item -> item.modelPath() == null || item.modelPath().isBlank()).count()
+                + this.itemFactory.getCraftMaterials(normalized).stream().filter(item -> item.modelPath() == null || item.modelPath().isBlank()).count();
+        if (blankModels > 0L) {
+            warnings.add(blankModels + " item model path(s) are blank.");
+        }
+        lines.add(warnings.isEmpty() ? "Readiness: ready" : "Readiness: degraded");
+        warnings.forEach(warning -> lines.add("Warning: " + warning));
+        return lines;
+    }
+
+    public Boolean getDimensionLockedOverride(World.Environment environment) {
+        if (environment != this.eventEnvironment() || !this.isDimensionLockEnabled()) {
+            return null;
+        }
+        return this.plugin.getConfig().getBoolean(this.dimensionLockKey(), true);
+    }
+
     public boolean isEndEvent() {
         return END_EVENT_KEY.equalsIgnoreCase(this.getActiveEventKey());
     }
@@ -151,7 +256,11 @@ public class EventManager {
     }
 
     private String eventRoot() {
-        return "events." + this.getActiveEventKey();
+        return this.eventRoot(this.getActiveEventKey());
+    }
+
+    private String eventRoot(String eventKey) {
+        return "events." + eventKey;
     }
 
     private World.Environment eventEnvironment() {
@@ -159,7 +268,19 @@ public class EventManager {
     }
 
     private String dimensionLockKey() {
-        return this.isEndEvent() ? "dimensions.end-locked" : "dimensions.nether-locked";
+        return this.dimensionLockKey(this.getActiveEventKey());
+    }
+
+    private String dimensionLockKey(String eventKey) {
+        return this.isEndEvent(eventKey) ? "dimensions.end-locked" : "dimensions.nether-locked";
+    }
+
+    private boolean isDimensionLockEnabled() {
+        return this.isDimensionLockEnabled(this.getActiveEventKey());
+    }
+
+    private boolean isDimensionLockEnabled(String eventKey) {
+        return this.plugin.getConfig().getBoolean(this.eventRoot(eventKey) + ".dimension-lock.enabled", true);
     }
 
     public String getTitle() {
@@ -269,7 +390,8 @@ public class EventManager {
     }
 
     public String getDimensionLockMessage(World.Environment environment) {
-        if (environment != this.eventEnvironment() || !this.plugin.getConfig().getBoolean(this.dimensionLockKey(), true)) {
+        if (environment != this.eventEnvironment() || !this.isDimensionLockEnabled()
+                || !this.plugin.getConfig().getBoolean(this.dimensionLockKey(), true)) {
             return null;
         }
         if (!this.isEnabled()) {
@@ -444,8 +566,10 @@ public class EventManager {
         this.endAt = 0L;
         this.pausedRemainingMs = 0L;
         this.announcedCheckpoints.clear();
-        this.plugin.getConfig().set(this.dimensionLockKey(), true);
-        this.plugin.saveConfig();
+        if (this.isDimensionLockEnabled()) {
+            this.plugin.getConfig().set(this.dimensionLockKey(), true);
+            this.plugin.saveConfig();
+        }
         this.saveState();
         this.broadcast(Component.text(this.getTitle() + " scheduled for " + this.formatTimestamp(parsed) + ".", NamedTextColor.GOLD));
         return true;
@@ -1171,13 +1295,22 @@ public class EventManager {
             this.endAt = now + Duration.ofDays(this.getDurationDays()).toMillis();
         }
         this.pausedRemainingMs = 0L;
-        this.plugin.getConfig().set(this.dimensionLockKey(), false);
-        this.plugin.saveConfig();
+        if (this.isDimensionLockEnabled()) {
+            this.plugin.getConfig().set(this.dimensionLockKey(), false);
+            this.plugin.saveConfig();
+        }
         this.saveState();
-        this.broadcast(Component.text(this.getTitle() + " has begun. " + this.getDimensionName() + " is now open!", NamedTextColor.RED));
-        this.broadcast(Component.text(this.isEndEvent()
-                ? "Recover void relics, gather craft materials, and claim rewards with /ce event."
-                : "Recover relics, turn them in from /ce relics, and claim rewards with /ce event.", NamedTextColor.GOLD));
+        List<String> configuredMessages = this.plugin.getConfig().getStringList(this.eventRoot() + ".broadcasts.start");
+        if (configuredMessages.isEmpty()) {
+            this.broadcast(Component.text(this.getTitle() + " has begun. " + this.getDimensionName() + " is now open!", NamedTextColor.RED));
+            this.broadcast(Component.text(this.isEndEvent()
+                    ? "Recover void relics, gather craft materials, and claim rewards with /ce event."
+                    : "Recover relics, turn them in from /ce relics, and claim rewards with /ce event.", NamedTextColor.GOLD));
+        } else {
+            for (String line : configuredMessages) {
+                this.broadcast(Component.text(line, NamedTextColor.GOLD));
+            }
+        }
         if (this.isEndEvent()) {
             this.triggerLiveMoment("dragon-ceremony", "Dragon Ceremony",
                     "The End has opened. Rally at the central island and begin the first expedition.",
@@ -1233,6 +1366,21 @@ public class EventManager {
         this.seedCheckpointState();
     }
 
+    private String getStoredStateLabel(String eventKey) {
+        try (PreparedStatement statement = this.plugin.getDataManager().getConnection().prepareStatement(
+                "SELECT state FROM server_event_state WHERE event_key = ?")) {
+            statement.setString(1, eventKey);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("state");
+                }
+            }
+        } catch (SQLException exception) {
+            this.plugin.getLogger().warning("[Events] State dry-run lookup failed: " + exception.getMessage());
+        }
+        return "not initialized";
+    }
+
     private void saveState() {
         try (PreparedStatement statement = this.plugin.getDataManager().getConnection().prepareStatement(
                 "UPDATE server_event_state SET display_name = ?, state = ?, previous_state = ?, scheduled_start_at = ?, live_at = ?, end_at = ?, paused_remaining_ms = ?, updated_at = ? WHERE event_key = ?")) {
@@ -1264,8 +1412,10 @@ public class EventManager {
             this.resumeState = EventState.LIVE;
             this.liveAt = configured;
             this.endAt = configured + Duration.ofDays(this.getDurationDays()).toMillis();
-            this.plugin.getConfig().set(this.dimensionLockKey(), false);
-            this.plugin.saveConfig();
+            if (this.isDimensionLockEnabled()) {
+                this.plugin.getConfig().set(this.dimensionLockKey(), false);
+                this.plugin.saveConfig();
+            }
         } else {
             this.scheduledStartAt = configured;
             this.state = configured - System.currentTimeMillis() <= this.getCountdownThresholdMs() ? EventState.COUNTDOWN : EventState.SCHEDULED;
@@ -1526,7 +1676,8 @@ public class EventManager {
     }
 
     private void syncDimensionLock() {
-        if ((this.state == EventState.LIVE || this.state == EventState.ENDED)
+        if (this.isDimensionLockEnabled()
+                && (this.state == EventState.LIVE || this.state == EventState.ENDED)
                 && this.plugin.getConfig().getBoolean(this.dimensionLockKey(), true)) {
             this.plugin.getConfig().set(this.dimensionLockKey(), false);
             this.plugin.saveConfig();

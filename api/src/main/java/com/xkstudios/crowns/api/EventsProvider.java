@@ -5,6 +5,10 @@ import org.bukkit.World;
 public interface EventsProvider {
     String getDimensionLockMessage(World.Environment environment);
 
+    default Boolean getDimensionLockedOverride(World.Environment environment) {
+        return null;
+    }
+
     default String getActiveEventLabel() {
         return "No active event";
     }

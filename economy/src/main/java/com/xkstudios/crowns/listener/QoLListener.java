@@ -140,6 +140,10 @@ implements Listener {
     }
 
     private boolean isLocked(World.Environment env) {
+        Boolean eventOverride = this.plugin.getEventManager() == null ? null : this.plugin.getEventManager().getDimensionLockedOverride(env);
+        if (eventOverride != null) {
+            return eventOverride;
+        }
         if (env == World.Environment.NETHER) {
             return this.plugin.getConfig().getBoolean("dimensions.nether-locked", true);
         }

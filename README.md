@@ -2,7 +2,7 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.2` with the first in-game Structure Studio pipeline.
+`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsEvents is on `1.5.0` with the Season 1 vanilla Endfall Opening Week, CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.2` with the first in-game Structure Studio pipeline.
 
 It currently includes:
 
@@ -23,7 +23,7 @@ Only the latest supported build for each plugin/resource pack is kept in that fo
 - `CrownsAPI-1.4.0.jar`
 - `CrownsEconomy-1.4.0.jar`
 - `CrownsAdmin-1.4.0.jar`
-- `CrownsEvents-1.4.0.jar`
+- `CrownsEvents-1.5.0.jar`
 - `CrownsDrugs-1.4.0.jar`
 - `CrownsMMO-1.8.0.jar`
 - `CrownsTerrain-1.8.2.jar`
@@ -74,6 +74,14 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - `CrownsTerrain`: reports Floor 1 readiness through the shared TerrainProvider so MMO and Admin surfaces can diagnose generation state.
 - `CrownsTerrain + CrownsMMO`: adds the shared FloorRuntimeProvider contract, Terrain-owned runtime anchors/QA/repair steps, MMO-safe floor entry, respawn routing, and reconnect routing.
 - `downloads`: the verification script packages only current jars and refreshes checksums.
+
+## CrownsEvents 1.5.0
+
+- Ships Season 1 `Endfall Opening Week` as a vanilla End event with no CrownsMMO or CrownsTerrain dependency.
+- Keeps safe install defaults: Nether Week remains the active event until staff run `/events admin activate end-opening`.
+- Adds `/events admin activate <event>`, `/events admin schedule <event> <yyyy-MM-dd HH:mm>`, `/events admin start <event>`, `/events admin end <event>`, and `/events admin dryrun <event>`.
+- Adds explicit Endfall config for guide text, relics, rewards, milestones, source drops, elite pressure, and End dimension-lock control.
+- Keeps Nether Week and Endfall archive pages viewable without mixing progress, rewards, logs, or cache claims.
 
 ## 1.3.0 Highlights
 
@@ -152,6 +160,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.4.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.2`.
+- Suite-core plugin versions are currently aligned to `1.4.0` except CrownsEvents at `1.5.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.2`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

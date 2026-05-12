@@ -14,6 +14,7 @@
 
 - Minimum viable suite: `CrownsAPI` plus any one feature plugin.
 - Recommended general SMP stack: `CrownsAPI`, `CrownsEconomy`, `CrownsAdmin`, and `CrownsEvents`.
+- Recommended Season 1 Endfall stack: `CrownsAPI`, `CrownsEconomy`, `CrownsAdmin`, and `CrownsEvents`; CrownsMMO and CrownsTerrain are not required.
 - Recommended Season 2 / MMO stack: all current jars, with `CrownsTerrain` installed before players use `/cmmo start`.
 - `CrownsMMO` can run without optional modules, but it will show degraded status when Terrain, Economy, Events, Admin, or Drugs are missing.
 
@@ -29,11 +30,11 @@
 2. Install only the current jars from `downloads`.
 3. Start the server and run `/capi status` or `/capi modules`.
 4. Confirm `/capi downloads` lists the expected jar/resource-pack versions.
-5. Run `/cterrain admin blueprint 1`.
-6. Run `/cterrain admin debugmaps 1`.
-7. Run `/cterrain admin generate 1`.
-8. Wait for `/cterrain admin status 1` to show a player-ready state.
-9. Run `/cterrain verify floor 1`.
+5. For Season 1 Endfall, run `/events admin dryrun end-opening`.
+6. Run `/events admin activate end-opening` only when staff are ready to prepare Endfall.
+7. Run `/events admin schedule end-opening <yyyy-MM-dd HH:mm>` or `/events admin start end-opening`.
+8. For Season 2 / MMO testing, run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`.
+9. Wait for `/cterrain admin status 1` to show a player-ready state, then run `/cterrain verify floor 1`.
 10. Test `/cmmo status`, then `/cmmo start`.
 
 ## Resource Pack

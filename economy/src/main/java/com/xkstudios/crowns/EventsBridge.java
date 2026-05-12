@@ -9,4 +9,9 @@ public class EventsBridge {
         EventsProvider provider = CrownsAPI.getEvents();
         return provider == null ? null : provider.getDimensionLockMessage(environment);
     }
+
+    public Boolean getDimensionLockedOverride(World.Environment environment) {
+        EventsProvider provider = CrownsAPI.getEvents();
+        return provider == null ? null : provider.getDimensionLockedOverride(environment);
+    }
 }

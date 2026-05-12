@@ -67,6 +67,11 @@ public class CrownsPlugin extends JavaPlugin {
             }
 
             @Override
+            public Boolean getDimensionLockedOverride(World.Environment environment) {
+                return eventManager.getDimensionLockedOverride(environment);
+            }
+
+            @Override
             public String getActiveEventLabel() {
                 return eventManager.getMenuLabel();
             }
@@ -169,6 +174,12 @@ public class CrownsPlugin extends JavaPlugin {
         }
         if (CrownsAPI.getEconomy() == null) {
             warnings.add("CrownsEconomy is missing; currency rewards will be skipped.");
+        }
+        if (this.eventManager != null) {
+            this.eventManager.dryRun(this.eventManager.getActiveEventKey()).stream()
+                    .filter(line -> line.startsWith("Warning:"))
+                    .map(line -> line.substring("Warning:".length()).trim())
+                    .forEach(warnings::add);
         }
         String summary = this.eventManager == null
                 ? "Event framework unavailable."

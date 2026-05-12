@@ -111,9 +111,34 @@ public class EventsCommand implements CommandExecutor, TabCompleter {
         }
         EventManager manager = this.plugin.getEventManager();
         switch (args[1].toLowerCase(Locale.ROOT)) {
-            case "start" -> manager.forceStart();
-            case "stop", "end" -> manager.endNow();
+            case "activate" -> {
+                if (args.length < 3) {
+                    player.sendMessage(Component.text("Usage: /events admin activate <nether-opening|end-opening>", NamedTextColor.RED));
+                    return true;
+                }
+                boolean activated = manager.activateEvent(args[2]);
+                player.sendMessage(Component.text(activated ? "Active event changed to " + manager.getMenuLabel() + "." : "Unknown or disabled event.", activated ? NamedTextColor.GREEN : NamedTextColor.RED));
+            }
+            case "start" -> {
+                boolean started = args.length >= 3 ? manager.startEvent(args[2]) : this.startCurrent(manager);
+                player.sendMessage(Component.text(started ? "Event started." : "Could not start that event.", started ? NamedTextColor.GREEN : NamedTextColor.RED));
+            }
+            case "stop", "end" -> {
+                boolean ended = args.length >= 3 ? manager.endEvent(args[2]) : manager.endNow();
+                player.sendMessage(Component.text(ended ? "Event ended." : "Could not end that event.", ended ? NamedTextColor.YELLOW : NamedTextColor.RED));
+            }
             case "pause" -> manager.togglePause();
+            case "dryrun" -> {
+                if (args.length < 3) {
+                    player.sendMessage(Component.text("Usage: /events admin dryrun <nether-opening|end-opening>", NamedTextColor.RED));
+                    return true;
+                }
+                player.sendMessage(Component.text("=== Event Dry Run ===", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD));
+                for (String line : manager.dryRun(args[2])) {
+                    player.sendMessage(Component.text(line, line.startsWith("Warning:") ? NamedTextColor.YELLOW : NamedTextColor.GRAY));
+                }
+                return true;
+            }
             case "live" -> {
                 if (args.length >= 3) {
                     String action = args[2].toLowerCase(Locale.ROOT);
@@ -138,8 +163,12 @@ public class EventsCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case "schedule" -> {
-                if (args.length >= 3) {
-                    manager.scheduleFromInput(String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+                if (args.length >= 4 && manager.normalizeEventKey(args[2]) != null) {
+                    boolean scheduled = manager.scheduleEvent(args[2], String.join(" ", Arrays.copyOfRange(args, 3, args.length)));
+                    player.sendMessage(Component.text(scheduled ? "Event scheduled." : "Could not schedule that event.", scheduled ? NamedTextColor.GREEN : NamedTextColor.RED));
+                } else if (args.length >= 3) {
+                    boolean scheduled = manager.scheduleFromInput(String.join(" ", Arrays.copyOfRange(args, 2, args.length)));
+                    player.sendMessage(Component.text(scheduled ? "Event scheduled." : "Could not schedule that time.", scheduled ? NamedTextColor.GREEN : NamedTextColor.RED));
                 }
             }
             case "reset" -> {
@@ -163,7 +192,13 @@ public class EventsCommand implements CommandExecutor, TabCompleter {
                 "/events guide",
                 "/events turnin <hand|all>",
                 "/events admin schedule <yyyy-MM-dd HH:mm>",
+                "/events admin activate <nether-opening|end-opening>",
+                "/events admin schedule <event> <yyyy-MM-dd HH:mm>",
                 "/events admin start",
+                "/events admin start <event>",
+                "/events admin end <event>",
+                "/events admin stop <event>",
+                "/events admin dryrun <event>",
                 "/events admin live list",
                 "/events admin live start <dragon-ceremony|expedition|boss-rush>",
                 "/events admin live stop <key>",
@@ -182,7 +217,11 @@ public class EventsCommand implements CommandExecutor, TabCompleter {
             return this.filter(List.of("hand", "all"), args[1]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
-            return this.filter(List.of("schedule", "start", "pause", "end", "reset", "live"), args[1]);
+            return this.filter(List.of("activate", "schedule", "start", "pause", "end", "reset", "dryrun", "live"), args[1]);
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin")
+                && List.of("activate", "schedule", "start", "stop", "end", "dryrun").contains(args[1].toLowerCase(Locale.ROOT))) {
+            return this.filter(List.of("nether-opening", "end-opening"), args[2]);
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("live")) {
             return this.filter(List.of("list", "start", "stop"), args[2]);
@@ -209,6 +248,11 @@ public class EventsCommand implements CommandExecutor, TabCompleter {
             case "expedition" -> "An exploration push has begun. Survey caches and landmarks are the focus right now.";
             default -> "A staff-run live moment is active.";
         };
+    }
+
+    private boolean startCurrent(EventManager manager) {
+        manager.forceStart();
+        return true;
     }
 
     private List<String> filter(List<String> values, String prefix) {

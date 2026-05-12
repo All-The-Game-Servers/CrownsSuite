@@ -2,7 +2,7 @@
 
 Crowns Suite is the Lowlight SMP management toolkit by XKStudios. It is split into focused plugins so the server can grow without one giant jar doing everything.
 
-`1.4.0` focuses on platform cohesion, module diagnostics, cleaner owner/admin workflows, and tighter MMO/Terrain/Economy/Admin integration.
+`1.4.0` focuses on platform cohesion, module diagnostics, cleaner owner/admin workflows, and tighter MMO/Terrain/Economy/Admin integration. CrownsEvents is currently `1.5.0` for the Season 1 vanilla Endfall Opening Week.
 
 ## Plugins
 
@@ -43,6 +43,7 @@ The seasonal content and server event framework.
 - Event lifecycle management
 - Relics, milestones, and rewards
 - Opening-week style SMP content
+- Season 1 Endfall Opening Week for the vanilla End dimension
 - Admin-triggered live moments for ceremonies and future server events
 - Reusable suite activity hooks for MMO floor clears, economy milestones, terrain discoveries, and future ceremonies
 
