@@ -33,34 +33,41 @@
 5. For Season 1 Endfall, run `/events admin dryrun end-opening`.
 6. Run `/events admin activate end-opening` only when staff are ready to prepare Endfall.
 7. Run `/events admin schedule end-opening <yyyy-MM-dd HH:mm>` or `/events admin start end-opening`.
-8. For Season 2 / MMO testing, run `/cterrain admin blueprint 1`, `/cterrain admin debugmaps 1`, and `/cterrain admin generate 1`.
-9. Wait for `/cterrain admin status 1` to show a player-ready state, then run `/cterrain verify floor 1`.
-10. Test `/cmmo status`, then `/cmmo start`.
+8. For Season 2 / MMO testing, build/export the WorldPainter Floor 1 slice first. CrownsTerrain can auto-copy the cached export from `terrain.floors.1.worldpainter.install-source-folder`.
+9. Run `/cterrain admin generate 1`.
+10. Wait for `/cterrain admin status 1` to show a player-ready state, then run `/cterrain verify floor 1`.
+11. Test `/cmmo status`, then `/cmmo start`.
 
 ## Resource Pack
 
-- CrownsAPI provides manual resource-pack sharing and server-side pack download support
-- Configure the pack URL, version, and SHA1 in the CrownsAPI config
-- Run `/capi pack download` to download the configured resource pack onto the server
-- Players can open the suite pack page in-game to receive the download link when manual delivery is used
-- Current pack file: `CrownsSuite-ResourcePack-1.5.0.zip`
-- Current pack SHA1: `aa3a31780d939471971b0fd63dd3ed216f80e813`
+- CrownsAPI provides required resource-pack delivery through GitHub Releases
+- Publish the current pack zip and `.sha1` as GitHub Release assets
+- Run `/capi pack refresh` to resolve, cache, and verify the latest release pack
+- Run `/capi pack apply` to resend the required pack to online players; joining players receive it automatically
+- Current pack file: `CrownsSuite-ResourcePack-1.6.0.zip`
+- Current pack SHA1: `a511c036004513985f463427b986995f28b47095`
 - Current target: Minecraft `1.21.11` resource-pack format `75`
-- The default resource-pack config keeps ValhallaMMO-safe manual delivery enabled and does not force client prompts
+- CrownsAPI is the required pack owner. If ValhallaMMO is installed, disable Valhalla's separate automatic pack prompt or publish a merged pack later.
 
 ## CrownsMMO / Terrain Relaunch Notes
 
-- CrownsTerrain `1.8.0` defaults Floor 1 terrain generation to the fresh hybrid-engine world `crowns_floor_1_v6`, not the server's existing `world`, `crowns_floor_1`, `crowns_floor_1_v2`, `crowns_floor_1_v3`, `crowns_floor_1_v4`, or `crowns_floor_1_v5`.
-- Run `/cterrain admin blueprint 1` first to precompute deterministic Floor 1 intent.
-- Run `/cterrain admin debugmaps 1` to inspect the terrain QA maps before spending time in-game.
+- CrownsTerrain `1.8.5` defaults Floor 1 terrain testing to the WorldPainter-backed world `crowns_floor_1_wp_slice`, not the server's existing `world`, `crowns_floor_1`, `crowns_floor_1_v2`, `crowns_floor_1_v3`, `crowns_floor_1_v4`, `crowns_floor_1_v5`, or `crowns_floor_1_v6`.
+- Run `tools\terrain\worldpainter\build_floor1_masks.ps1` first and inspect `floor1-composite-preview.png`.
+- Build/export the WorldPainter project after installing WorldPainter to `D:\CrownsSuiteTools\Apps\WorldPainter` or setting `WORLDPAINTER_HOME`.
+- Keep the exported `D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\ExportsTest2\crowns_floor_1_wp_slice` folder available on the server machine. CrownsTerrain auto-installs it into the server root when `/cterrain admin generate 1` runs, or you can run `/cterrain admin installsource 1` manually.
 - Run `/cterrain admin generate 1` before player testing, then wait for `/cterrain admin status 1` to show `CRITICAL_READY`.
-- Run `/cterrain verify floor 1` to confirm blueprint QA plus physical First Haven, road, farm, shrine, waystone, camp, and arena blocks.
+- Run `/cterrain verify floor 1` to confirm generation status plus physical First Haven, road, farm, shrine, waystone, camp, and arena blocks.
 - New adventurers can run `/cmmo start` to enter First Haven and begin the Floor 1 path.
 - Use `/cterrain floor status 1`, `/cterrain floor anchors 1`, and `/cterrain floor qa 1` for the new Floor Runtime Platform checks.
 - CrownsMMO `1.8.0` routes `/cmmo start`, `/cmmo floor 1`, floor deaths, and reconnect recovery through safe CrownsTerrain runtime anchors once Floor 1 is ready.
 
 ## CrownsTerrain Structure Pipeline
 
+- For the WorldPainter macro terrain layer, run `powershell -ExecutionPolicy Bypass -File tools/terrain/worldpainter/build_floor1_masks.ps1`.
+- Check the local WorldPainter install with `powershell -ExecutionPolicy Bypass -File tools/terrain/worldpainter/verify_worldpainter_install.ps1`.
+- Once WorldPainter is installed, run `tools/terrain/worldpainter/build_floor1_worldpainter.ps1` and `tools/terrain/worldpainter/export_floor1_world.ps1`; the default export target is `D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\ExportsTest2\crowns_floor_1_wp_slice`, which CrownsTerrain uses as the local install cache.
+- For the bundled Floor 1 Blender kit, run `powershell -ExecutionPolicy Bypass -File tools/terrain/build_floor1_kit.ps1`. This writes the editable source to `D:\CrownsSuiteTools\Projects\CrownsTerrain\Floor1Kit\floor1_kit.blend` and bundles generated `fh_*` `.ctpl` templates into CrownsTerrain.
+- To review Floor 1 without a server, run `powershell -ExecutionPolicy Bypass -File tools/terrain/render_floor1_previews.ps1` and open `build/terrain-preview/floor1-kit-contact-sheet.png` plus `build/terrain-preview/floor1-layout.png`.
 - Use `py tools/terrain/vox_to_ctpl.py` to convert MagicaVoxel `.vox` files into CrownsTerrain `.ctpl` templates.
 - Use `tools/terrain/blender_export_blocks.py` and `tools/terrain/json_to_ctpl.py` for Blender cube/block scenes.
 - Copy finished `.ctpl` files into the folder shown by `/cterrain structure folder`.

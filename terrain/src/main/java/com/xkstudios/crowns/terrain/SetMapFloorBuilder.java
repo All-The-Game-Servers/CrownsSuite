@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.data.BlockData;
 
 public final class SetMapFloorBuilder {
     private static final int TOWN_Y = 70;
@@ -101,6 +102,10 @@ public final class SetMapFloorBuilder {
 
     public static void apply(World world, BlockOperation operation) {
         if (operation.y() <= world.getMinHeight() || operation.y() >= world.getMaxHeight()) {
+            return;
+        }
+        if (operation.blockData() != null) {
+            world.getBlockAt(operation.x(), operation.y(), operation.z()).setBlockData(operation.blockData(), false);
             return;
         }
         world.getBlockAt(operation.x(), operation.y(), operation.z()).setType(operation.material(), false);
@@ -499,6 +504,13 @@ public final class SetMapFloorBuilder {
     public record ChunkCoord(int x, int z) {
     }
 
-    public record BlockOperation(int x, int y, int z, Material material) {
+    public record BlockOperation(int x, int y, int z, Material material, BlockData blockData) {
+        public BlockOperation(int x, int y, int z, Material material) {
+            this(x, y, z, material, null);
+        }
+
+        public BlockOperation(int x, int y, int z, BlockData blockData) {
+            this(x, y, z, blockData == null ? Material.AIR : blockData.getMaterial(), blockData);
+        }
     }
 }

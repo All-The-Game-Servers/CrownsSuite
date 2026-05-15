@@ -6,6 +6,7 @@ It is built primarily for CrownsMMO floor worlds: CrownsMMO owns progression, bo
 
 ## What It Adds
 
+- WorldPainter-backed macro terrain for the current Floor 1 vertical slice
 - Hybrid route-first floor engine generation for CrownsMMO worlds
 - Floor-themed terrain palettes
 - Custom code-authored villages
@@ -40,7 +41,7 @@ CrownsTerrain `1.1.0` focuses on making Floor 1 feel alive while keeping it surv
 CrownsTerrain `1.2.0` moves floor layout toward seed-based procedural generation.
 
 - Floor 1 defaults to a `16,000 x 16,000` livable starter world.
-- Current relaunch default Floor 1 world is `crowns_floor_1_v6`, so existing survival `world` and older Crowns floor worlds are not overwritten.
+- Current WorldPainter test default Floor 1 world is `crowns_floor_1_wp_slice`, so existing survival `world` and older Crowns floor worlds are not overwritten.
 - Floor 2+ default to `8,000 x 8,000` adventure worlds.
 - Villages, camps, waystones, road markers, shrines, landmarks, and arenas can be selected from seeded safe candidates.
 - Explicit config coordinates still win, and generated points persist in the shared database.
@@ -226,4 +227,44 @@ CrownsTerrain `1.8.2` adds in-game structure authoring tools on top of the `.ctp
 - `/cterrain studio capture <key>` saves non-air blocks as `plugins/CrownsTerrain/structures/<key>.ctpl`.
 - `/cterrain studio preview <key> [rotation] [seconds]` shows player-only ghost blocks and clears them automatically.
 - `/cterrain studio place <key> [rotation]` stages real placement, and `/cterrain studio confirm` writes blocks.
+
+## 1.8.3 Blender Floor 1 Kit
+
+CrownsTerrain `1.8.3` upgrades the offline structure pipeline into a repeatable Blender-authored Floor 1 kit.
+
+- `tools/terrain/build_floor1_kit.ps1` generates an editable Blender scene on the Seagate tools drive, exports each top-level collection as JSON, converts it to `.ctpl`, validates the kit, and bundles the templates into CrownsTerrain.
+- The first kit includes larger First Haven pieces: town hall, plaza, homes, market street, market hall, blacksmith, barn, farms, shrine, waystone, camp, bridge, route stamps, arena approach, and First Gate platform.
+- Blender is only an authoring tool. Servers still run from `.ctpl` templates, so there is no runtime Blender dependency.
+- Floor 1 planning now prefers the new `fh_*` templates while older prototype templates remain compatible for custom overrides and fallback testing.
+
+## 1.8.4 Offline Visual QA
+
+CrownsTerrain `1.8.4` makes Floor 1 reviewable without a live Minecraft server.
+
+- `tools/terrain/render_floor1_previews.ps1` renders top, front, side, and isometric PNGs for every `fh_*` template.
+- The contact sheet at `build/terrain-preview/floor1-kit-contact-sheet.png` lets staff review the full kit quickly.
+- The layout map at `build/terrain-preview/floor1-layout.png` shows First Haven, route pieces, camp, shrine, and arena footprints.
+- `build/terrain-preview/floor1-layout-report.json` flags likely overlaps and spacing issues before in-game testing.
 - `.ctpl` palettes now support Bukkit BlockData strings, so captured stairs, slabs, fences, trapdoors, panes, and lantern states are preserved where Paper exposes them.
+
+## 1.8.5 WorldPainter Macro Terrain Pipeline
+
+CrownsTerrain `1.8.5` adds WorldPainter as the macro-terrain authoring layer while keeping Blender and `.ctpl` templates as the structure layer.
+
+- Floor 1 defaults to `crowns_floor_1_wp_slice` for the first `2k x 2k` vertical slice.
+- `tools\terrain\worldpainter\build_floor1_masks.ps1` generates heightmap, biome, river, road, settlement, landmark, composite preview, and JSON report artifacts.
+- `tools\terrain\worldpainter\verify_worldpainter_install.ps1` checks for `wpscript` under `D:\CrownsSuiteTools\Apps\WorldPainter` or `WORLDPAINTER_HOME`.
+- `tools\terrain\worldpainter\build_floor1_worldpainter.ps1` builds the `.world` project once WorldPainter is installed.
+- `tools\terrain\worldpainter\export_floor1_world.ps1` exports the Minecraft world folder for server testing.
+- `/cterrain admin installsource 1` copies the cached export into the server root without starting pregeneration.
+- CrownsTerrain source mode `worldpainter-plus-ctpl` refuses to create a replacement world when the exported map folder is missing.
+- `/cterrain admin generate 1` auto-installs the cached export if needed, then pregenerates and overlays CrownsTerrain route blocks plus authored `.ctpl` structures onto the exported WorldPainter base map.
+
+Recommended workflow:
+
+1. Run `build_floor1_masks.ps1`.
+2. Inspect `floor1-composite-preview.png`.
+3. Build/export the WorldPainter project.
+4. Keep `D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\ExportsTest2\crowns_floor_1_wp_slice` available on the server machine as the install cache.
+5. Run `/cterrain admin generate 1`.
+6. Run `/cterrain verify floor 1`.

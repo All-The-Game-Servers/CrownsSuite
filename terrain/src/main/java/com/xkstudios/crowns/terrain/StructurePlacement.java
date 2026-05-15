@@ -1,6 +1,7 @@
 package com.xkstudios.crowns.terrain;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.generator.ChunkGenerator;
@@ -126,6 +127,31 @@ public final class StructurePlacement {
                 if (y >= chunkData.getMinHeight() && y < maxY) {
                     chunkData.setBlock(localX, y, localZ, block.blockData());
                 }
+            }
+        }
+    }
+
+    public void appendBlockOperations(List<SetMapFloorBuilder.BlockOperation> operations, int minHeight, int maxHeight) {
+        int clearTo = Math.min(maxHeight - 1, this.baseY + this.maxBlockY + 8);
+        for (long key : this.footprint) {
+            int worldX = (int) (key >> 32);
+            int worldZ = (int) key;
+            for (int y = Math.max(minHeight, this.baseY); y <= clearTo; y++) {
+                operations.add(new SetMapFloorBuilder.BlockOperation(worldX, y, worldZ, Material.AIR));
+            }
+            if (this.foundation != null) {
+                for (int y = Math.max(minHeight, this.baseY - 6); y < this.baseY; y++) {
+                    operations.add(new SetMapFloorBuilder.BlockOperation(worldX, y, worldZ, this.foundation));
+                }
+            }
+        }
+        for (StructureTemplate.BlockEntry block : this.template.blocks()) {
+            int[] rotated = this.template.rotate(block.x() - this.template.anchorX(), block.z() - this.template.anchorZ(), this.rotation);
+            int worldX = this.originX + rotated[0];
+            int worldZ = this.originZ + rotated[1];
+            int worldY = this.baseY + block.y() - this.template.anchorY();
+            if (worldY >= minHeight && worldY < maxHeight) {
+                operations.add(new SetMapFloorBuilder.BlockOperation(worldX, worldY, worldZ, block.blockData()));
             }
         }
     }

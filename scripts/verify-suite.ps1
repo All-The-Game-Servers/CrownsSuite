@@ -8,13 +8,13 @@ $downloads = Join-Path $root "downloads"
 $buildRoot = Join-Path $root "build\verify-suite"
 
 $modules = @(
-    @{ Name = "api"; Jar = "CrownsAPI"; Version = "1.4.0"; Dependencies = @() },
+    @{ Name = "api"; Jar = "CrownsAPI"; Version = "1.5.0"; Dependencies = @() },
     @{ Name = "economy"; Jar = "CrownsEconomy"; Version = "1.4.0"; Dependencies = @("api") },
     @{ Name = "admin"; Jar = "CrownsAdmin"; Version = "1.4.0"; Dependencies = @("api") },
     @{ Name = "events"; Jar = "CrownsEvents"; Version = "1.5.0"; Dependencies = @("api") },
     @{ Name = "drugs"; Jar = "CrownsDrugs"; Version = "1.4.0"; Dependencies = @("api") },
     @{ Name = "mmo"; Jar = "CrownsMMO"; Version = "1.8.0"; Dependencies = @("api") },
-    @{ Name = "terrain"; Jar = "CrownsTerrain"; Version = "1.8.2"; Dependencies = @("api") }
+    @{ Name = "terrain"; Jar = "CrownsTerrain"; Version = "1.8.5"; Dependencies = @("api") }
 )
 
 function Get-DependencyClasspath {

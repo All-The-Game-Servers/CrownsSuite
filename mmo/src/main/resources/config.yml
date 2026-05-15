@@ -153,7 +153,7 @@ mmo:
   floors:
     default-border-size: 16000
     generated-border-size: 8000
-    floor-1-world: crowns_floor_1_v6
+    floor-1-world: crowns_floor_1_wp_slice
     generated-world-prefix: crowns_floor_
     boss-clear-combat-xp: 80
     mob-scaling:
@@ -163,9 +163,9 @@ mmo:
       note: "Foundation hook for later CrownsMMO smithing/resource progression."
     list:
       1:
-        world: crowns_floor_1_v6
+        world: crowns_floor_1_wp_slice
         environment: NORMAL
-        border-size: 16000
+        border-size: 2048
         required-floor: 1
         difficulty: 1.0
         resource-tier: 1

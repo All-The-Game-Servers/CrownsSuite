@@ -36,7 +36,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "1.4.0",
+                "1.5.0",
                 List.of(),
                 List.of(),
                 List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")
@@ -59,6 +59,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         });
         CrownsAPI.setInboxProvider(this.inboxManager);
         Bukkit.getPluginManager().registerEvents(new SuiteMenuListener(), this);
+        Bukkit.getPluginManager().registerEvents(this.resourcePackService, this);
         CapiCommand command = new CapiCommand(this);
         if (this.getCommand("capi") != null) {
             this.getCommand("capi").setExecutor(command);
@@ -111,7 +112,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "1.4.0",
+                "1.5.0",
                 List.of(),
                 List.of(),
                 List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")

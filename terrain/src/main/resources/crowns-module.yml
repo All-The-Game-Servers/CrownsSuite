@@ -1,6 +1,6 @@
 key: terrain
 name: CrownsTerrain
-version: 1.8.2
+version: 1.8.5
 required-api-version: 1.4.0
 required-dependencies:
   - CrownsAPI
@@ -12,9 +12,13 @@ provided-services:
   - floor-readiness
   - blueprints
   - debug-maps
+  - worldpainter-pipeline
   - structure-pipeline
   - structure-studio
+  - blender-floor1-kit
+  - offline-visual-qa
 health-checks:
   - terrain-manager
   - floor-readiness
   - blueprint-artifacts
+  - worldpainter-export

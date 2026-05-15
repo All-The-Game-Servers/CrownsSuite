@@ -2,30 +2,48 @@ terrain:
   enabled: true
   affect-all-floors: true
   showcase-floor: 2
-  floor-1-world: crowns_floor_1_v6
+  floor-1-world: crowns_floor_1_wp_slice
   generated-world-prefix: crowns_floor_
   persist-layout-points: true
   floor-1-livable: true
   defaults:
-    floor-1-world-size: 16000
+    floor-1-world-size: 2048
     generated-floor-world-size: 8000
     village-radius: 56
     arena-radius: 72
     spawn-safe-radius: 192
     structure-density: 1.0
-    placement-mode: hybrid-engine
+    placement-mode: worldpainter-plus-ctpl
   floors:
     1:
       theme: First Haven
       palette: haven
-      world: crowns_floor_1_v6
-      generation-mode: hybrid-engine
-      terrain-profile: first_haven_engine
-      blueprint-version: first_haven_engine_v1
+      world: crowns_floor_1_wp_slice
+      source-mode: worldpainter-plus-ctpl
+      generation-mode: worldpainter-plus-ctpl
+      terrain-profile: first_haven_worldpainter_slice
+      blueprint-version: first_haven_worldpainter_v1
       fresh-world-required: true
-      world-size: 16000
+      world-size: 2048
       structure-density: 1.25
       enabled-structures: [village, camp, landmark, waystone, road_marker, shrine, arena]
+      worldpainter:
+        enabled: true
+        slice-size: 2048
+        world-name: crowns_floor_1_wp_slice
+        workspace: D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\Floor1Slice
+        require-exported-world: true
+        auto-install-on-generate: true
+        install-source-folder: D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\ExportsTest2\crowns_floor_1_wp_slice
+        bundled-resource: ''
+        masks:
+          heightmap: floor1-heightmap.png
+          biomes: floor1-biomes.png
+          rivers: floor1-rivers.png
+          roads: floor1-roads.png
+          settlement: floor1-settlement-mask.png
+          landmarks: floor1-landmarks.png
+          composite: floor1-composite-preview.png
       vanilla:
         caves: true
         mobs: true
@@ -51,8 +69,9 @@ terrain:
         decoration: true
       first-haven:
         scale: large-town
-        target-structures: 12
+        target-structures: 20
         style: high-fantasy-mmo
+        asset-kit: blender-floor1-kit-v1
       road-network:
         hub: first-haven
         connect-villages: true
@@ -80,12 +99,14 @@ terrain:
           minimum-parcels: 7
           minimum-decorations: 40
       blueprint-sets:
-        first-haven-civic: [spawn_plaza, town_hall, fountain_plaza, notice_board, waystone, large_shrine]
-        first-haven-residential: [haven_house, haven_house_tall, haven_house_garden, hillside_house, retaining_wall, switchback_stair]
-        first-haven-market: [market_stall, market_row, blacksmith]
-        first-haven-farming: [terraced_farm, farm_plot, barn, mill]
-        first-haven-defensive: [gatehouse, watchtower, gate_tower, wall_fragment]
-        wilderness: [stream_camp, giant_tree_base, cliff_overlook, road_marker, starter_shrine]
+        first-haven-civic: [fh_spawn_plaza_grand, fh_town_hall_grand, fh_waystone_platform, notice_board, fh_shrine_grove]
+        first-haven-residential: [fh_house_large_a, fh_house_large_b, fh_house_row, retaining_wall, switchback_stair]
+        first-haven-market: [fh_market_street, fh_market_hall, fh_blacksmith_large]
+        first-haven-farming: [fh_farm_terrace_stamp, fh_barn_large, fh_bridge_stream, farm_plot]
+        first-haven-defensive: [fh_gatehouse_grand, fh_watchtower_tall, wall_fragment]
+        wilderness: [fh_starter_camp, fh_cliff_rocks, road_marker, fh_shrine_grove, fh_bridge_stream]
+        route-stamps: [fh_road_straight, fh_road_curve, fh_bridge_stream, fh_arena_approach]
+        arena: [fh_first_gate_platform, fh_arena_approach, arena_staging, arena_threshold]
       set-map:
         points:
           first-haven: "Town spawn and civic center."
@@ -105,14 +126,15 @@ terrain:
           defensive-gate: "Gatehouse, tower, and wall edge."
           wilderness-route: "Road to camp, shrine, and arena."
         required-structures:
-          - town_hall
-          - guild_hall
-          - market_square
-          - farm_district
-          - starter_camp
-          - starter_shrine
-          - first_waystone
-          - first_gate_arena
+          - fh_town_hall_grand
+          - fh_spawn_plaza_grand
+          - fh_market_street
+          - fh_farm_terrace_stamp
+          - fh_starter_camp
+          - fh_shrine_grove
+          - fh_waystone_platform
+          - fh_first_gate_platform
+          - fh_arena_approach
       regions:
         meadow-basin: "Starter meadow around First Haven with broad building space and safe travel."
         oak-highlands: "Rolling oak hills with rocks, groves, and overlook paths."

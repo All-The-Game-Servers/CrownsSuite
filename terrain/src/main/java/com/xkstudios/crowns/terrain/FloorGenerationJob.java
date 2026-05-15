@@ -108,9 +108,14 @@ public final class FloorGenerationJob {
                     this.operations.size(), this.blockIndex, this.startedBy, "Loading critical route chunks.");
         }
         if (this.chunkIndex >= this.chunks.size()) {
-            this.operations = this.blueprint == null
+            List<SetMapFloorBuilder.BlockOperation> builtOperations = this.blueprint == null
                     ? SetMapFloorBuilder.operations(this.world, this.terrainManager.theme(this.floor), this.terrainManager.getAllPoints(this.floor, this.worldName))
                     : SetMapFloorBuilder.operations(this.terrainManager.theme(this.floor), this.blueprint);
+            if (this.terrainManager.isWorldPainterFloor(this.floor)) {
+                builtOperations = new ArrayList<>(builtOperations);
+                builtOperations.addAll(this.terrainManager.plannedStructureOperations(this.floor, this.worldName, this.world));
+            }
+            this.operations = builtOperations;
             this.terrainManager.saveGenerationJob(this.floor, this.worldName, "GENERATING", this.chunks.size(), this.chunkIndex,
                     this.operations.size(), 0, this.startedBy, "Placing authored route blocks.");
             this.phase = Phase.BUILD_SET_MAP;
@@ -148,6 +153,9 @@ public final class FloorGenerationJob {
     }
 
     private String modeLabel() {
+        if (this.terrainManager.isWorldPainterFloor(this.floor)) {
+            return "WorldPainter + .ctpl overlay";
+        }
         return this.blueprint == null ? "set-map" : "hybrid engine";
     }
 }

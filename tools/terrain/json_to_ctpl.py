@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
-from ctpl_writer import Block, normalize_key, normalize_material, write_ctpl
+from ctpl_writer import Block, normalize_block, normalize_key, write_ctpl
 
 
 def load_blocks(path: Path) -> tuple[str, tuple[int, int, int] | None, list[Block]]:
@@ -16,7 +16,7 @@ def load_blocks(path: Path) -> tuple[str, tuple[int, int, int] | None, list[Bloc
     anchor = tuple(int(value) for value in anchor_data) if isinstance(anchor_data, list) and len(anchor_data) == 3 else None
     blocks: list[Block] = []
     for entry in data.get("blocks", []):
-        material = normalize_material(entry.get("material", "STONE"))
+        material = normalize_block(entry.get("blockdata") or entry.get("material", "STONE"))
         if material == "AIR":
             continue
         blocks.append(Block(int(entry["x"]), int(entry["y"]), int(entry["z"]), material))

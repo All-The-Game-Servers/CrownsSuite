@@ -2,7 +2,7 @@
 
 Crowns Suite is the Lowlight SMP management toolkit by XKStudios. It is split into focused plugins so the server can grow without one giant jar doing everything.
 
-`1.4.0` focuses on platform cohesion, module diagnostics, cleaner owner/admin workflows, and tighter MMO/Terrain/Economy/Admin integration. CrownsEvents is currently `1.5.0` for the Season 1 vanilla Endfall Opening Week.
+`1.4.0` focuses on platform cohesion, module diagnostics, cleaner owner/admin workflows, and tighter MMO/Terrain/Economy/Admin integration. CrownsEvents is currently `1.5.0` for the Season 1 vanilla Endfall Opening Week, CrownsMMO is `1.8.0`, and CrownsTerrain is `1.8.5`.
 
 ## Plugins
 
@@ -13,7 +13,7 @@ The shared backbone for the suite.
 - Shared database access
 - Shared GUI shell and section registration
 - Shared inbox, menu, and provider contracts
-- Manual resource-pack distribution and install info
+- Required resource-pack delivery, GitHub Release refresh, and install info
 - Suite profile and recent alert surfaces
 - Suite status page for module versions, provider health, database state, resource-pack state, and download metadata
 - Typed module registry with `MISSING`, `LOADED`, `DEGRADED`, `READY`, and `FAILED` states
@@ -67,6 +67,7 @@ The Season 2 SAO-inspired MMO layer.
 ### CrownsTerrain
 The terrain identity layer for CrownsMMO floor worlds.
 
+- WorldPainter-backed macro terrain for the current Floor 1 vertical slice
 - Hybrid route-first floor engine generation for livable but authored worlds
 - Floor-themed custom villages, landmarks, and boss arena locations
 - Safe/useful settlement design for future NPCs, shops, and quests
@@ -75,6 +76,9 @@ The terrain identity layer for CrownsMMO floor worlds.
 - `1.8.0` adds the paired Floor Runtime Platform with Terrain-owned runtime state, anchors, QA lines, repair steps, and MMO-safe start/respawn/reconnect routing.
 - `CrownsTerrain 1.8.1` adds custom `.ctpl` structure loading plus MagicaVoxel/Blender converter scripts for authored map pieces.
 - `CrownsTerrain 1.8.2` adds in-game Structure Studio capture, preview, confirm, and placement commands.
+- `CrownsTerrain 1.8.3` adds the Blender Floor 1 kit pipeline and larger `fh_*` templates for the First Haven critical route.
+- `CrownsTerrain 1.8.4` adds offline visual QA previews and layout reports so Floor 1 can be reviewed before server testing.
+- `CrownsTerrain 1.8.5` adds a WorldPainter macro terrain pipeline for `crowns_floor_1_wp_slice`, while Blender/`.ctpl` remains the structure layer.
 
 ## CrownsEconomy Overview
 

@@ -2,7 +2,7 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsEvents is on `1.5.0` with the Season 1 vanilla Endfall Opening Week, CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.2` with the first in-game Structure Studio pipeline.
+`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsEvents is on `1.5.0` with the Season 1 vanilla Endfall Opening Week, CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.5` with the WorldPainter macro-terrain pipeline plus Blender-authored Floor 1 assets.
 
 It currently includes:
 
@@ -20,15 +20,15 @@ The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDriv
 
 Only the latest supported build for each plugin/resource pack is kept in that folder, so the download list is intentionally short.
 
-- `CrownsAPI-1.4.0.jar`
+- `CrownsAPI-1.5.0.jar`
 - `CrownsEconomy-1.4.0.jar`
 - `CrownsAdmin-1.4.0.jar`
 - `CrownsEvents-1.5.0.jar`
 - `CrownsDrugs-1.4.0.jar`
 - `CrownsMMO-1.8.0.jar`
-- `CrownsTerrain-1.8.2.jar`
-- `CrownsSuite-ResourcePack-1.5.0.zip`
-- `CrownsSuite-ResourcePack-1.5.0.sha1`
+- `CrownsTerrain-1.8.5.jar`
+- `CrownsSuite-ResourcePack-1.6.0.zip`
+- `CrownsSuite-ResourcePack-1.6.0.sha1`
 
 ## Wiki
 
@@ -50,7 +50,7 @@ Suggested GitHub wiki structure:
 
 The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack), and the distributable build is mirrored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads).
 
-Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3a31780d939471971b0fd63dd3ed216f80e813`. It is rebuilt for Minecraft `1.21.11` resource-pack format `75`. CrownsAPI is configured so `/capi pack download` downloads this pack onto the server while keeping ValhallaMMO-safe manual delivery.
+Current resource-pack build: `CrownsSuite-ResourcePack-1.6.0.zip` with SHA1 `a511c036004513985f463427b986995f28b47095`. It is rebuilt for Minecraft `1.21.11` resource-pack format `75`. CrownsAPI `1.5.0` is configured for GitHub Release resolution, required delivery on join, and `/capi pack refresh` plus `/capi pack apply`.
 
 ## Project Layout
 
@@ -151,6 +151,26 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 - Extends `.ctpl` palettes to support Bukkit BlockData strings while keeping old Material-only templates compatible.
 - Preview uses player-only ghost blocks and real placement requires `/cterrain studio confirm`.
 
+## CrownsTerrain 1.8.3
+
+- Adds a Blender Floor 1 kit pipeline that creates editable `.blend` sources on the Seagate tools drive, exports per-collection JSON, converts to `.ctpl`, validates the kit, and bundles the templates.
+- Adds larger First Haven structure and route-stamp templates for town hall, homes, market street, blacksmith, barn, farms, shrine, waystone, camp, bridge, arena approach, and First Gate platform.
+- Updates Floor 1 planning/config so the critical route prefers the new Blender-authored templates while keeping the older prototype pieces compatible as fallback/custom assets.
+
+## CrownsTerrain 1.8.4
+
+- Adds offline `.ctpl` visual QA for Floor 1 templates: top, front, side, isometric PNGs, and a contact-sheet gallery.
+- Adds a Floor 1 layout preview and JSON QA report so overlaps and spacing issues can be reviewed before server testing.
+- Adds a Floor 1 kit guide for improving Blender-authored structures without waiting on a live Minecraft server.
+
+## CrownsTerrain 1.8.5
+
+- Adds a WorldPainter macro-terrain pipeline for the first `2k x 2k` Floor 1 vertical slice.
+- Generates heightmap, biome, river, road, settlement, landmark, composite preview, and report artifacts under `D:\CrownsSuiteTools\Projects\CrownsTerrain\WorldPainter\Floor1Slice`.
+- Changes Floor 1 default source mode to `worldpainter-plus-ctpl` and test world `crowns_floor_1_wp_slice`.
+- Keeps Blender/`.ctpl` as the structure layer; CrownsTerrain pregeneration overlays route blocks and authored templates after the WorldPainter map is exported.
+- Refuses to silently create a replacement floor world if the WorldPainter export folder is missing.
+
 ## Resource Pack 1.5.0
 
 - Full Dark Arcane redraw for the suite branding pack.
@@ -160,6 +180,6 @@ Current resource-pack build: `CrownsSuite-ResourcePack-1.5.0.zip` with SHA1 `aa3
 
 ## Notes
 
-- Suite-core plugin versions are currently aligned to `1.4.0` except CrownsEvents at `1.5.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.2`.
+- Suite-core plugin versions are currently aligned to `1.4.0` except CrownsEvents at `1.5.0`; CrownsMMO is `1.8.0` and CrownsTerrain is `1.8.5`.
 - The suite is designed to preserve shared data through `CrownsAPI`.
 - The repo is set up so the wiki content and downloadable jars can live alongside the source tree.

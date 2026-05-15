@@ -1,5 +1,5 @@
 name: CrownsAPI
-version: 1.4.0
+version: 1.5.0
 main: com.xkstudios.crowns.api.CrownsAPIPlugin
 api-version: "1.21"
 load: STARTUP
@@ -12,5 +12,5 @@ commands:
     aliases: [crownsapi]
 permissions:
   crowns.api.admin:
-    description: Allows sharing and broadcasting the Crowns Suite resource pack.
+    description: Allows refreshing and applying the required Crowns Suite resource pack.
     default: op

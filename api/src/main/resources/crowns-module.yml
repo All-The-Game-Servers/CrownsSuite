@@ -1,7 +1,7 @@
 key: api
 name: CrownsAPI
-version: 1.4.0
-required-api-version: 1.4.0
+version: 1.5.0
+required-api-version: 1.5.0
 required-dependencies: []
 optional-dependencies: []
 provided-services:

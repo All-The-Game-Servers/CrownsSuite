@@ -17,7 +17,7 @@ class Block:
     x: int
     y: int
     z: int
-    material: str
+    block: str
 
 
 def normalize_key(value: str) -> str:
@@ -32,6 +32,15 @@ def normalize_material(value: str) -> str:
     return value or "STONE"
 
 
+def normalize_block(value: str) -> str:
+    value = str(value or "STONE").strip()
+    if not value:
+        return "STONE"
+    if "[" in value or ":" in value:
+        return value.replace(" ", "")
+    return normalize_material(value)
+
+
 def write_ctpl(path: Path, key: str, blocks: list[Block], anchor: tuple[int, int, int] | None = None, source: str | None = None) -> None:
     if not blocks:
         raise ValueError("Cannot write an empty .ctpl template.")
@@ -41,7 +50,7 @@ def write_ctpl(path: Path, key: str, blocks: list[Block], anchor: tuple[int, int
     min_y = min(block.y for block in blocks)
     min_z = min(block.z for block in blocks)
     shifted = [
-        Block(block.x - min_x, block.y - min_y, block.z - min_z, normalize_material(block.material))
+        Block(block.x - min_x, block.y - min_y, block.z - min_z, normalize_block(block.block))
         for block in blocks
     ]
 
@@ -53,14 +62,14 @@ def write_ctpl(path: Path, key: str, blocks: list[Block], anchor: tuple[int, int
     else:
         anchor = (anchor[0] - min_x, anchor[1] - min_y, anchor[2] - min_z)
 
-    materials = sorted({block.material for block in shifted})
+    materials = sorted({block.block for block in shifted})
     if len(materials) > len(SYMBOLS):
         raise ValueError(f"Too many materials for .ctpl palette: {len(materials)} > {len(SYMBOLS)}")
     symbols = {material: SYMBOLS[index] for index, material in enumerate(materials)}
 
     layers: dict[int, dict[tuple[int, int], str]] = defaultdict(dict)
     for block in shifted:
-        layers[block.y][(block.x, block.z)] = symbols[block.material]
+        layers[block.y][(block.x, block.z)] = symbols[block.block]
 
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:

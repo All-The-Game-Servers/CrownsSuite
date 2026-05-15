@@ -132,18 +132,27 @@ public class CapiCommand implements TabExecutor {
 
         String action = args[1].toLowerCase(Locale.ROOT);
         if (action.equals("info")) {
-            sender.sendMessage("Crowns Suite Resource Pack");
-            sender.sendMessage("Enabled: " + packs.isEnabled());
-            sender.sendMessage("Version: " + packs.getVersion());
-            sender.sendMessage("URL: " + (packs.getUrl().isBlank() ? "<not configured>" : packs.getUrl()));
-            sender.sendMessage("Download URL: " + (packs.getDownloadUrl().isBlank() ? "<not configured>" : packs.getDownloadUrl()));
-            sender.sendMessage("SHA1: " + (packs.getSha1().isBlank() ? "<not configured>" : packs.getSha1()));
-            sender.sendMessage("GitHub: " + packs.getGitHubPageUrl());
-            sender.sendMessage("Local Path: " + packs.getLocalPackPath());
-            sender.sendMessage("ValhallaMMO Safe Mode: " + (!packs.allowClientPromptWithValhalla()));
-            if (!packs.getPromptBlockReason().isBlank()) {
-                sender.sendMessage("Prompt Status: " + packs.getPromptBlockReason());
+            this.sendPackStatus(sender, packs);
+            return true;
+        }
+        if (action.equals("status")) {
+            this.sendPackStatus(sender, packs);
+            return true;
+        }
+        if (action.equals("refresh")) {
+            if (!sender.hasPermission("crowns.api.admin")) {
+                sender.sendMessage("You do not have permission to refresh the resource pack from GitHub Releases.");
+                return true;
             }
+            packs.refreshFromGitHubRelease(sender);
+            return true;
+        }
+        if (action.equals("apply")) {
+            if (!sender.hasPermission("crowns.api.admin")) {
+                sender.sendMessage("You do not have permission to apply the resource pack.");
+                return true;
+            }
+            packs.applyRequiredPack(sender);
             return true;
         }
         if (action.equals("download")) {
@@ -177,12 +186,7 @@ public class CapiCommand implements TabExecutor {
                 sender.sendMessage("You do not have permission to broadcast the resource pack.");
                 return true;
             }
-            if (!packs.canPromptPlayers()) {
-                sender.sendMessage(packs.getPromptBlockReason().isBlank() ? "The resource pack is not ready to broadcast yet." : packs.getPromptBlockReason());
-                return true;
-            }
-            packs.broadcastDownloadRequest();
-            sender.sendMessage("Broadcast the resource-pack prompt to all online players.");
+            packs.applyRequiredPack(sender);
             return true;
         }
         if (action.equals("share")) {
@@ -222,14 +226,38 @@ public class CapiCommand implements TabExecutor {
             }
         }
 
-        sender.sendMessage("Usage: /" + label + " pack [download|prompt|info|link|broadcast|share <player>]");
+        sender.sendMessage("Usage: /" + label + " pack [refresh|download|apply|status|prompt|info|link|broadcast|share <player>]");
         return true;
+    }
+
+    private void sendPackStatus(CommandSender sender, ResourcePackService packs) {
+        sender.sendMessage("Crowns Suite Resource Pack");
+        sender.sendMessage("Enabled: " + packs.isEnabled());
+        sender.sendMessage("Required: " + packs.isRequired());
+        sender.sendMessage("Version: " + packs.getVersion());
+        sender.sendMessage("URL: " + (packs.getUrl().isBlank() ? "<not configured>" : packs.getUrl()));
+        sender.sendMessage("Download URL: " + (packs.getDownloadUrl().isBlank() ? "<not configured>" : packs.getDownloadUrl()));
+        sender.sendMessage("SHA1: " + (packs.getSha1().isBlank() ? "<not configured>" : packs.getSha1()));
+        sender.sendMessage("GitHub: " + packs.getGitHubPageUrl());
+        sender.sendMessage("Release Source: " + packs.getGitHubOwner() + "/" + packs.getGitHubRepo() + " @ " + packs.getGitHubReleaseTag());
+        sender.sendMessage("Asset Pattern: " + packs.getZipAssetPattern() + " | " + packs.getSha1AssetPattern());
+        sender.sendMessage("Local Path: " + packs.getLocalPackPath());
+        sender.sendMessage("ValhallaMMO Present: " + packs.isValhallaPresent());
+        if (packs.isValhallaPresent()) {
+            sender.sendMessage("Warning: CrownsAPI is the required pack owner. Disable ValhallaMMO's separate pack prompt or publish a merged pack.");
+        }
+        if (!packs.getPromptBlockReason().isBlank()) {
+            sender.sendMessage("Prompt Status: " + packs.getPromptBlockReason());
+        }
     }
 
     private void sendHelp(CommandSender sender, String label) {
         sender.sendMessage("CrownsAPI");
         sender.sendMessage("/" + label + " pack - download the current Crowns Suite resource pack onto the server");
         sender.sendMessage("/" + label + " pack download - same as /" + label + " pack");
+        sender.sendMessage("/" + label + " pack refresh - resolve/download the latest pack from GitHub Releases");
+        sender.sendMessage("/" + label + " pack apply - send the required pack to all online players");
+        sender.sendMessage("/" + label + " pack status - show configured pack details");
         sender.sendMessage("/" + label + " pack prompt - send yourself the direct pack prompt");
         sender.sendMessage("/" + label + " pack link - show the manual install link");
         sender.sendMessage("/" + label + " pack info - show configured pack details");
@@ -250,7 +278,7 @@ public class CapiCommand implements TabExecutor {
             return StringUtil.copyPartialMatches(args[0], List.of("pack", "gui", "status", "modules", "downloads", "help"), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("pack")) {
-            List<String> base = new ArrayList<>(List.of("download", "prompt", "info", "link"));
+            List<String> base = new ArrayList<>(List.of("download", "refresh", "apply", "status", "prompt", "info", "link"));
             if (sender.hasPermission("crowns.api.admin")) {
                 base.add("broadcast");
                 base.add("share");

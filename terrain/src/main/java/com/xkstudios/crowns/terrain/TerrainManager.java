@@ -8,6 +8,10 @@ import com.xkstudios.crowns.api.TerrainProvider;
 import com.xkstudios.crowns.data.DataManager;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,6 +21,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -47,6 +54,9 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
     @Override
     public ChunkGenerator getGeneratorForFloor(int floorNumber, String worldName, World.Environment environment, long resourceTier) {
         if (!this.plugin.getConfig().getBoolean("terrain.enabled", true)) {
+            return null;
+        }
+        if (this.isWorldPainterFloor(floorNumber)) {
             return null;
         }
         if (this.isHybridBlueprintFloor(floorNumber)) {
@@ -216,10 +226,18 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         if (existing != null) {
             return existing;
         }
+        File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+        if (this.isWorldPainterFloor(floorNumber) && !worldFolder.isDirectory()) {
+            if (!this.ensureWorldPainterSourceInstalled(floorNumber, null)) {
+                this.plugin.getLogger().warning("[CrownsTerrain] Floor " + floorNumber + " is configured for WorldPainter source mode, but the exported world folder is missing: " + worldFolder.getAbsolutePath());
+                this.plugin.getLogger().warning("[CrownsTerrain] Build/export the map with tools/terrain/worldpainter or configure terrain.floors." + floorNumber + ".worldpainter.install-source-folder before running /cterrain admin generate " + floorNumber + ".");
+                return null;
+            }
+        }
         WorldCreator creator = new WorldCreator(worldName)
                 .environment(World.Environment.NORMAL)
                 .generator(this.getGeneratorForFloor(floorNumber, worldName, World.Environment.NORMAL, floorNumber))
-                .generateStructures(!this.isHybridBlueprintFloor(floorNumber));
+                .generateStructures(!this.isHybridBlueprintFloor(floorNumber) && !this.isWorldPainterFloor(floorNumber));
         if (this.isHybridBlueprintFloor(floorNumber)) {
             creator.biomeProvider(new BlueprintBiomeProvider(this.getOrCreateBlueprint(floorNumber)));
         }
@@ -232,6 +250,58 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         return world;
     }
 
+    public boolean ensureWorldPainterSourceInstalled(int floorNumber, CommandSender sender) {
+        if (!this.isWorldPainterFloor(floorNumber)) {
+            this.sendInstallMessage(sender, "Floor " + floorNumber + " is not configured for WorldPainter source mode.", false);
+            return false;
+        }
+        String worldName = this.getWorldName(floorNumber);
+        File target = new File(Bukkit.getWorldContainer(), worldName);
+        if (this.isMinecraftWorldFolder(target)) {
+            this.sendInstallMessage(sender, "WorldPainter test map is already installed: " + target.getAbsolutePath(), true);
+            return true;
+        }
+        if (target.exists()) {
+            this.sendInstallMessage(sender, "Refusing to overwrite malformed existing world folder: " + target.getAbsolutePath(), false);
+            return false;
+        }
+
+        String sourcePath = this.getWorldPainterInstallSourceFolder(floorNumber);
+        if (sourcePath != null && !sourcePath.isBlank()) {
+            File source = new File(sourcePath);
+            if (this.isMinecraftWorldFolder(source)) {
+                try {
+                    this.copyWorldFolder(source.toPath(), target.toPath());
+                    this.sendInstallMessage(sender, "Installed WorldPainter test map from local cache: " + source.getAbsolutePath(), true);
+                    return true;
+                } catch (IOException exception) {
+                    this.plugin.getLogger().warning("[CrownsTerrain] Failed to copy WorldPainter source world: " + exception.getMessage());
+                    this.sendInstallMessage(sender, "Failed to copy WorldPainter source world: " + exception.getMessage(), false);
+                    return false;
+                }
+            }
+        }
+
+        String bundledZip = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".worldpainter.bundled-resource", "");
+        if (bundledZip != null && !bundledZip.isBlank()) {
+            try (InputStream input = this.plugin.getResource(bundledZip)) {
+                if (input != null) {
+                    this.extractWorldZip(input, target.toPath());
+                    this.sendInstallMessage(sender, "Installed WorldPainter test map from bundled resource: " + bundledZip, true);
+                    return true;
+                }
+            } catch (IOException exception) {
+                this.plugin.getLogger().warning("[CrownsTerrain] Failed to extract bundled WorldPainter world: " + exception.getMessage());
+                this.sendInstallMessage(sender, "Failed to extract bundled WorldPainter world: " + exception.getMessage(), false);
+                return false;
+            }
+        }
+
+        this.sendInstallMessage(sender, "WorldPainter map is missing. Export path checked: " + sourcePath, false);
+        this.sendInstallMessage(sender, "Run tools\\terrain\\worldpainter\\export_floor1_world.ps1 once, or set terrain.floors." + floorNumber + ".worldpainter.install-source-folder.", false);
+        return false;
+    }
+
     public boolean startGeneration(CommandSender sender, int floorNumber) {
         if (!this.isManagedGenerationFloor(floorNumber)) {
             sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is not configured for managed CrownsTerrain generation.", net.kyori.adventure.text.format.NamedTextColor.RED));
@@ -239,6 +309,11 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         }
         if (this.isHybridBlueprintFloor(floorNumber)) {
             this.getOrCreateBlueprint(floorNumber);
+        }
+        if (this.isWorldPainterFloor(floorNumber)
+                && this.plugin.getConfig().getBoolean("terrain.floors." + floorNumber + ".worldpainter.auto-install-on-generate", true)
+                && !this.ensureWorldPainterSourceInstalled(floorNumber, sender)) {
+            return false;
         }
         if (this.activeGenerationJobs.containsKey(floorNumber)) {
             sender.sendMessage(net.kyori.adventure.text.Component.text("Floor " + floorNumber + " is already generating. Use /cterrain admin status " + floorNumber + ".", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
@@ -340,6 +415,15 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         if (!this.isManagedGenerationFloor(floorNumber)) {
             return List.of("This floor is not managed by CrownsTerrain. Check its normal world configuration.");
         }
+        if (this.isWorldPainterFloor(floorNumber)) {
+            return List.of(
+                    "Run tools\\terrain\\worldpainter\\build_floor1_masks.ps1",
+                    "Build and export the WorldPainter project into the server root as " + this.getWorldName(floorNumber),
+                    "/cterrain floor pregenerate " + floorNumber + " critical",
+                    "/cterrain floor qa " + floorNumber,
+                    "/cterrain verify floor " + floorNumber
+            );
+        }
         return List.of(
                 "/cterrain admin blueprint " + floorNumber,
                 "/cterrain admin debugmaps " + floorNumber,
@@ -350,7 +434,7 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
     }
 
     public boolean isManagedGenerationFloor(int floorNumber) {
-        return this.isSetMapFloor(floorNumber) || this.isHybridBlueprintFloor(floorNumber);
+        return this.isSetMapFloor(floorNumber) || this.isHybridBlueprintFloor(floorNumber) || this.isWorldPainterFloor(floorNumber);
     }
 
     public boolean isSetMapFloor(int floorNumber) {
@@ -360,6 +444,26 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
     public boolean isHybridBlueprintFloor(int floorNumber) {
         String mode = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "");
         return mode.equalsIgnoreCase("hybrid-blueprint") || mode.equalsIgnoreCase("hybrid-engine");
+    }
+
+    public boolean isWorldPainterFloor(int floorNumber) {
+        String sourceMode = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".source-mode", "");
+        String generationMode = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".generation-mode", "");
+        return sourceMode.equalsIgnoreCase("worldpainter-plus-ctpl") || generationMode.equalsIgnoreCase("worldpainter-plus-ctpl");
+    }
+
+    public String getWorldPainterWorkspace(int floorNumber) {
+        return this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".worldpainter.workspace",
+                "D:\\CrownsSuiteTools\\Projects\\CrownsTerrain\\WorldPainter\\Floor1Slice");
+    }
+
+    public String getWorldPainterInstallSourceFolder(int floorNumber) {
+        String configured = this.plugin.getConfig().getString("terrain.floors." + floorNumber + ".worldpainter.install-source-folder", "");
+        if (configured != null && !configured.isBlank()) {
+            return configured;
+        }
+        String worldName = this.getWorldName(floorNumber);
+        return "D:\\CrownsSuiteTools\\Projects\\CrownsTerrain\\WorldPainter\\ExportsTest2\\" + worldName;
     }
 
     public FloorBlueprint getOrCreateBlueprint(int floorNumber) {
@@ -432,6 +536,16 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
 
     public List<String> getBlueprintStatusLines(int floorNumber) {
         List<String> lines = new ArrayList<>();
+        if (this.isWorldPainterFloor(floorNumber)) {
+            String worldName = this.getWorldName(floorNumber);
+            File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            File workspace = new File(this.getWorldPainterWorkspace(floorNumber));
+            lines.add("WorldPainter source: " + (worldFolder.isDirectory() ? "exported world found" : "exported world missing"));
+            lines.add("World folder: " + worldFolder.getAbsolutePath());
+            lines.add("WP workspace: " + workspace.getAbsolutePath());
+            lines.add("Runtime overlay: CrownsTerrain pregeneration places route markers and .ctpl structures after the base map is exported.");
+            return lines;
+        }
         if (!this.isHybridBlueprintFloor(floorNumber)) {
             lines.add("Blueprint: not configured for this floor.");
             return lines;
@@ -518,11 +632,22 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         return TerrainGenerationStatus.notGenerated(floorNumber, worldName, this.isHybridBlueprintFloor(floorNumber) ? this.getBlueprintVersion(floorNumber) : this.getTerrainProfile(floorNumber));
     }
 
+    public List<SetMapFloorBuilder.BlockOperation> plannedStructureOperations(int floorNumber, String worldName, World world) {
+        if (world == null) {
+            return List.of();
+        }
+        List<SetMapFloorBuilder.BlockOperation> operations = new ArrayList<>();
+        for (StructurePlacement placement : this.plannedPlacements(floorNumber, worldName)) {
+            placement.appendBlockOperations(operations, world.getMinHeight(), world.getMaxHeight());
+        }
+        return operations;
+    }
+
     public List<String> getGenerationStatusLines(int floorNumber) {
         TerrainGenerationStatus status = this.getGenerationStatus(floorNumber);
         List<String> lines = new ArrayList<>();
         lines.add("Floor " + floorNumber + " world: " + status.worldName());
-        if (this.isHybridBlueprintFloor(floorNumber)) {
+        if (this.isHybridBlueprintFloor(floorNumber) || this.isWorldPainterFloor(floorNumber)) {
             lines.addAll(this.getBlueprintStatusLines(floorNumber));
         }
         lines.add("Status: " + status.status() + " | " + status.progressSummary());
@@ -607,6 +732,9 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
         lines.add("Profile: " + this.getTerrainProfile(floorNumber) + " | Size: " + this.getWorldSize(floorNumber));
         lines.add("Expected world: " + worldName + (floorNumber == 1 && this.isFreshWorldRequired(floorNumber) ? " | fresh world required" : ""));
         lines.add("Bundled templates loaded: " + this.structureTemplateManager.count());
+        if (this.isWorldPainterFloor(floorNumber)) {
+            lines.addAll(this.worldPainterExportDiagnostics(floorNumber, worldName));
+        }
         TerrainGenerationStatus generationStatus = this.getGenerationStatus(floorNumber);
         if (this.isManagedGenerationFloor(floorNumber)) {
             lines.add("Generation: " + generationStatus.status() + " | " + generationStatus.progressSummary());
@@ -648,10 +776,17 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
                 .orElse(villages.isEmpty() ? null : villages.get(0));
         lines.add("Villages: " + villages.size() + (firstHaven == null ? "" : " | First spawn: " + firstHaven.coordinateSummary()));
         lines.add("Persisted points: " + this.countPersistedPoints(floorNumber, worldName));
+        if (floorNumber == 1) {
+            lines.addAll(this.requiredFloorOnePointDiagnostics(worldName));
+        }
         if (world == null) {
-            lines.add(this.isManagedGenerationFloor(floorNumber)
-                    ? "FAIL: world is not loaded. Run /cterrain admin generate " + floorNumber + " first."
-                    : "FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
+            if (this.isWorldPainterFloor(floorNumber)) {
+                lines.add("FAIL: WorldPainter world is not loaded. Copy the exported '" + worldName + "' folder into the server root, then run /cterrain admin generate " + floorNumber + ".");
+            } else {
+                lines.add(this.isManagedGenerationFloor(floorNumber)
+                        ? "FAIL: world is not loaded. Run /cterrain admin generate " + floorNumber + " first."
+                        : "FAIL: world is not loaded. Run /cterrain admin create " + floorNumber + " first.");
+            }
             return lines;
         }
         if (firstHaven == null) {
@@ -692,12 +827,26 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
             lines.add(this.hasSetMapHouseBlocks(world, firstHaven)
                     ? "PASS: First Haven has large authored building blocks."
                     : "FAIL: First Haven large authored building blocks were not found.");
+            if (this.isWorldPainterFloor(floorNumber)) {
+                List<StructurePlacement> plannedPlacements = this.plannedPlacements(floorNumber, worldName);
+                int minimumTownStructures = this.plugin.getConfig().getInt("terrain.floors.1.qa.minimum-town-structures", 20);
+                int plannedTownStructures = this.countPlannedNear(plannedPlacements, firstHaven, 128);
+                int physicalTownStructures = this.countPhysicalPlacements(world, plannedPlacements, firstHaven, 128);
+                lines.add(plannedTownStructures >= minimumTownStructures
+                        ? "PASS: .ctpl overlay has " + plannedTownStructures + " planned First Haven pieces."
+                        : "FAIL: .ctpl overlay only has " + plannedTownStructures + " planned First Haven pieces; expected at least " + minimumTownStructures + ".");
+                lines.add(physicalTownStructures >= minimumTownStructures
+                        ? "PASS: .ctpl overlay has " + physicalTownStructures + " physical First Haven pieces."
+                        : "FAIL: .ctpl overlay only has " + physicalTownStructures + " physical First Haven pieces; run /cterrain admin generate 1 after copying the WorldPainter world.");
+            }
             if (blueprint != null) {
                 lines.add(blueprint.metrics().decorations() >= this.plugin.getConfig().getInt("terrain.floors." + floorNumber + ".qa.thresholds.minimum-decorations", 40)
                         ? "PASS: blueprint has enough wilderness support decoration candidates."
                         : "FAIL: blueprint has too few wilderness support decoration candidates.");
             }
-            lines.add("Debug: if these fail, this world was likely loaded but never pregenerated with /cterrain admin generate 1.");
+            lines.add(this.isWorldPainterFloor(floorNumber)
+                    ? "Debug: if physical checks fail, the WorldPainter base loaded but the CrownsTerrain .ctpl overlay/pregeneration did not finish."
+                    : "Debug: if these fail, this world was likely loaded but never pregenerated with /cterrain admin generate 1.");
             return lines;
         }
         if (floorNumber == 1) {
@@ -1069,6 +1218,182 @@ public class TerrainManager implements TerrainProvider, FloorRuntimeProvider {
             }
         }
         return false;
+    }
+
+    private List<String> worldPainterExportDiagnostics(int floorNumber, String worldName) {
+        List<String> lines = new ArrayList<>();
+        File serverWorld = new File(Bukkit.getWorldContainer(), worldName);
+        lines.add(serverWorld.isDirectory()
+                ? "PASS: WorldPainter world folder exists in server root: " + serverWorld.getAbsolutePath()
+                : "FAIL: WorldPainter world folder is missing from server root: " + serverWorld.getAbsolutePath());
+        if (serverWorld.isDirectory()) {
+            lines.add(new File(serverWorld, "level.dat").isFile()
+                    ? "PASS: WorldPainter export has level.dat."
+                    : "FAIL: WorldPainter export is missing level.dat.");
+            lines.add(new File(serverWorld, "region").isDirectory()
+                    ? "PASS: WorldPainter export has region data."
+                    : "FAIL: WorldPainter export is missing the region folder.");
+            lines.add(new File(serverWorld, "entities").isDirectory()
+                    ? "PASS: WorldPainter export has entities folder."
+                    : "FAIL: WorldPainter export is missing the entities folder.");
+        }
+        File workspace = new File(this.getWorldPainterWorkspace(floorNumber));
+        File report = new File(workspace, "floor1-worldpainter-report.json");
+        File composite = new File(workspace, "floor1-composite-preview.png");
+        lines.add(report.isFile()
+                ? "PASS: local WorldPainter report exists: " + report.getAbsolutePath()
+                : "FAIL: local WorldPainter report is missing. Run tools\\terrain\\worldpainter\\build_floor1_masks.ps1.");
+        lines.add(composite.isFile()
+                ? "PASS: local composite preview exists: " + composite.getAbsolutePath()
+                : "FAIL: local composite preview is missing. Run tools\\terrain\\worldpainter\\build_floor1_masks.ps1.");
+        return lines;
+    }
+
+    private boolean isMinecraftWorldFolder(File folder) {
+        return folder != null
+                && folder.isDirectory()
+                && new File(folder, "level.dat").isFile()
+                && new File(folder, "region").isDirectory()
+                && new File(folder, "entities").isDirectory();
+    }
+
+    private void copyWorldFolder(Path source, Path target) throws IOException {
+        Path parent = target.getParent();
+        if (parent == null) {
+            throw new IOException("Target world path has no parent: " + target);
+        }
+        Path temp = parent.resolve(target.getFileName() + "_installing");
+        this.deleteInstallTemp(temp, parent);
+        Files.createDirectories(temp);
+        try (Stream<Path> paths = Files.walk(source)) {
+            for (Path path : paths.toList()) {
+                Path relative = source.relativize(path);
+                Path destination = temp.resolve(relative);
+                if (Files.isDirectory(path)) {
+                    Files.createDirectories(destination);
+                } else {
+                    Files.createDirectories(destination.getParent());
+                    Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                }
+            }
+        } catch (IOException exception) {
+            this.deleteInstallTemp(temp, parent);
+            throw exception;
+        }
+        if (!this.isMinecraftWorldFolder(temp.toFile())) {
+            this.deleteInstallTemp(temp, parent);
+            throw new IOException("Copied source did not produce a valid Minecraft world folder.");
+        }
+        try {
+            Files.move(temp, target, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException ignored) {
+            Files.move(temp, target);
+        }
+    }
+
+    private void extractWorldZip(InputStream input, Path target) throws IOException {
+        Path parent = target.getParent();
+        if (parent == null) {
+            throw new IOException("Target world path has no parent: " + target);
+        }
+        Path temp = parent.resolve(target.getFileName() + "_installing");
+        this.deleteInstallTemp(temp, parent);
+        Files.createDirectories(temp);
+        try (ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                Path destination = temp.resolve(entry.getName()).normalize();
+                if (!destination.startsWith(temp)) {
+                    throw new IOException("Unsafe zip entry: " + entry.getName());
+                }
+                Files.createDirectories(destination.getParent());
+                Files.copy(zip, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException exception) {
+            this.deleteInstallTemp(temp, parent);
+            throw exception;
+        }
+
+        Path candidate = this.findMinecraftWorldFolder(temp);
+        if (candidate == null) {
+            this.deleteInstallTemp(temp, parent);
+            throw new IOException("Bundled zip did not contain a valid Minecraft world folder.");
+        }
+        if (!candidate.equals(temp)) {
+            Path normalizedTemp = parent.resolve(target.getFileName() + "_normalized");
+            this.deleteInstallTemp(normalizedTemp, parent);
+            Files.move(candidate, normalizedTemp);
+            this.deleteInstallTemp(temp, parent);
+            temp = normalizedTemp;
+        }
+        try {
+            Files.move(temp, target, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException ignored) {
+            Files.move(temp, target);
+        }
+    }
+
+    private Path findMinecraftWorldFolder(Path root) throws IOException {
+        if (this.isMinecraftWorldFolder(root.toFile())) {
+            return root;
+        }
+        try (Stream<Path> paths = Files.walk(root, 2)) {
+            return paths
+                    .filter(path -> this.isMinecraftWorldFolder(path.toFile()))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
+    private void deleteInstallTemp(Path temp, Path expectedParent) throws IOException {
+        if (temp == null || expectedParent == null || !temp.getParent().equals(expectedParent)
+                || !temp.getFileName().toString().endsWith("_installing")
+                && !temp.getFileName().toString().endsWith("_normalized")) {
+            throw new IOException("Refusing to remove unexpected install temp path: " + temp);
+        }
+        if (!Files.exists(temp)) {
+            return;
+        }
+        try (Stream<Path> paths = Files.walk(temp)) {
+            for (Path path : paths.sorted((left, right) -> right.getNameCount() - left.getNameCount()).toList()) {
+                Files.deleteIfExists(path);
+            }
+        }
+    }
+
+    private void sendInstallMessage(CommandSender sender, String message, boolean success) {
+        if (sender != null) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text(message,
+                    success ? net.kyori.adventure.text.format.NamedTextColor.GREEN : net.kyori.adventure.text.format.NamedTextColor.RED));
+        }
+    }
+
+    private List<String> requiredFloorOnePointDiagnostics(String worldName) {
+        List<String> lines = new ArrayList<>();
+        Map<String, String> required = Map.of(
+                "village:first-haven", "First Haven",
+                "landmark:market-square", "Market Square",
+                "road_marker:farm-gate", "Farm Gate",
+                "camp:starter-camp", "Starter Camp",
+                "shrine:starter-shrine", "Starter Shrine",
+                "waystone:first-waystone", "First Waystone",
+                "road_marker:arena-approach", "Arena Approach",
+                "arena:first-gate-arena", "First Gate Arena"
+        );
+        for (Map.Entry<String, String> entry : required.entrySet()) {
+            String[] parts = entry.getKey().split(":", 2);
+            String type = parts[0];
+            String key = parts[1];
+            boolean exists = this.getPoints(1, worldName, type).stream()
+                    .anyMatch(point -> point.key().equalsIgnoreCase(key) || point.key().replace('_', '-').equalsIgnoreCase(key));
+            lines.add(exists
+                    ? "PASS: TerrainProvider anchor exists: " + entry.getValue() + " [" + key + "]."
+                    : "FAIL: TerrainProvider anchor missing: " + entry.getValue() + " [" + key + "].");
+        }
+        return lines;
     }
 
     private boolean hasFarmBlocks(World world, List<TerrainPoint> points) {

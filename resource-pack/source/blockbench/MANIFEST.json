@@ -1,0 +1,43 @@
+{
+  "version": "1.6.0",
+  "blockbench": "D:\\CrownsSuiteTools\\Apps\\Blockbench-5.1.4-portable.exe",
+  "sources": [
+    {
+      "source": "suite_crown_crest.bbmodel",
+      "palette": "suite",
+      "intended_model_paths": [
+        "lowlight/suite/api",
+        "lowlight/suite/resource_pack",
+        "lowlight/suite/status"
+      ]
+    },
+    {
+      "source": "event_relics.bbmodel",
+      "palette": "end",
+      "intended_model_paths": [
+        "lowlight/end/void_core",
+        "lowlight/end/crown_of_the_void",
+        "lowlight/nether/crown_fragment"
+      ]
+    },
+    {
+      "source": "mmo_gate_gear.bbmodel",
+      "palette": "mmo",
+      "intended_model_paths": [
+        "lowlight/mmo/floors",
+        "lowlight/mmo/gear/gatebreaker_compass",
+        "lowlight/mmo/floor1/gatekeeper_trophy"
+      ]
+    },
+    {
+      "source": "economy_trade_seals.bbmodel",
+      "palette": "economy",
+      "intended_model_paths": [
+        "lowlight/economy/wallet",
+        "lowlight/economy/server_trader",
+        "lowlight/economy/market_stalls"
+      ]
+    }
+  ],
+  "note": "These are editable source models for the 1.6.0 premium redraw pipeline. Runtime still uses generated lowlight/... model paths."
+}

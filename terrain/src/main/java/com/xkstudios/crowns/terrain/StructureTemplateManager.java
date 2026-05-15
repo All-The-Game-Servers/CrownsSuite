@@ -28,7 +28,14 @@ public final class StructureTemplateManager {
             "giant_tree_base", "stream_camp", "ruined_gate_marker",
             "fountain_plaza", "haven_house_tall", "haven_house_garden", "blacksmith",
             "barn", "market_row", "gate_tower", "wall_fragment", "cliff_overlook",
-            "river_bridge", "arena_threshold", "arena_staging"
+            "river_bridge", "arena_threshold", "arena_staging",
+            "fh_spawn_plaza_grand", "fh_town_hall_grand", "fh_market_hall",
+            "fh_market_street", "fh_house_large_a", "fh_house_large_b",
+            "fh_house_row", "fh_blacksmith_large", "fh_barn_large",
+            "fh_farm_terrace_stamp", "fh_watchtower_tall", "fh_gatehouse_grand",
+            "fh_shrine_grove", "fh_waystone_platform", "fh_starter_camp",
+            "fh_road_straight", "fh_road_curve", "fh_bridge_stream",
+            "fh_cliff_rocks", "fh_arena_approach", "fh_first_gate_platform"
     );
 
     private final CrownsTerrainPlugin plugin;

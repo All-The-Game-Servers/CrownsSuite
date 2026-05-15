@@ -32,7 +32,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "structure-pipeline", "structure-studio")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "worldpainter-pipeline", "structure-pipeline", "structure-studio")
         ), this::moduleHealth);
         CrownsAPI.registerSection(new SuiteSection(
                 "terrain",
@@ -52,7 +52,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new TerrainMenuListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TerrainSafetyListener(this), this);
         Bukkit.getPluginManager().registerEvents(new TerrainStudioListener(this), this);
-        this.getLogger().info("CrownsTerrain enabled with hybrid route-first floor engine support.");
+        this.getLogger().info("CrownsTerrain enabled with WorldPainter macro terrain, hybrid route-first floor, and Structure Studio support.");
     }
 
     @Override
@@ -91,7 +91,7 @@ public class CrownsTerrainPlugin extends JavaPlugin {
                 "1.4.0",
                 List.of("CrownsAPI"),
                 List.of("CrownsMMO"),
-                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "structure-pipeline", "structure-studio")
+                List.of("terrain", "floor-runtime", "floor-readiness", "blueprints", "debug-maps", "worldpainter-pipeline", "structure-pipeline", "structure-studio")
         );
         List<String> warnings = new java.util.ArrayList<>();
         if (this.terrainManager == null) {

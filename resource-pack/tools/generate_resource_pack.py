@@ -10,7 +10,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "1.5.0"
+VERSION = "1.6.0"
 PACK_NAME = f"CrownsSuite-ResourcePack-{VERSION}"
 PACK_DIR = ROOT / "resource-pack" / PACK_NAME
 BUILD_DIR = ROOT / "build" / "resource-pack"
@@ -20,6 +20,8 @@ SHA1_PATH = BUILD_DIR / f"{PACK_NAME}.sha1"
 DOWNLOAD_ZIP_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.zip"
 DOWNLOAD_SHA1_PATH = DOWNLOADS_DIR / f"{PACK_NAME}.sha1"
 INDEX_PATH = ROOT / "resource-pack" / "ASSET_INDEX.md"
+CONTACT_SHEET_PATH = ROOT / "build" / "resource-pack" / f"{PACK_NAME}-contact-sheet.png"
+BLOCKBENCH_SOURCE_DIR = ROOT / "resource-pack" / "source" / "blockbench"
 TRANSPARENT = (0, 0, 0, 0)
 RESOURCE_PACK_FORMAT = 75
 
@@ -150,6 +152,16 @@ class Canvas:
             int(out_a),
         )
 
+    def paste(self, source, x0, y0, scale=1):
+        for y in range(source.h):
+            for x in range(source.w):
+                color = source.pixels[y][x]
+                if color[3] <= 0:
+                    continue
+                for sy in range(scale):
+                    for sx in range(scale):
+                        self.blend(x0 + x * scale + sx, y0 + y * scale + sy, color)
+
     def rect(self, x0, y0, x1, y1, color):
         for y in range(y0, y1 + 1):
             for x in range(x0, x1 + 1):
@@ -237,15 +249,21 @@ def write_model_files(model_path: str):
 def base_canvas(palette_name: str):
     palette = PALETTES[palette_name]
     canvas = Canvas()
-    for radius, alpha in ((14, 16), (11, 24), (7, 36)):
+    for y in range(32):
+        for x in range(32):
+            shade = palette["shade"]
+            canvas.blend(x, y, (shade[0], shade[1], shade[2], 28 + min(60, y * 2)))
+    for radius, alpha in ((15, 18), (12, 30), (8, 46), (4, 58)):
         glow = palette["glow"]
         canvas.circle(16, 16, radius, (glow[0], glow[1], glow[2], alpha))
-    canvas.frame((palette["trim"][0], palette["trim"][1], palette["trim"][2], 82), 2)
-    canvas.frame((palette["shade"][0], palette["shade"][1], palette["shade"][2], 170), 4)
-    canvas.line(6, 25, 25, 6, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 34))
-    canvas.line(7, 26, 26, 7, (palette["glow"][0], palette["glow"][1], palette["glow"][2], 28))
+    canvas.frame((palette["trim"][0], palette["trim"][1], palette["trim"][2], 150), 2)
+    canvas.frame((palette["gold"][0], palette["gold"][1], palette["gold"][2], 115), 3)
+    canvas.frame((palette["shade"][0], palette["shade"][1], palette["shade"][2], 210), 4)
+    canvas.line(6, 25, 25, 6, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 64))
+    canvas.line(7, 26, 26, 7, (palette["glow"][0], palette["glow"][1], palette["glow"][2], 42))
     for ox, oy in ((4, 4), (27, 4), (4, 27), (27, 27)):
-        canvas.rect(ox - 1, oy - 1, ox + 1, oy + 1, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 125))
+        canvas.rect(ox - 1, oy - 1, ox + 1, oy + 1, (palette["trim"][0], palette["trim"][1], palette["trim"][2], 165))
+        canvas.blend(ox, oy, palette["gold"])
     return canvas, palette
 
 
@@ -496,7 +514,7 @@ def write_pack_files():
         "pack": {
             "min_format": RESOURCE_PACK_FORMAT,
             "max_format": RESOURCE_PACK_FORMAT,
-            "description": "Crowns Suite 1.5.0 - 1.21.11 Dark Arcane relaunch pack."
+            "description": "Crowns Suite 1.6.0 - required 1.21.11 premium dark arcane pack."
         }
     }, indent=2), encoding="utf-8")
     lowlight = PACK_DIR / "assets" / "lowlight"
@@ -504,12 +522,101 @@ def write_pack_files():
     (lowlight / "sounds").mkdir(parents=True, exist_ok=True)
     (lowlight / "font" / "default.json").write_text(json.dumps({"providers": []}, indent=2), encoding="utf-8")
     (lowlight / "sounds.json").write_text("{}", encoding="utf-8")
-    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.5.0\nTheme: Full Dark Arcane redraw\n", encoding="utf-8")
+    (PACK_DIR / "credits.txt").write_text("Crowns Suite Resource Pack 1.6.0\nTheme: Premium Dark Arcane redraw\nAuthoring: Blockbench source pipeline + validated 32x icons\n", encoding="utf-8")
 
 
 def write_asset_index():
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
     INDEX_PATH.write_text("# Crowns Suite Resource Pack Asset Index\n\n| Model Path | Icon | Palette |\n| --- | --- | --- |\n" + "\n".join(f"| `{p}` | `{k}` | `{pal}` |" for p, k, pal in ASSETS) + "\n", encoding="utf-8")
+
+
+def write_blockbench_sources():
+    BLOCKBENCH_SOURCE_DIR.mkdir(parents=True, exist_ok=True)
+    groups = {
+        "suite_crown_crest": ("suite", ["lowlight/suite/api", "lowlight/suite/resource_pack", "lowlight/suite/status"]),
+        "event_relics": ("end", ["lowlight/end/void_core", "lowlight/end/crown_of_the_void", "lowlight/nether/crown_fragment"]),
+        "mmo_gate_gear": ("mmo", ["lowlight/mmo/floors", "lowlight/mmo/gear/gatebreaker_compass", "lowlight/mmo/floor1/gatekeeper_trophy"]),
+        "economy_trade_seals": ("economy", ["lowlight/economy/wallet", "lowlight/economy/server_trader", "lowlight/economy/market_stalls"]),
+    }
+    manifest = []
+    for key, (palette_name, model_paths) in groups.items():
+        palette = PALETTES[palette_name]
+        model = {
+            "meta": {
+                "format_version": "4.10",
+                "model_format": "free",
+                "box_uv": False
+            },
+            "name": key,
+            "geometry_name": key,
+            "visible_box": [1, 1, 0],
+            "variable_placeholders": "",
+            "resolution": {"width": 32, "height": 32},
+            "elements": [
+                {
+                    "name": "backplate",
+                    "from": [3, 3, 7.5],
+                    "to": [13, 13, 8.5],
+                    "color": 1,
+                    "faces": {
+                        face: {"uv": [3, 3, 29, 29], "texture": 0}
+                        for face in ["north", "south", "east", "west", "up", "down"]
+                    }
+                },
+                {
+                    "name": "raised_glyph",
+                    "from": [6, 5, 6.5],
+                    "to": [10, 11, 9.5],
+                    "color": 2,
+                    "faces": {
+                        face: {"uv": [8, 7, 24, 25], "texture": 0}
+                        for face in ["north", "south", "east", "west", "up", "down"]
+                    }
+                }
+            ],
+            "textures": [
+                {
+                    "path": f"assets/lowlight/textures/item/{model_paths[0].split('/', 1)[1]}.png",
+                    "name": key,
+                    "folder": "item",
+                    "namespace": "lowlight",
+                    "id": "0",
+                    "particle": True
+                }
+            ],
+            "outliner": ["backplate", "raised_glyph"],
+            "crowns": {
+                "intended_model_paths": model_paths,
+                "palette": palette_name,
+                "style": "dark_arcane_low_poly_item",
+                "trim": "#%02x%02x%02x" % palette["trim"][:3],
+                "glow": "#%02x%02x%02x" % palette["glow"][:3]
+            }
+        }
+        path = BLOCKBENCH_SOURCE_DIR / f"{key}.bbmodel"
+        path.write_text(json.dumps(model, indent=2), encoding="utf-8")
+        manifest.append({"source": path.name, "palette": palette_name, "intended_model_paths": model_paths})
+    (BLOCKBENCH_SOURCE_DIR / "MANIFEST.json").write_text(json.dumps({
+        "version": VERSION,
+        "blockbench": "D:\\CrownsSuiteTools\\Apps\\Blockbench-5.1.4-portable.exe",
+        "sources": manifest,
+        "note": "These are editable source models for the 1.6.0 premium redraw pipeline. Runtime still uses generated lowlight/... model paths."
+    }, indent=2), encoding="utf-8")
+
+
+def write_contact_sheet(rendered_icons: list[tuple[str, Canvas]]):
+    columns = 8
+    cell = 40
+    rows = (len(rendered_icons) + columns - 1) // columns
+    sheet = Canvas(columns * cell, rows * cell)
+    for index, (_, icon) in enumerate(rendered_icons):
+        col = index % columns
+        row = index // columns
+        x0 = col * cell + 4
+        y0 = row * cell + 4
+        sheet.rect(col * cell, row * cell, col * cell + cell - 1, row * cell + cell - 1, (4, 4, 8, 255))
+        sheet.paste(icon, x0, y0)
+    write_png(CONTACT_SHEET_PATH, sheet)
 
 
 def export_zip():
@@ -520,6 +627,8 @@ def export_zip():
                 zf.write(file, file.relative_to(PACK_DIR))
     SHA1_PATH.write_text(hashlib.sha1(ZIP_PATH.read_bytes()).hexdigest(), encoding="utf-8")
     DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
+    for stale in DOWNLOADS_DIR.glob("CrownsSuite-ResourcePack-*"):
+        stale.unlink()
     shutil.copy2(ZIP_PATH, DOWNLOAD_ZIP_PATH)
     shutil.copy2(SHA1_PATH, DOWNLOAD_SHA1_PATH)
 
@@ -543,6 +652,10 @@ def validate_pack():
         for required in required_files:
             if not required.exists():
                 raise RuntimeError(f"Missing generated resource-pack asset: {required.relative_to(PACK_DIR)}")
+        model_json = json.loads((PACK_DIR / "assets" / namespace / "models" / "item" / f"{key}.json").read_text(encoding="utf-8"))
+        texture_ref = model_json.get("textures", {}).get("layer0", "")
+        if texture_ref != f"{namespace}:item/{key}":
+            raise RuntimeError(f"Invalid texture reference for {model_path}: {texture_ref}")
 
     referenced = set()
     pattern = re.compile(r"lowlight/[a-z0-9_./-]+")
@@ -557,13 +670,22 @@ def validate_pack():
     missing = sorted(path for path in referenced if path not in expected and not path.endswith("/") and not path.endswith("_"))
     if missing:
         raise RuntimeError("Missing generated assets for plugin model paths:\n" + "\n".join(missing))
+    if not CONTACT_SHEET_PATH.exists():
+        raise RuntimeError("Missing resource-pack contact sheet.")
+    if not (BLOCKBENCH_SOURCE_DIR / "MANIFEST.json").exists():
+        raise RuntimeError("Missing Blockbench source manifest.")
 
 
 def main():
     write_pack_files()
+    write_blockbench_sources()
+    rendered_icons = []
     for model_path, kind, palette_name in ASSETS:
         texture = write_model_files(model_path)
-        write_png(texture, draw_icon(kind, palette_name))
+        icon = draw_icon(kind, palette_name)
+        write_png(texture, icon)
+        rendered_icons.append((model_path, icon))
+    write_contact_sheet(rendered_icons)
     write_asset_index()
     validate_pack()
     export_zip()
