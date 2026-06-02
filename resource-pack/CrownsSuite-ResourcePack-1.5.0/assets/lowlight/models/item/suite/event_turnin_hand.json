@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "lowlight:item/suite/event_turnin_hand"
-  }
-}

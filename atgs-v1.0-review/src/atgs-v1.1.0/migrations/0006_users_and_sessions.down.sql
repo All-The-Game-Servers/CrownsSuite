@@ -1,0 +1,4 @@
+ALTER TABLE instances DROP COLUMN IF EXISTS owner_user_id;
+DROP TABLE IF EXISTS user_sessions;
+DROP TABLE IF EXISTS users;
+DROP TYPE IF EXISTS user_role;

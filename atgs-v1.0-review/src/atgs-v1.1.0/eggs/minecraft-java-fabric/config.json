@@ -1,0 +1,18 @@
+{
+  "id": "minecraft-java-fabric",
+  "name": "Minecraft Java (Fabric)",
+  "description": "Fabric-based Minecraft Java Edition server using itzg/minecraft-server. Ship mods into the instance data directory and keep client/server mod sets aligned.",
+  "docker_image": "itzg/minecraft-server:java21",
+  "env": {
+    "EULA": "TRUE",
+    "TYPE": "FABRIC",
+    "VERSION": "LATEST",
+    "MEMORY": "2G"
+  },
+  "ports": [
+    { "container_port": 25565, "protocol": "tcp", "public": true }
+  ],
+  "data_volumes": ["/data"],
+  "stop_command": "stop",
+  "stop_timeout_secs": 30
+}

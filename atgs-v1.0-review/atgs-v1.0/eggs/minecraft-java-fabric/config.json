@@ -1,0 +1,26 @@
+{
+  "id": "minecraft-java-fabric",
+  "name": "Minecraft Java (Fabric)",
+  "description": "Fabric-based Minecraft Java Edition server using itzg/minecraft-server. Supports most modern Fabric mods (e.g. Sodium, Lithium, Iris, Fabric API, Simple Voice Chat). Drop mod jars into <instance_data>/mods/ on the host.",
+  "docker_image": "itzg/minecraft-server:java21",
+  "env": {
+    "EULA": "TRUE",
+    "TYPE": "FABRIC",
+    "VERSION": "LATEST",
+    "FABRIC_LOADER_VERSION": "LATEST",
+    "FABRIC_INSTALLER_VERSION": "LATEST",
+    "MEMORY": "4G",
+    "MAX_PLAYERS": "20",
+    "DIFFICULTY": "normal",
+    "MODE": "survival",
+    "ONLINE_MODE": "true",
+    "SERVER_PORT": "25565"
+  },
+  "ports": [
+    { "container_port": 25565, "protocol": "tcp", "description": "Game port", "public": true }
+  ],
+  "data_volumes": ["/data"],
+  "stop_command": "stop",
+  "stop_timeout_secs": 30,
+  "notes": "Mods go in <data_root>/<instance_id>/mods/ on the keeper host. Restart the instance after adding mods. For modpacks distributed as CurseForge or Modrinth .zip, set AUTO_CURSEFORGE=1 or set MODRINTH_MODPACK=<slug/version> via a custom env override."
+}

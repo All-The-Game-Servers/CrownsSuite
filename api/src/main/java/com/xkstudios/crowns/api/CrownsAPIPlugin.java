@@ -6,6 +6,10 @@ import com.xkstudios.crowns.economy.Currency;
 import com.xkstudios.crowns.gui.SuiteGuiManager;
 import com.xkstudios.crowns.gui.SuiteMenuListener;
 import com.xkstudios.crowns.inbox.InboxManager;
+import com.xkstudios.crowns.api.action.CooldownService;
+import com.xkstudios.crowns.api.action.DefaultActionInputService;
+import com.xkstudios.crowns.api.action.ParticlePatternService;
+import com.xkstudios.crowns.api.action.ResourceMeterService;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +21,10 @@ public class CrownsAPIPlugin extends JavaPlugin {
     private InboxManager inboxManager;
     private SuiteGuiManager suiteGuiManager;
     private ResourcePackService resourcePackService;
+    private DefaultActionInputService actionInputService;
+    private CooldownService cooldownService;
+    private ResourceMeterService resourceMeterService;
+    private ParticlePatternService particlePatternService;
 
     @Override
     public void onEnable() {
@@ -28,18 +36,26 @@ public class CrownsAPIPlugin extends JavaPlugin {
         this.inboxManager = new InboxManager(this, this.dataManager);
         this.resourcePackService = new ResourcePackService(this);
         this.suiteGuiManager = new SuiteGuiManager(this);
+        this.actionInputService = new DefaultActionInputService();
+        this.cooldownService = new CooldownService();
+        this.resourceMeterService = new ResourceMeterService();
+        this.particlePatternService = new ParticlePatternService(this);
         CrownsAPI.setDataManager(this.dataManager);
         CrownsAPI.setSuiteGui(this.suiteGuiManager);
         CrownsAPI.setResourcePackService(this.resourcePackService);
+        CrownsAPI.setActionInputService(this.actionInputService);
+        CrownsAPI.setCooldownService(this.cooldownService);
+        CrownsAPI.setResourceMeterService(this.resourceMeterService);
+        CrownsAPI.setParticlePatternService(this.particlePatternService);
         CrownsAPI.registerModule(new ModuleDescriptor(
                 "api",
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "1.5.0",
+                "0.1.2",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")
+                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat")
         ), this::apiHealth);
         CrownsAPI.setPlayerDataProvider(new PlayerDataProvider() {
             @Override
@@ -60,6 +76,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setInboxProvider(this.inboxManager);
         Bukkit.getPluginManager().registerEvents(new SuiteMenuListener(), this);
         Bukkit.getPluginManager().registerEvents(this.resourcePackService, this);
+        Bukkit.getPluginManager().registerEvents(this.actionInputService, this);
         CapiCommand command = new CapiCommand(this);
         if (this.getCommand("capi") != null) {
             this.getCommand("capi").setExecutor(command);
@@ -79,6 +96,10 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setDataManager(null);
         CrownsAPI.setSuiteGui(null);
         CrownsAPI.setResourcePackService(null);
+        CrownsAPI.setActionInputService(null);
+        CrownsAPI.setCooldownService(null);
+        CrownsAPI.setResourceMeterService(null);
+        CrownsAPI.setParticlePatternService(null);
         CrownsAPI.unregisterModule("api");
         CrownsAPI.clearSections();
         if (this.dataManager != null) {
@@ -107,15 +128,21 @@ public class CrownsAPIPlugin extends JavaPlugin {
         } else if (!this.resourcePackService.isEnabled()) {
             warnings.add("Resource-pack metadata is disabled in API config.");
         }
+        if (this.actionInputService == null) {
+            warnings.add("Action input service is not registered.");
+        }
+        if (this.resourceMeterService == null || this.cooldownService == null) {
+            warnings.add("Ability resource/cooldown services are not registered.");
+        }
         ModuleDescriptor descriptor = new ModuleDescriptor(
                 "api",
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "1.5.0",
+                "0.1.2",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "floor-runtime", "resource-pack", "inbox")
+                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat")
         );
         if (!databaseOnline) {
             return ModuleHealth.of(descriptor, ServiceState.FAILED, "Core API services are unavailable.", warnings);

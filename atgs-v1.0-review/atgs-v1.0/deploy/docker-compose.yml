@@ -1,0 +1,83 @@
+# ATGS v1.0 — Central + Postgres docker-compose
+#
+# One-command launch:
+#   docker compose up -d
+#
+# On first boot, edit the environment block below with your admin credentials
+# and enrollment token settings. After the first successful boot, remove the
+# ATGS_CENTRAL_ADMIN_PASSWORD line (the admin user is now in the database).
+#
+# To run the keeper on the same host:
+#   1. docker compose up -d central
+#   2. docker exec atgs-central ./central mint-enrollment-token
+#   3. copy the token
+#   4. docker compose up -d keeper
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atgs-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: atgs
+      POSTGRES_USER: atgs
+      POSTGRES_PASSWORD: change-this-in-production
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atgs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  central:
+    image: xkstudios/atgs-central:1.0.0
+    # Alternatively, build locally from the central source:
+    # build: ./central
+    container_name: atgs-central
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"    # admin API
+      - "8443:8443"    # keeper listener (mTLS)
+    environment:
+      ATGS_CENTRAL_DATABASE_URL: "postgres://atgs:change-this-in-production@postgres:5432/atgs?sslmode=disable"
+      ATGS_CENTRAL_ADMIN_ADDR: "0.0.0.0:8080"
+      ATGS_CENTRAL_KEEPER_ADDR: "0.0.0.0:8443"
+      ATGS_CENTRAL_CA_DIR: "/data/ca"
+      ATGS_CENTRAL_BACKUP_ROOT: "/data/backups"
+      ATGS_CENTRAL_DEV: "false"
+      # First-boot admin (remove these lines after first successful boot):
+      ATGS_CENTRAL_ADMIN_EMAIL: "admin@example.com"
+      ATGS_CENTRAL_ADMIN_PASSWORD: "change-this-12-chars-plus"
+    volumes:
+      - central-data:/data
+    command: ["/app/central", "serve"]
+
+  keeper:
+    image: xkstudios/atgs-keeper:1.0.0
+    # Alternatively, build locally from the keeper Dockerfile:
+    # build: -f keeper/Dockerfile .
+    container_name: atgs-keeper
+    restart: unless-stopped
+    depends_on:
+      - central
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock    # keeper spawns game servers via Docker
+      - keeper-state:/state
+      - ./eggs:/eggs:ro
+    environment:
+      ATGS_KEEPER_CENTRAL_URL: "https://central:8443"
+      ATGS_KEEPER_STATE_DIR: "/state"
+      ATGS_KEEPER_EGGS_DIR: "/eggs"
+      ATGS_KEEPER_DATA_ROOT: "/state/instances"
+      ATGS_KEEPER_INSECURE_TLS: "true"               # dev only; remove in production
+      # Enrollment token — fill this in after running 'mint-enrollment-token':
+      ATGS_ENROLL_TOKEN: ""
+
+volumes:
+  postgres-data:
+  central-data:
+  keeper-state:

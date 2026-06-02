@@ -1,0 +1,63 @@
+# ATGS relay cluster — Envoy L4 config
+#
+# Ring-hash LB with SNI as the hash key. Alternative to HAProxy for operators
+# who prefer Envoy or are already running service mesh.
+#
+# Envoy's `ring_hash` with `hash_policy.source_ip` is the common pattern,
+# but we want SNI, not source IP — a player on a changing cellular IP
+# should stay on the same relay while they're on the same hostname.
+
+static_resources:
+  listeners:
+    - name: atgs_java
+      address:
+        socket_address: { address: 0.0.0.0, port_value: 25565 }
+      listener_filters:
+        - name: envoy.filters.listener.tls_inspector
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.tcp_proxy
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+                stat_prefix: atgs_java
+                cluster: atgs_relays_java
+                idle_timeout: 86400s
+                hash_policy:
+                  - source_ip: {}  # fallback
+          # Match on SNI
+          filter_chain_match:
+            server_names: ["*.atgslowlightsmp.mine.bz"]
+
+  clusters:
+    - name: atgs_relays_java
+      connect_timeout: 5s
+      type: STRICT_DNS
+      lb_policy: RING_HASH
+      ring_hash_lb_config:
+        minimum_ring_size: 1024
+        maximum_ring_size: 8192
+      load_assignment:
+        cluster_name: atgs_relays_java
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address: { address: relay-1.internal, port_value: 25565 }
+              - endpoint:
+                  address:
+                    socket_address: { address: relay-2.internal, port_value: 25565 }
+              - endpoint:
+                  address:
+                    socket_address: { address: relay-3.internal, port_value: 25565 }
+      health_checks:
+        - timeout: 3s
+          interval: 5s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          tcp_health_check: {}
+
+admin:
+  address:
+    socket_address: { address: 127.0.0.1, port_value: 9901 }

@@ -2,33 +2,27 @@
 
 Crowns Suite is the modular Lowlight SMP plugin suite by XKStudios.
 
-`1.4.0` is the suite-wide `BetterPvP-Informed Platform Cohesion` release. CrownsEvents is on `1.5.0` with the Season 1 vanilla Endfall Opening Week, CrownsMMO is on `1.8.0`, and CrownsTerrain is on `1.8.5` with the WorldPainter macro-terrain pipeline plus Blender-authored Floor 1 assets.
+The active relaunch line is now `CrownsAPI 0.1.2` ("Swords Update") with `CrownsMagic 0.1.0` ("A World Born") and `CrownsSwords 0.1.0`. Older Crowns Suite modules are preserved in the repo for reference, but the current active build only packages the relaunch modules while the suite is being rebuilt from the ground up.
 
-It currently includes:
+The active relaunch currently includes:
 
-- `CrownsAPI` for shared data, GUI shell, and provider wiring
-- `CrownsEconomy` for wallets, auctions, stalls, jobs, demand, trader, and gambling
-- `CrownsAdmin` for moderation, vanish, staff tools, analytics, and inspection
-- `CrownsEvents` for Nether Week, Endfall Week, and future seasonal content
-- `CrownsDrugs` for grow, process, use, and sell contraband items through the Crowns economy
-- `CrownsMMO` for Season 2 MMO progression, professions, combat identity, and world progression
-- `CrownsTerrain` for hybrid MMO floor terrain, villages, landmarks, and arena placement
+- `CrownsAPI` for shared data, GUI shell, provider wiring, module status, resource-pack handling, gesture input, cooldown/resource meters, and particle helpers
+- `CrownsMagic` for gesture-based spell casting, spellbook loadouts, mana, cooldowns, and the first playable magic spell set
+- `CrownsSwords` for gesture-based sword arts, skillbook loadouts, stamina, cooldowns, and the first playable weapon-art set
 
 ## Downloads
 
 The current downloadable builds are stored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads):
 
-Only the latest supported build for each plugin/resource pack is kept in that folder, so the download list is intentionally short.
+Current relaunch artifacts:
 
-- `CrownsAPI-1.5.0.jar`
-- `CrownsEconomy-1.4.0.jar`
-- `CrownsAdmin-1.4.0.jar`
-- `CrownsEvents-1.5.0.jar`
-- `CrownsDrugs-1.4.0.jar`
-- `CrownsMMO-1.8.0.jar`
-- `CrownsTerrain-1.8.5.jar`
-- `CrownsSuite-ResourcePack-1.6.0.zip`
-- `CrownsSuite-ResourcePack-1.6.0.sha1`
+- `CrownsAPI-0.1.2.jar`
+- `CrownsMagic-0.1.0.jar`
+- `CrownsSwords-0.1.0.jar`
+- `CrownsSuite-ResourcePack-1.7.0.zip`
+- `CrownsSuite-ResourcePack-1.7.0.sha1`
+
+Some legacy jars may still be visible locally if OneDrive has locked them, but they are not part of the active relaunch build.
 
 ## Wiki
 
@@ -50,11 +44,13 @@ Suggested GitHub wiki structure:
 
 The Crowns Suite resource pack source is stored in [resource-pack](C:\Users\sirgi\OneDrive\Documents\New project\resource-pack), and the distributable build is mirrored in [downloads](C:\Users\sirgi\OneDrive\Documents\New project\downloads).
 
-Current resource-pack build: `CrownsSuite-ResourcePack-1.6.0.zip` with SHA1 `a511c036004513985f463427b986995f28b47095`. It is rebuilt for Minecraft `1.21.11` resource-pack format `75`. CrownsAPI `1.5.0` is configured for GitHub Release resolution, required delivery on join, and `/capi pack refresh` plus `/capi pack apply`.
+Current resource-pack build: `CrownsSuite-ResourcePack-1.7.0.zip` with SHA1 `7829996977bbecc38204d3abe7e104af508e5e39`. Magic uses stable model paths under `lowlight/magic/...`; Swords uses stable model paths under `lowlight/swords/...`.
 
 ## Project Layout
 
 - [api](C:\Users\sirgi\OneDrive\Documents\New project\api)
+- [magic](C:\Users\sirgi\OneDrive\Documents\New project\magic)
+- [swords](C:\Users\sirgi\OneDrive\Documents\New project\swords)
 - [economy](C:\Users\sirgi\OneDrive\Documents\New project\economy)
 - [admin](C:\Users\sirgi\OneDrive\Documents\New project\admin)
 - [events](C:\Users\sirgi\OneDrive\Documents\New project\events)

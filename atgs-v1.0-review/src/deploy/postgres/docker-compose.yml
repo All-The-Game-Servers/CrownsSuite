@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: atgs-postgres-dev
+    environment:
+      POSTGRES_USER: atgs
+      POSTGRES_PASSWORD: atgs
+      POSTGRES_DB: atgs
+    ports:
+      - "5432:5432"
+    volumes:
+      - atgs_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atgs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  atgs_pg_data:

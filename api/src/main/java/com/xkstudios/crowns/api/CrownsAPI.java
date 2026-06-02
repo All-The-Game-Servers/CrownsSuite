@@ -2,6 +2,10 @@ package com.xkstudios.crowns.api;
 
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.gui.SuiteGuiManager;
+import com.xkstudios.crowns.api.action.ActionInputService;
+import com.xkstudios.crowns.api.action.CooldownService;
+import com.xkstudios.crowns.api.action.ParticlePatternService;
+import com.xkstudios.crowns.api.action.ResourceMeterService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -23,6 +27,10 @@ public final class CrownsAPI {
     private static DataManager dataManager;
     private static SuiteGuiManager suiteGuiManager;
     private static ResourcePackService resourcePackService;
+    private static ActionInputService actionInputService;
+    private static CooldownService cooldownService;
+    private static ResourceMeterService resourceMeterService;
+    private static ParticlePatternService particlePatternService;
     private static final Map<String, SuiteSection> sections = new LinkedHashMap<>();
     private static final Map<String, ModuleDescriptor> expectedModules = new LinkedHashMap<>();
     private static final Map<String, ModuleDescriptor> modules = new LinkedHashMap<>();
@@ -33,13 +41,9 @@ public final class CrownsAPI {
     private static final List<SuiteActivityListener> activityListeners = new CopyOnWriteArrayList<>();
 
     static {
-        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "1.4.0", List.of(), List.of(), List.of("data", "gui", "modules", "floor-runtime", "resource-pack")));
-        registerExpectedModule(new ModuleDescriptor("economy", "CrownsEconomy", "CrownsEconomy", "unknown", "1.4.0", List.of("CrownsAPI"), List.of(), List.of("economy", "market-activity")));
-        registerExpectedModule(new ModuleDescriptor("admin", "CrownsAdmin", "CrownsAdmin", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("moderation", "analytics")));
-        registerExpectedModule(new ModuleDescriptor("events", "CrownsEvents", "CrownsEvents", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("events", "activity-hooks")));
-        registerExpectedModule(new ModuleDescriptor("drugs", "CrownsDrugs", "CrownsDrugs", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEconomy"), List.of("drugs")));
-        registerExpectedModule(new ModuleDescriptor("mmo", "CrownsMMO", "CrownsMMO", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsTerrain", "CrownsEconomy", "CrownsEvents", "CrownsAdmin", "CrownsDrugs"), List.of("mmo", "floor-runtime-consumer")));
-        registerExpectedModule(new ModuleDescriptor("terrain", "CrownsTerrain", "CrownsTerrain", "unknown", "1.4.0", List.of("CrownsAPI"), List.of("CrownsEvents"), List.of("terrain", "floor-runtime")));
+        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "0.1.2", List.of(), List.of(), List.of("data", "gui", "modules", "resource-pack", "input", "particles", "resources", "action-combat")));
+        registerExpectedModule(new ModuleDescriptor("magic", "CrownsMagic", "CrownsMagic", "unknown", "0.1.1", List.of("CrownsAPI"), List.of(), List.of("magic", "abilities")));
+        registerExpectedModule(new ModuleDescriptor("swords", "CrownsSwords", "CrownsSwords", "unknown", "0.1.2", List.of("CrownsAPI"), List.of(), List.of("swords", "weapon-arts")));
     }
 
     private CrownsAPI() {
@@ -131,6 +135,38 @@ public final class CrownsAPI {
 
     public static ResourcePackService getResourcePackService() {
         return resourcePackService;
+    }
+
+    public static void setActionInputService(ActionInputService service) {
+        actionInputService = service;
+    }
+
+    public static ActionInputService getActionInputService() {
+        return actionInputService;
+    }
+
+    public static void setCooldownService(CooldownService service) {
+        cooldownService = service;
+    }
+
+    public static CooldownService getCooldownService() {
+        return cooldownService;
+    }
+
+    public static void setResourceMeterService(ResourceMeterService service) {
+        resourceMeterService = service;
+    }
+
+    public static ResourceMeterService getResourceMeterService() {
+        return resourceMeterService;
+    }
+
+    public static void setParticlePatternService(ParticlePatternService service) {
+        particlePatternService = service;
+    }
+
+    public static ParticlePatternService getParticlePatternService() {
+        return particlePatternService;
     }
 
     public static void registerSection(SuiteSection section) {

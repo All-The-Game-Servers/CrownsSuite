@@ -44,8 +44,8 @@
 - Publish the current pack zip and `.sha1` as GitHub Release assets
 - Run `/capi pack refresh` to resolve, cache, and verify the latest release pack
 - Run `/capi pack apply` to resend the required pack to online players; joining players receive it automatically
-- Current pack file: `CrownsSuite-ResourcePack-1.6.0.zip`
-- Current pack SHA1: `a511c036004513985f463427b986995f28b47095`
+- Current pack file: `CrownsSuite-ResourcePack-1.7.0.zip`
+- Current pack SHA1: `16c23b995647afbce1cb2495548e34d0e92b4e2b`
 - Current target: Minecraft `1.21.11` resource-pack format `75`
 - CrownsAPI is the required pack owner. If ValhallaMMO is installed, disable Valhalla's separate automatic pack prompt or publish a merged pack later.
 

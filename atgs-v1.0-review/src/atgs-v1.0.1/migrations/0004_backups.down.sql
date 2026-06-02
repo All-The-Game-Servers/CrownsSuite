@@ -1,0 +1,10 @@
+DROP INDEX IF EXISTS idx_backup_schedules_instance;
+DROP INDEX IF EXISTS idx_backup_schedules_next_run;
+DROP INDEX IF EXISTS idx_backup_chunks_refcount;
+DROP INDEX IF EXISTS idx_backups_status;
+DROP INDEX IF EXISTS idx_backups_instance;
+DROP TABLE IF EXISTS backup_schedules;
+DROP TABLE IF EXISTS backup_chunks;
+DROP TABLE IF EXISTS backups;
+DROP TYPE IF EXISTS backup_storage;
+DROP TYPE IF EXISTS backup_status;

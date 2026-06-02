@@ -1,0 +1,22 @@
+name: CrownsMagic
+version: 0.1.0
+main: com.xkstudios.crowns.magic.CrownsMagicPlugin
+api-version: "1.21"
+depend: [CrownsAPI]
+authors: [XKStudios]
+description: Gesture-based magic for the Crowns relaunch.
+commands:
+  magic:
+    description: Open the Crowns Magic spellbook and manage spells.
+    usage: /magic [spellbook|focus|mana|bind|spells|reload]
+    aliases: [cmagic, spellbook]
+  mana:
+    description: Show your Crowns Magic mana.
+    usage: /mana
+permissions:
+  crowns.magic.use:
+    description: Allows players to use Crowns Magic.
+    default: true
+  crowns.magic.admin:
+    description: Allows Crowns Magic admin commands.
+    default: op

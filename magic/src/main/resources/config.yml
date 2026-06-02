@@ -1,0 +1,40 @@
+magic:
+  focus-required: true
+  pvp-enabled: false
+  mana:
+    maximum: 100
+    regen-amount: 4
+    regen-interval-ticks: 40
+  input:
+    default-sequence-window-ms: 900
+  spells:
+    starlight_flicker:
+      enabled: true
+      mana-cost: 12
+      cooldown-ms: 5000
+    ember_bolt:
+      enabled: true
+      mana-cost: 18
+      cooldown-ms: 3500
+      damage: 4.0
+      range: 18.0
+      ignite-ticks: 40
+    aether_step:
+      enabled: true
+      mana-cost: 20
+      cooldown-ms: 8000
+      distance: 6.0
+    verdant_mend:
+      enabled: true
+      mana-cost: 24
+      cooldown-ms: 10000
+      heal: 4.0
+    arcane_ward:
+      enabled: true
+      mana-cost: 22
+      cooldown-ms: 12000
+    gravity_snare:
+      enabled: true
+      mana-cost: 28
+      cooldown-ms: 14000
+      radius: 5.0

@@ -1,0 +1,269 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_economy_library",
+  "geometry_name": "crowns_economy_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/economy.png",
+      "name": "economy_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "coin_body",
+      "from": [
+        4,
+        4,
+        6.8
+      ],
+      "to": [
+        12,
+        12,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "coin_inner",
+      "from": [
+        5,
+        5,
+        6.4
+      ],
+      "to": [
+        11,
+        11,
+        9.6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "coin_crown",
+      "from": [
+        6,
+        7,
+        5.8
+      ],
+      "to": [
+        10,
+        9,
+        10.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "coin_body",
+    "coin_inner",
+    "coin_crown"
+  ],
+  "crowns": {
+    "version": "1.7.0",
+    "family": "economy",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/economy/wallet",
+      "lowlight/economy/auction_house",
+      "lowlight/economy/market_stalls",
+      "lowlight/economy/jobs",
+      "lowlight/economy/demand_board",
+      "lowlight/economy/server_trader",
+      "lowlight/economy/gambling",
+      "lowlight/economy/inbox",
+      "lowlight/economy/top_balances",
+      "lowlight/economy/commissions",
+      "lowlight/economy/contracts",
+      "lowlight/economy/gambling_lottery",
+      "lowlight/economy/gambling_coinflip",
+      "lowlight/economy/gambling_slots",
+      "lowlight/economy/slots_small",
+      "lowlight/economy/slots_standard",
+      "lowlight/economy/slots_high",
+      "lowlight/economy/slots_rules",
+      "lowlight/economy/slots_symbols"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

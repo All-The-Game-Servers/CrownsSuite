@@ -1,0 +1,27 @@
+{
+  "id": "minecraft-bedrock",
+  "name": "Minecraft Bedrock",
+  "description": "Official Minecraft Bedrock Server via itzg/bedrock-server. Supports Windows, mobile, console clients.",
+  "docker_image": "itzg/bedrock-server:latest",
+  "env": {
+    "EULA": "TRUE",
+    "VERSION": "LATEST",
+    "GAMEMODE": "survival",
+    "DIFFICULTY": "normal",
+    "LEVEL_NAME": "Bedrock level",
+    "SERVER_NAME": "ATGS Bedrock Server",
+    "MAX_PLAYERS": "10",
+    "ALLOW_CHEATS": "false",
+    "ONLINE_MODE": "true",
+    "SERVER_PORT": "19132",
+    "SERVER_PORTV6": "19133"
+  },
+  "ports": [
+    { "container_port": 19132, "protocol": "udp", "description": "IPv4 game port", "public": true },
+    { "container_port": 19133, "protocol": "udp", "description": "IPv6 game port", "public": true }
+  ],
+  "data_volumes": ["/data"],
+  "stop_command": "stop",
+  "stop_timeout_secs": 60,
+  "notes": "Bedrock runs over UDP. Ensure the host firewall allows inbound UDP 19132. Bedrock does NOT support IPv4-over-TCP; players must be able to route UDP to this server."
+}

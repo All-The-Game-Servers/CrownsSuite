@@ -1,0 +1,346 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_mmo_library",
+  "geometry_name": "crowns_mmo_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/mmo.png",
+      "name": "mmo_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "gate_left",
+      "from": [
+        3.5,
+        4,
+        5.5
+      ],
+      "to": [
+        5.5,
+        14,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "gate_right",
+      "from": [
+        10.5,
+        4,
+        5.5
+      ],
+      "to": [
+        12.5,
+        14,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "gate_top",
+      "from": [
+        4,
+        3,
+        5.5
+      ],
+      "to": [
+        12,
+        5,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "gate_void",
+      "from": [
+        6,
+        7,
+        5
+      ],
+      "to": [
+        10,
+        13,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "gate_left",
+    "gate_right",
+    "gate_top",
+    "gate_void"
+  ],
+  "crowns": {
+    "version": "1.7.0",
+    "family": "mmo",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/suite/mmo",
+      "lowlight/mmo/floors",
+      "lowlight/mmo/resources",
+      "lowlight/mmo/gear",
+      "lowlight/mmo/recipes",
+      "lowlight/mmo/party",
+      "lowlight/mmo/guild",
+      "lowlight/mmo/skills",
+      "lowlight/mmo/professions",
+      "lowlight/mmo/combat",
+      "lowlight/mmo/actives",
+      "lowlight/mmo/guide",
+      "lowlight/mmo/quests",
+      "lowlight/mmo/quest",
+      "lowlight/mmo/quest_active",
+      "lowlight/mmo/quest_complete",
+      "lowlight/mmo/quest_detail",
+      "lowlight/mmo/quest_reward",
+      "lowlight/mmo/quest_turnin",
+      "lowlight/mmo/custom_floor_drop",
+      "lowlight/mmo/gear/pathfinder_boots",
+      "lowlight/mmo/gear/deep_miner_charm",
+      "lowlight/mmo/gear/gatebreaker_compass",
+      "lowlight/mmo/gear/forager_satchel",
+      "lowlight/mmo/gear/wardenhide_cloak",
+      "lowlight/mmo/gear/veilwalkers_lantern"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

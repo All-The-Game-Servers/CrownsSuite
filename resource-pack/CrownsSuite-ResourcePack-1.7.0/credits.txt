@@ -1,0 +1,3 @@
+Crowns Suite Resource Pack 1.7.0
+Theme: 3D Dark Fantasy Relics
+Runtime: stable lowlight/... item model ids with generated Blockbench-style JSON models

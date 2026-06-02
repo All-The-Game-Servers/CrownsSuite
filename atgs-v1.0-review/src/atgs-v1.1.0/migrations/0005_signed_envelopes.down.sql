@@ -1,0 +1,2 @@
+ALTER TABLE keepers DROP COLUMN IF EXISTS ed25519_public_key;
+ALTER TABLE keepers DROP COLUMN IF EXISTS cert_serial_hex;

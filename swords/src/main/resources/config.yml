@@ -1,0 +1,51 @@
+swords:
+  stance-required: true
+  pvp-enabled: false
+  training-blade-enabled: true
+  stamina:
+    maximum: 100
+    regen-amount: 6
+    regen-interval-ticks: 35
+  allowed-weapons:
+    - WOODEN_SWORD
+    - STONE_SWORD
+    - IRON_SWORD
+    - GOLDEN_SWORD
+    - DIAMOND_SWORD
+    - NETHERITE_SWORD
+  skills:
+    linear:
+      enabled: true
+      stamina-cost: 12
+      cooldown-ms: 2800
+      damage: 4.0
+      range: 4.5
+    horizontal_arc:
+      enabled: true
+      stamina-cost: 18
+      cooldown-ms: 4500
+      damage: 3.0
+      range: 4.0
+      cone-degrees: 100
+    starburst_step:
+      enabled: true
+      stamina-cost: 24
+      cooldown-ms: 8500
+      damage: 4.5
+      distance: 5.5
+    guard_breaker:
+      enabled: true
+      stamina-cost: 22
+      cooldown-ms: 7000
+      damage: 5.0
+      range: 4.0
+    aegis_parry:
+      enabled: true
+      stamina-cost: 16
+      cooldown-ms: 10000
+    whirling_edge:
+      enabled: true
+      stamina-cost: 34
+      cooldown-ms: 14000
+      damage: 3.5
+      radius: 4.0

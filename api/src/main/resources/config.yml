@@ -16,11 +16,11 @@ inbox:
 resource-pack:
   enabled: true
   required: true
-  version: 1.6.0
-  url: "https://github.com/All-The-Game-Servers/CrownsSuite/releases/download/resource-pack-1.6.0/CrownsSuite-ResourcePack-1.6.0.zip"
-  download-url: "https://github.com/All-The-Game-Servers/CrownsSuite/releases/download/resource-pack-1.6.0/CrownsSuite-ResourcePack-1.6.0.zip"
+  version: 1.7.0
+  url: "https://github.com/All-The-Game-Servers/CrownsSuite/releases/download/resource-pack-1.7.0/CrownsSuite-ResourcePack-1.7.0.zip"
+  download-url: "https://github.com/All-The-Game-Servers/CrownsSuite/releases/download/resource-pack-1.7.0/CrownsSuite-ResourcePack-1.7.0.zip"
   github-page-url: "https://github.com/All-The-Game-Servers/CrownsSuite/releases"
-  sha1: "a511c036004513985f463427b986995f28b47095"
+  sha1: "7829996977bbecc38204d3abe7e104af508e5e39"
   allow-client-prompt-with-valhalla: true
   prompt: Lowlight SMP requires the Crowns Suite resource pack for custom items and menus.
   github:

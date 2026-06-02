@@ -1,0 +1,18 @@
+{
+  "id": "minecraft-java-paper",
+  "name": "Minecraft Java (Paper)",
+  "description": "Paper-based Minecraft Java Edition server using itzg/minecraft-server.",
+  "docker_image": "itzg/minecraft-server:java21",
+  "env": {
+    "EULA": "TRUE",
+    "TYPE": "PAPER",
+    "VERSION": "LATEST",
+    "MEMORY": "2G"
+  },
+  "ports": [
+    { "container_port": 25565, "protocol": "tcp" }
+  ],
+  "data_volumes": ["/data"],
+  "stop_command": "stop",
+  "stop_timeout_secs": 30
+}

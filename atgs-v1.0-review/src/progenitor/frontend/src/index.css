@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+  }
+  body {
+    background: #08090b;
+    color: #e8e4d8;
+    font-family: "Instrument Sans", "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    /* Subtle film-grain overlay via a base64 SVG noise pattern.
+       Grain at low opacity gives the whole UI a slightly filmic, printed-on-paper
+       quality rather than the usual flat-digital look. */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.9  0 0 0 0 0.88  0 0 0 0 0.82  0 0 0 0.025 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  }
+  ::selection { background: rgba(200, 169, 96, 0.35); color: #e8e4d8; }
+  /* Remove default number input spinners for a cleaner look */
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+}
+
+@layer components {
+  /* Section headers with a hairline under them, like a document chapter */
+  .section-title {
+    @apply font-display text-4xl text-bone font-normal tracking-tight;
+  }
+  .section-number {
+    @apply font-mono text-xs text-gold tracking-caps uppercase;
+  }
+  .section-sub {
+    @apply text-pewter text-sm italic font-display;
+  }
+  .hairline {
+    @apply border-iron;
+  }
+
+  /* Label in small caps - used above tables, fields, panels */
+  .label {
+    @apply text-xs text-pewter uppercase tracking-caps font-mono;
+  }
+
+  /* Buttons - no rounded rects; sharp corners with hairline borders */
+  .btn {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-body transition-colors;
+    @apply bg-transparent text-parchment border border-iron;
+    @apply hover:text-bone hover:border-pewter;
+  }
+  .btn-primary {
+    @apply btn border-copper/60 text-copper;
+    @apply hover:bg-copper/10 hover:text-bone hover:border-copper;
+  }
+  .btn-gold {
+    @apply btn border-gold/50 text-gold;
+    @apply hover:bg-gold/10 hover:text-gold hover:border-gold;
+  }
+  .btn-danger {
+    @apply btn border-rust/40 text-rust/80;
+    @apply hover:bg-rust/10 hover:text-rust hover:border-rust;
+  }
+  .btn-ghost {
+    @apply btn border-transparent text-pewter;
+    @apply hover:text-bone hover:border-iron;
+  }
+
+  /* Inputs - flat, no border-radius, underline-style focus */
+  .input {
+    @apply w-full bg-carbon border border-iron text-bone px-3 py-2 text-sm font-body;
+    @apply focus:outline-none focus:border-gold/60;
+    @apply placeholder:text-pewter/60;
+  }
+  .input-mono {
+    @apply input font-mono text-parchment;
+  }
+
+  /* Status tags - all caps, tiny, monospace, colored border-left only */
+  .tag {
+    @apply inline-block px-2 py-0.5 text-[10px] font-mono uppercase tracking-caps;
+    @apply border-l-2;
+  }
+  .tag-ok      { @apply tag border-sage text-sage bg-sage/5; }
+  .tag-warn    { @apply tag border-gold text-gold bg-gold/5; }
+  .tag-alert   { @apply tag border-rust text-rust bg-rust/5; }
+  .tag-pending { @apply tag border-copper text-copper bg-copper/5; }
+  .tag-mute    { @apply tag border-pewter text-pewter bg-pewter/5; }
+
+  /* Data table rows. Hairline grid, not alternating zebra. */
+  .data-table {
+    @apply w-full text-sm font-body;
+  }
+  .data-table thead th {
+    @apply label text-left px-4 py-3 font-normal border-b border-iron;
+  }
+  .data-table tbody td {
+    @apply px-4 py-3 border-b border-iron/50 align-middle;
+  }
+  .data-table tbody tr {
+    @apply transition-colors;
+  }
+  .data-table tbody tr:hover {
+    background: rgba(200, 169, 96, 0.03);
+  }
+}
+
+@layer utilities {
+  /* Diagonal etched line - used as a subtle decorative rule */
+  .rule-diag {
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(200, 169, 96, 0.15) 0,
+      rgba(200, 169, 96, 0.15) 1px,
+      transparent 1px,
+      transparent 6px
+    );
+  }
+  /* Enter animation for staggered reveal on mount */
+  .enter {
+    opacity: 0;
+    animation: enter 0.5s ease-out forwards;
+  }
+  @keyframes enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
