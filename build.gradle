@@ -1,21 +1,13 @@
 ext.crownsModuleVersions = [
-        api    : '1.5.0',
-        economy: '1.4.0',
-        admin  : '1.4.0',
-        events : '1.5.0',
-        drugs  : '1.4.0',
-        mmo    : '1.8.0',
-        terrain: '1.8.5'
+        api   : '0.1.2',
+        magic : '0.1.0',
+        swords: '0.1.0'
 ]
 
 ext.crownsJarNames = [
-        api    : 'CrownsAPI',
-        economy: 'CrownsEconomy',
-        admin  : 'CrownsAdmin',
-        events : 'CrownsEvents',
-        drugs  : 'CrownsDrugs',
-        mmo    : 'CrownsMMO',
-        terrain: 'CrownsTerrain'
+        api   : 'CrownsAPI',
+        magic : 'CrownsMagic',
+        swords: 'CrownsSwords'
 ]
 
 subprojects {
@@ -65,6 +57,8 @@ tasks.register('cleanDownloads') {
     doLast {
         delete fileTree("${rootDir}/downloads") {
             include 'CrownsAPI-*.jar'
+            include 'CrownsMagic-*.jar'
+            include 'CrownsSwords-*.jar'
             include 'CrownsEconomy-*.jar'
             include 'CrownsAdmin-*.jar'
             include 'CrownsEvents-*.jar'

@@ -307,6 +307,8 @@ public class SuiteGuiManager {
     private Material moduleIcon(String key) {
         return switch (key) {
             case "api" -> Material.NETHER_STAR;
+            case "magic" -> Material.AMETHYST_SHARD;
+            case "swords" -> Material.DIAMOND_SWORD;
             case "economy" -> Material.GOLD_INGOT;
             case "admin" -> Material.SHIELD;
             case "events" -> Material.DRAGON_HEAD;
@@ -320,6 +322,8 @@ public class SuiteGuiManager {
     private String moduleModel(String key) {
         return switch (key) {
             case "api" -> "lowlight/suite/api";
+            case "magic" -> "lowlight/magic/focus";
+            case "swords" -> "lowlight/swords/training_blade";
             case "economy" -> "lowlight/suite/economy";
             case "admin" -> "lowlight/suite/admin";
             case "events" -> "lowlight/suite/events";

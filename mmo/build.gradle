@@ -1,9 +1,0 @@
-dependencies {
-    implementation project(':api')
-}
-
-version = '1.7.0'
-
-jar {
-    archiveBaseName = 'CrownsMMO'
-}

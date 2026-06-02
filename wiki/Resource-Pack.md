@@ -1,34 +1,23 @@
 # Resource Pack
 
-Crowns Suite ships with a Dark Arcane resource pack that gives the suite a shared visual identity.
+Current pack: `CrownsSuite-ResourcePack-1.7.0.zip`
 
-## What It Covers
+SHA1: `7829996977bbecc38204d3abe7e104af508e5e39`
 
-- Suite home and navigation icons
-- Economy hub icons
-- Admin hub icons
-- Event relics and rewards
-- Drugs item families
-- MMO floor resources, boss trophies, party/guild icons, and adventurer gear
-- Terrain hub, village, arena, landmark, camp, road marker, waystone, shrine, and floor-theme icons
+The pack keeps stable `lowlight/...` model paths so plugin items can evolve without constantly renaming model IDs.
 
-## 1.6.0 Focus
+## Delivery
 
-- Required-pack relaunch for Minecraft `1.21.11`
-- Blockbench source models under `resource-pack/source/blockbench`
-- Sharper 32x icons with stronger shading, glow, outlines, and material identity
-- Complete validation against every plugin-side `lowlight/...` model path
-- Contact-sheet preview generated at build time for visual QA
-- CrownsAPI can resolve the latest pack from GitHub Releases with `/capi pack refresh`
-- `/capi pack apply` sends the required pack to online players
-- Rebuilt for Minecraft `1.21.11` resource-pack format `75`
-- ValhallaMMO no longer blocks CrownsAPI; disable Valhalla's separate automatic pack prompt or publish a merged pack later
+CrownsAPI owns resource-pack delivery. The intended production flow is:
 
-## Current Build
+1. Publish the pack zip and `.sha1` file to GitHub Releases.
+2. Configure CrownsAPI with the release URL and SHA1.
+3. Use CrownsAPI pack commands to refresh/apply the pack.
+4. Keep only the current pack zip in `downloads` to avoid accidental installs.
 
-- File: `CrownsSuite-ResourcePack-1.6.0.zip`
-- SHA1: `a511c036004513985f463427b986995f28b47095`
+## Current Coverage
 
-## Server Download Flow
-
-CrownsAPI is configured for GitHub Releases. Publish `CrownsSuite-ResourcePack-1.6.0.zip` and `CrownsSuite-ResourcePack-1.6.0.sha1` as release assets, then run `/capi pack refresh` to resolve and cache the latest release pack. The pack is required by default and is sent automatically on join. Staff can run `/capi pack apply` to resend it to online players.
+- Suite/API icons.
+- Magic spellbook, focus, and starter spell icons.
+- Swords skillbook, training blade, and starter sword-art icons.
+- Compatibility assets for older `lowlight/...` paths while the relaunch continues.
