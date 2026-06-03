@@ -1,0 +1,407 @@
+{
+  "credit": "Crowns Suite generated Blockbench-style dark fantasy item model",
+  "ambientocclusion": true,
+  "texture_size": [
+    64,
+    64
+  ],
+  "textures": {
+    "0": "lowlight:item/atlases/nether",
+    "particle": "lowlight:item/atlases/nether"
+  },
+  "elements": [
+    {
+      "name": "bow_upper",
+      "from": [
+        5,
+        3,
+        7
+      ],
+      "to": [
+        7,
+        10,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "bow_lower",
+      "from": [
+        9,
+        6,
+        7
+      ],
+      "to": [
+        11,
+        13,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "bow_string",
+      "from": [
+        7.5,
+        3,
+        7.6
+      ],
+      "to": [
+        8.5,
+        13,
+        8.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "bow_flame",
+      "from": [
+        7,
+        7,
+        6.4
+      ],
+      "to": [
+        10,
+        10,
+        9.6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.82,
+        0.82,
+        0.82
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.42,
+        0.42,
+        0.42
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        180,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.72,
+        0.72,
+        0.72
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.45,
+        0.45,
+        0.45
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "translation": [
+        1.13,
+        3.2,
+        1.13
+      ],
+      "scale": [
+        0.58,
+        0.58,
+        0.58
+      ]
+    }
+  }
+}

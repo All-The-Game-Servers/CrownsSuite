@@ -1,0 +1,462 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_swords_library",
+  "geometry_name": "crowns_swords_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/swords.png",
+      "name": "swords_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "scroll_sheet",
+      "from": [
+        4,
+        3,
+        6.6
+      ],
+      "to": [
+        12,
+        13,
+        8.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "scroll_roll_top",
+      "from": [
+        3.3,
+        2.6,
+        6
+      ],
+      "to": [
+        12.7,
+        4.1,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "scroll_roll_bottom",
+      "from": [
+        3.3,
+        11.9,
+        6
+      ],
+      "to": [
+        12.7,
+        13.4,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "ink_line_a",
+      "from": [
+        5,
+        6,
+        5.8
+      ],
+      "to": [
+        11,
+        6.6,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "ink_line_b",
+      "from": [
+        5,
+        8.5,
+        5.8
+      ],
+      "to": [
+        10,
+        9.1,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    }
+  ],
+  "outliner": [
+    "scroll_sheet",
+    "scroll_roll_top",
+    "scroll_roll_bottom",
+    "ink_line_a",
+    "ink_line_b"
+  ],
+  "crowns": {
+    "version": "1.8.1",
+    "family": "swords",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/swords/skillbook",
+      "lowlight/swords/training_blade",
+      "lowlight/swords/excalibur",
+      "lowlight/swords/styles/flash",
+      "lowlight/swords/styles/guard",
+      "lowlight/swords/styles/phantom",
+      "lowlight/swords/skills/linear",
+      "lowlight/swords/skills/horizontal_arc",
+      "lowlight/swords/skills/starburst_step",
+      "lowlight/swords/skills/guard_breaker",
+      "lowlight/swords/skills/aegis_parry",
+      "lowlight/swords/skills/whirling_edge",
+      "lowlight/swords/skills/rising_cut",
+      "lowlight/swords/skills/crescent_lunge",
+      "lowlight/swords/skills/phantom_riposte",
+      "lowlight/swords/skills/piercing_flash",
+      "lowlight/swords/skills/meteor_slash",
+      "lowlight/swords/skills/afterimage_chain",
+      "lowlight/swords/skills/iron_wall",
+      "lowlight/swords/skills/counter_cross",
+      "lowlight/swords/skills/shadowstep_cut",
+      "lowlight/swords/skills/mirage_edge"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

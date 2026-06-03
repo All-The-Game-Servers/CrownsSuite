@@ -8,6 +8,9 @@ public record AbilityRegistration(
         String modelPath,
         AbilityType type,
         AbilityCategory category,
+        String familyKey,
+        String familyName,
+        AbilityRank rank,
         int manaCost,
         long cooldownMillis,
         GestureSequence defaultBinding
@@ -22,7 +25,22 @@ public record AbilityRegistration(
             long cooldownMillis,
             GestureSequence defaultBinding
     ) {
-        this(pluginKey, abilityKey, displayName, description, modelPath, AbilityType.UTILITY, AbilityCategory.COMBO, manaCost, cooldownMillis, defaultBinding);
+        this(pluginKey, abilityKey, displayName, description, modelPath, AbilityType.UTILITY, AbilityCategory.COMBO, "", "", AbilityRank.NOVICE, manaCost, cooldownMillis, defaultBinding);
+    }
+
+    public AbilityRegistration(
+            String pluginKey,
+            String abilityKey,
+            String displayName,
+            String description,
+            String modelPath,
+            AbilityType type,
+            AbilityCategory category,
+            int manaCost,
+            long cooldownMillis,
+            GestureSequence defaultBinding
+    ) {
+        this(pluginKey, abilityKey, displayName, description, modelPath, type, category, "", "", AbilityRank.NOVICE, manaCost, cooldownMillis, defaultBinding);
     }
 
     public AbilityRegistration {
@@ -37,6 +55,9 @@ public record AbilityRegistration(
         modelPath = modelPath == null ? "" : modelPath;
         type = type == null ? AbilityType.UTILITY : type;
         category = category == null ? AbilityCategory.COMBO : category;
+        familyKey = familyKey == null ? "" : familyKey;
+        familyName = familyName == null || familyName.isBlank() ? familyKey : familyName;
+        rank = rank == null ? AbilityRank.NOVICE : rank;
         manaCost = Math.max(0, manaCost);
         cooldownMillis = Math.max(0L, cooldownMillis);
     }

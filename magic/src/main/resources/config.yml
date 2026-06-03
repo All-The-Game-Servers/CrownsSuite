@@ -38,3 +38,55 @@ magic:
       mana-cost: 28
       cooldown-ms: 14000
       radius: 5.0
+    starfall_spark:
+      enabled: true
+      mana-cost: 30
+      cooldown-ms: 12000
+      damage: 3.0
+      radius: 4.0
+    moonlit_veil:
+      enabled: true
+      mana-cost: 26
+      cooldown-ms: 16000
+    astral_lance:
+      enabled: true
+      mana-cost: 34
+      cooldown-ms: 11000
+      damage: 6.0
+      range: 22.0
+    flame_wave:
+      enabled: true
+      mana-cost: 26
+      cooldown-ms: 9000
+      damage: 3.5
+      range: 5.0
+    wind_step:
+      enabled: true
+      mana-cost: 18
+      cooldown-ms: 8500
+      force: 0.8
+    stone_skin:
+      enabled: true
+      mana-cost: 24
+      cooldown-ms: 13000
+    cleansing_light:
+      enabled: true
+      mana-cost: 20
+      cooldown-ms: 12000
+      heal: 2.0
+    renewing_circle:
+      enabled: true
+      mana-cost: 32
+      cooldown-ms: 16000
+      heal: 3.0
+      radius: 4.5
+    stellar_beacon:
+      enabled: true
+      mana-cost: 20
+      cooldown-ms: 10000
+    void_tether:
+      enabled: true
+      mana-cost: 30
+      cooldown-ms: 14000
+      damage: 3.0
+      range: 14.0

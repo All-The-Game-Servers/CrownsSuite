@@ -1,0 +1,371 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_magic_library",
+  "geometry_name": "crowns_magic_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/magic.png",
+      "name": "magic_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "crystal_core",
+      "from": [
+        6.2,
+        3,
+        6.2
+      ],
+      "to": [
+        9.8,
+        13,
+        9.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_a",
+      "from": [
+        4.5,
+        6,
+        6.6
+      ],
+      "to": [
+        7.5,
+        12,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_b",
+      "from": [
+        8.5,
+        7,
+        6.6
+      ],
+      "to": [
+        11.5,
+        12.5,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_base",
+      "from": [
+        5,
+        12,
+        6
+      ],
+      "to": [
+        11,
+        14,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "crystal_core",
+    "crystal_side_a",
+    "crystal_side_b",
+    "crystal_base"
+  ],
+  "crowns": {
+    "version": "1.8.1",
+    "family": "magic",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/magic/focus",
+      "lowlight/magic/spellbook",
+      "lowlight/magic/schools/elemental",
+      "lowlight/magic/schools/restoration",
+      "lowlight/magic/schools/astral",
+      "lowlight/magic/spells/starlight_flicker",
+      "lowlight/magic/spells/ember_bolt",
+      "lowlight/magic/spells/aether_step",
+      "lowlight/magic/spells/verdant_mend",
+      "lowlight/magic/spells/arcane_ward",
+      "lowlight/magic/spells/gravity_snare",
+      "lowlight/magic/spells/starfall_spark",
+      "lowlight/magic/spells/moonlit_veil",
+      "lowlight/magic/spells/astral_lance",
+      "lowlight/magic/spells/flame_wave",
+      "lowlight/magic/spells/wind_step",
+      "lowlight/magic/spells/stone_skin",
+      "lowlight/magic/spells/cleansing_light",
+      "lowlight/magic/spells/renewing_circle",
+      "lowlight/magic/spells/stellar_beacon",
+      "lowlight/magic/spells/void_tether"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

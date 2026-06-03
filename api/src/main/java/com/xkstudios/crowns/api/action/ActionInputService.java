@@ -20,4 +20,8 @@ public interface ActionInputService {
     AbilityRegistration getAbility(String abilityFullKey);
 
     Collection<AbilityRegistration> getAbilities();
+
+    void setDebug(UUID playerId, boolean enabled);
+
+    boolean isDebug(UUID playerId);
 }

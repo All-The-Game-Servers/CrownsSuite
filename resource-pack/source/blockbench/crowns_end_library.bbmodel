@@ -1,0 +1,366 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_end_library",
+  "geometry_name": "crowns_end_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/end.png",
+      "name": "end_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "crystal_core",
+      "from": [
+        6.2,
+        3,
+        6.2
+      ],
+      "to": [
+        9.8,
+        13,
+        9.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_a",
+      "from": [
+        4.5,
+        6,
+        6.6
+      ],
+      "to": [
+        7.5,
+        12,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_b",
+      "from": [
+        8.5,
+        7,
+        6.6
+      ],
+      "to": [
+        11.5,
+        12.5,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_base",
+      "from": [
+        5,
+        12,
+        6
+      ],
+      "to": [
+        11,
+        14,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "crystal_core",
+    "crystal_side_a",
+    "crystal_side_b",
+    "crystal_base"
+  ],
+  "crowns": {
+    "version": "1.8.1",
+    "family": "end",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/suite/endfall_week",
+      "lowlight/suite/lowlight_god",
+      "lowlight/end/echo_shard",
+      "lowlight/end/shulker_sigil",
+      "lowlight/end/starchart_fragment",
+      "lowlight/end/void_core",
+      "lowlight/end/crown_of_the_void",
+      "lowlight/end/reward/starchart_compass",
+      "lowlight/end/reward/voidwalker_boots",
+      "lowlight/end/reward/gateway_lantern",
+      "lowlight/end/reward/chorus_satchel",
+      "lowlight/end/reward/crown_beyond_stars",
+      "lowlight/end/reward/endfall_trophy",
+      "lowlight/end/material/void_filament",
+      "lowlight/end/material/chorus_weave",
+      "lowlight/end/material/gateway_residue"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

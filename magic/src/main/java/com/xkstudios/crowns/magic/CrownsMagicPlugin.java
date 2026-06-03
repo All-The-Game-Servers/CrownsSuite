@@ -48,10 +48,10 @@ public class CrownsMagicPlugin extends JavaPlugin {
                 "CrownsMagic",
                 "CrownsMagic",
                 this.getDescription().getVersion(),
-                "0.1.1",
+                "0.1.4",
                 List.of("CrownsAPI"),
                 List.of(),
-                List.of("magic", "abilities", "gesture-casting")
+                List.of("magic", "abilities", "gesture-casting", "arcane-rank", "schools", "playtest-progression")
         ), this::health);
         CrownsAPI.registerSection(new SuiteSection(
                 MODULE_KEY,
@@ -103,10 +103,10 @@ public class CrownsMagicPlugin extends JavaPlugin {
                 "CrownsMagic",
                 "CrownsMagic",
                 this.getDescription().getVersion(),
-                "0.1.1",
+                "0.1.4",
                 List.of("CrownsAPI"),
                 List.of(),
-                List.of("magic", "abilities", "gesture-casting")
+                List.of("magic", "abilities", "gesture-casting", "arcane-rank", "schools", "playtest-progression")
         );
         if (CrownsAPI.getActionInputService() == null) {
             return ModuleHealth.of(descriptor, ServiceState.FAILED, "CrownsAPI action input service is offline.", List.of("Restart CrownsAPI before CrownsMagic."));

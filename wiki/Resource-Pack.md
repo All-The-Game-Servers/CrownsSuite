@@ -1,8 +1,8 @@
 # Resource Pack
 
-Current pack: `CrownsSuite-ResourcePack-1.7.0.zip`
+Current pack: `CrownsSuite-ResourcePack-1.7.1.zip`
 
-SHA1: `7829996977bbecc38204d3abe7e104af508e5e39`
+SHA1: `d08f8fd54c47f83e9f33c80d981d24968e01a62e`
 
 The pack keeps stable `lowlight/...` model paths so plugin items can evolve without constantly renaming model IDs.
 
@@ -18,6 +18,6 @@ CrownsAPI owns resource-pack delivery. The intended production flow is:
 ## Current Coverage
 
 - Suite/API icons.
-- Magic spellbook, focus, and starter spell icons.
-- Swords skillbook, training blade, and starter sword-art icons.
+- Magic spellbook, focus, starter spell icons, and v0.2 unlockable spell icons.
+- Swords skillbook, training blade, starter sword-art icons, and v0.2 unlockable sword-art icons.
 - Compatibility assets for older `lowlight/...` paths while the relaunch continues.

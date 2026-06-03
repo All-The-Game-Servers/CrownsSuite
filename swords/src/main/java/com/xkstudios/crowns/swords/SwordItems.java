@@ -28,4 +28,21 @@ public final class SwordItems {
         item.setItemMeta(meta);
         return item;
     }
+
+    public static ItemStack excalibur(CrownsSwordsPlugin plugin) {
+        ItemStack item = new ItemStack(Material.NETHERITE_SWORD);
+        ItemMeta meta = item.getItemMeta();
+        meta.displayName(Component.text("Excalibur", NamedTextColor.GOLD));
+        meta.lore(List.of(
+                Component.text("Admin testing blade for CrownsSwords.", NamedTextColor.GRAY),
+                Component.text("Valid for all existing sword arts.", NamedTextColor.AQUA),
+                Component.text("Not a player progression reward.", NamedTextColor.DARK_GRAY)
+        ));
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+        meta.setUnbreakable(true);
+        meta.getPersistentDataContainer().set(plugin.excaliburKey(), PersistentDataType.BYTE, (byte) 1);
+        PackModelHelper.apply(meta, "lowlight/swords/excalibur");
+        item.setItemMeta(meta);
+        return item;
+    }
 }

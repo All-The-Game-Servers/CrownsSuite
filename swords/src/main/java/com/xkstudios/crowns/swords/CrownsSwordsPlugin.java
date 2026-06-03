@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitTask;
 public class CrownsSwordsPlugin extends JavaPlugin {
     public static final String MODULE_KEY = "swords";
     private NamespacedKey trainingBladeKey;
+    private NamespacedKey excaliburKey;
     private NamespacedKey actionKey;
     private SwordProfileManager profileManager;
     private SwordSkillManager skillManager;
@@ -25,6 +26,7 @@ public class CrownsSwordsPlugin extends JavaPlugin {
     public void onEnable() {
         this.saveDefaultConfig();
         this.trainingBladeKey = new NamespacedKey(this, "training_blade");
+        this.excaliburKey = new NamespacedKey(this, "excalibur_blade");
         this.actionKey = new NamespacedKey(this, "swords_action");
         this.profileManager = new SwordProfileManager(this);
         this.profileManager.load();
@@ -45,10 +47,10 @@ public class CrownsSwordsPlugin extends JavaPlugin {
                 "CrownsSwords",
                 "CrownsSwords",
                 this.getDescription().getVersion(),
-                "0.1.2",
+                "0.1.4",
                 List.of("CrownsAPI"),
                 List.of(),
-                List.of("swords", "weapon-arts", "gesture-combat")
+                List.of("swords", "weapon-arts", "gesture-combat", "blade-rank", "styles", "playtest-progression")
         ), this::health);
         CrownsAPI.registerSection(new SuiteSection(
                 MODULE_KEY,
@@ -100,10 +102,10 @@ public class CrownsSwordsPlugin extends JavaPlugin {
                 "CrownsSwords",
                 "CrownsSwords",
                 this.getDescription().getVersion(),
-                "0.1.2",
+                "0.1.4",
                 List.of("CrownsAPI"),
                 List.of(),
-                List.of("swords", "weapon-arts", "gesture-combat")
+                List.of("swords", "weapon-arts", "gesture-combat", "blade-rank", "styles", "playtest-progression")
         );
         if (CrownsAPI.getActionInputService() == null) {
             return ModuleHealth.of(descriptor, ServiceState.FAILED, "CrownsAPI action input service is offline.", List.of("Restart CrownsAPI before CrownsSwords."));
@@ -113,6 +115,10 @@ public class CrownsSwordsPlugin extends JavaPlugin {
 
     public NamespacedKey trainingBladeKey() {
         return this.trainingBladeKey;
+    }
+
+    public NamespacedKey excaliburKey() {
+        return this.excaliburKey;
     }
 
     public NamespacedKey actionKey() {

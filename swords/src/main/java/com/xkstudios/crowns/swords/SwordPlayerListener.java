@@ -1,8 +1,11 @@
 package com.xkstudios.crowns.swords;
 
 import com.xkstudios.crowns.api.CrownsAPI;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -30,6 +33,16 @@ public class SwordPlayerListener implements Listener {
         }
         if (CrownsAPI.getCooldownService() != null) {
             CrownsAPI.getCooldownService().clear(event.getPlayer().getUniqueId());
+        }
+    }
+
+    @EventHandler
+    public void onDamage(EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player player) || !(event.getDamager() instanceof LivingEntity attacker)) {
+            return;
+        }
+        if (this.plugin.skills().handleIncomingDamage(player, attacker)) {
+            event.setDamage(Math.max(0.0D, event.getDamage() * 0.35D));
         }
     }
 }

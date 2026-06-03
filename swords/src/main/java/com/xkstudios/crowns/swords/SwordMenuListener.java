@@ -39,6 +39,14 @@ public class SwordMenuListener implements Listener {
         } else if (action.equals("focus")) {
             player.getInventory().addItem(SwordItems.trainingBlade(this.plugin));
             player.sendMessage("You received a Training Blade.");
+        } else if (action.equals("progress")) {
+            this.plugin.gui().openProgress(player);
+        } else if (action.equals("playtest")) {
+            this.plugin.gui().openPlaytest(player);
+        } else if (action.equals("skillbook")) {
+            this.plugin.gui().openSkillbook(player);
+        } else if (action.startsWith("style:")) {
+            this.plugin.gui().openStyle(player, action.substring("style:".length()));
         } else if (action.startsWith("bind:")) {
             this.plugin.gui().cycleBinding(player, action.substring("bind:".length()));
         }

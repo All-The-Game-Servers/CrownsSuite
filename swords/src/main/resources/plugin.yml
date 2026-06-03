@@ -1,14 +1,14 @@
 name: CrownsSwords
-version: 0.1.0
+version: 0.3.1
 main: com.xkstudios.crowns.swords.CrownsSwordsPlugin
-api-version: "1.21"
+api-version: "26.1.2"
 depend: [CrownsAPI]
 authors: [XKStudios]
 description: Gesture-based sword arts for the Crowns relaunch.
 commands:
   swords:
     description: Open the Crowns Swords skillbook and manage sword arts.
-    usage: /swords [skillbook|focus|stamina|skills|bind|reload]
+    usage: /swords [skillbook|focus|stamina|progress|styles|style|playtest|skills|bind|admin|reload]
     aliases: [cswords]
 permissions:
   crowns.swords.use:

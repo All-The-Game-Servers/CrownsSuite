@@ -10,6 +10,7 @@ import com.xkstudios.crowns.api.action.CooldownService;
 import com.xkstudios.crowns.api.action.DefaultActionInputService;
 import com.xkstudios.crowns.api.action.ParticlePatternService;
 import com.xkstudios.crowns.api.action.ResourceMeterService;
+import com.xkstudios.crowns.api.action.AbilityTelemetryService;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
     private SuiteGuiManager suiteGuiManager;
     private ResourcePackService resourcePackService;
     private DefaultActionInputService actionInputService;
+    private AbilityTelemetryService abilityTelemetryService;
     private CooldownService cooldownService;
     private ResourceMeterService resourceMeterService;
     private ParticlePatternService particlePatternService;
@@ -37,6 +39,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         this.resourcePackService = new ResourcePackService(this);
         this.suiteGuiManager = new SuiteGuiManager(this);
         this.actionInputService = new DefaultActionInputService();
+        this.abilityTelemetryService = new AbilityTelemetryService();
         this.cooldownService = new CooldownService();
         this.resourceMeterService = new ResourceMeterService();
         this.particlePatternService = new ParticlePatternService(this);
@@ -44,6 +47,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setSuiteGui(this.suiteGuiManager);
         CrownsAPI.setResourcePackService(this.resourcePackService);
         CrownsAPI.setActionInputService(this.actionInputService);
+        CrownsAPI.setAbilityTelemetryService(this.abilityTelemetryService);
         CrownsAPI.setCooldownService(this.cooldownService);
         CrownsAPI.setResourceMeterService(this.resourceMeterService);
         CrownsAPI.setParticlePatternService(this.particlePatternService);
@@ -52,10 +56,10 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "0.1.2",
+                "0.1.4",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat")
+                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat", "telemetry", "ability-families")
         ), this::apiHealth);
         CrownsAPI.setPlayerDataProvider(new PlayerDataProvider() {
             @Override
@@ -97,6 +101,7 @@ public class CrownsAPIPlugin extends JavaPlugin {
         CrownsAPI.setSuiteGui(null);
         CrownsAPI.setResourcePackService(null);
         CrownsAPI.setActionInputService(null);
+        CrownsAPI.setAbilityTelemetryService(null);
         CrownsAPI.setCooldownService(null);
         CrownsAPI.setResourceMeterService(null);
         CrownsAPI.setParticlePatternService(null);
@@ -139,10 +144,10 @@ public class CrownsAPIPlugin extends JavaPlugin {
                 "CrownsAPI",
                 "CrownsAPI",
                 this.getDescription().getVersion(),
-                "0.1.2",
+                "0.1.4",
                 List.of(),
                 List.of(),
-                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat")
+                List.of("data", "gui", "modules", "resource-pack", "inbox", "input", "particles", "resources", "action-combat", "telemetry", "ability-families")
         );
         if (!databaseOnline) {
             return ModuleHealth.of(descriptor, ServiceState.FAILED, "Core API services are unavailable.", warnings);

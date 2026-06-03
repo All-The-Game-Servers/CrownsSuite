@@ -39,6 +39,14 @@ public class MagicMenuListener implements Listener {
         } else if (action.equals("focus")) {
             player.getInventory().addItem(MagicItems.focus(this.plugin));
             player.sendMessage("You received a Starlit Focus.");
+        } else if (action.equals("progress")) {
+            this.plugin.gui().openProgress(player);
+        } else if (action.equals("playtest")) {
+            this.plugin.gui().openPlaytest(player);
+        } else if (action.equals("spellbook")) {
+            this.plugin.gui().openSpellbook(player);
+        } else if (action.startsWith("school:")) {
+            this.plugin.gui().openSchool(player, action.substring("school:".length()));
         } else if (action.startsWith("bind:")) {
             this.plugin.gui().cycleBinding(player, action.substring("bind:".length()));
         }

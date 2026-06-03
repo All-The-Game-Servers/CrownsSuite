@@ -1,0 +1,362 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_nether_library",
+  "geometry_name": "crowns_nether_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/nether.png",
+      "name": "nether_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "crystal_core",
+      "from": [
+        6.2,
+        3,
+        6.2
+      ],
+      "to": [
+        9.8,
+        13,
+        9.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_a",
+      "from": [
+        4.5,
+        6,
+        6.6
+      ],
+      "to": [
+        7.5,
+        12,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            0,
+            16,
+            16,
+            32
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_side_b",
+      "from": [
+        8.5,
+        7,
+        6.6
+      ],
+      "to": [
+        11.5,
+        12.5,
+        9.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": "#0"
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5,
+        "rescale": true
+      }
+    },
+    {
+      "name": "crystal_base",
+      "from": [
+        5,
+        12,
+        6
+      ],
+      "to": [
+        11,
+        14,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "crystal_core",
+    "crystal_side_a",
+    "crystal_side_b",
+    "crystal_base"
+  ],
+  "crowns": {
+    "version": "1.8.1",
+    "family": "nether",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/suite/nether_week",
+      "lowlight/nether/ember_shard",
+      "lowlight/nether/gilded_fang",
+      "lowlight/nether/blaze_sigil",
+      "lowlight/nether/ancient_core",
+      "lowlight/nether/crown_fragment",
+      "lowlight/nether/reward/scout_lantern",
+      "lowlight/nether/reward/ashwalker_boots",
+      "lowlight/nether/reward/blazebound_bow",
+      "lowlight/nether/reward/bastion_guard",
+      "lowlight/nether/reward/crown_of_cinders",
+      "lowlight/nether/reward/opening_trophy"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

@@ -1,43 +1,303 @@
 {
-  "version": "1.6.0",
+  "version": "1.8.1",
   "blockbench": "D:\\CrownsSuiteTools\\Apps\\Blockbench-5.1.4-portable.exe",
+  "style": "3D Dark Fantasy Relics",
   "sources": [
     {
-      "source": "suite_crown_crest.bbmodel",
-      "palette": "suite",
-      "intended_model_paths": [
-        "lowlight/suite/api",
-        "lowlight/suite/resource_pack",
-        "lowlight/suite/status"
+      "source": "crowns_admin_library.bbmodel",
+      "family": "admin",
+      "count": 13,
+      "model_paths": [
+        "lowlight/suite/admin",
+        "lowlight/admin/operations",
+        "lowlight/admin/case_file",
+        "lowlight/admin/moderation",
+        "lowlight/admin/reports",
+        "lowlight/admin/player_inspection",
+        "lowlight/admin/staff_mode",
+        "lowlight/admin/true_vanish",
+        "lowlight/admin/analytics",
+        "lowlight/admin/playtime",
+        "lowlight/admin/entity_tools",
+        "lowlight/admin/roles",
+        "lowlight/admin/puppeteering"
       ]
     },
     {
-      "source": "event_relics.bbmodel",
-      "palette": "end",
-      "intended_model_paths": [
+      "source": "crowns_drugs_library.bbmodel",
+      "family": "drugs",
+      "count": 20,
+      "model_paths": [
+        "lowlight/suite/drugs",
+        "lowlight/drugs/grow",
+        "lowlight/drugs/process",
+        "lowlight/drugs/use",
+        "lowlight/drugs/sell",
+        "lowlight/drugs/upgrades",
+        "lowlight/drugs/storage",
+        "lowlight/drugs/crowns_economy",
+        "lowlight/drugs/restock_seeds",
+        "lowlight/drugs/restock_supplies",
+        "lowlight/drugs/upgrade_lab",
+        "lowlight/drugs/upgrade_storage",
+        "lowlight/drugs/upgrade_processor",
+        "lowlight/drugs/storage_capacity",
+        "lowlight/drugs/marijuana_raw",
+        "lowlight/drugs/marijuana_packaged",
+        "lowlight/drugs/cocaine_raw",
+        "lowlight/drugs/cocaine_packaged",
+        "lowlight/drugs/meth_raw",
+        "lowlight/drugs/meth_packaged"
+      ]
+    },
+    {
+      "source": "crowns_economy_library.bbmodel",
+      "family": "economy",
+      "count": 19,
+      "model_paths": [
+        "lowlight/economy/wallet",
+        "lowlight/economy/auction_house",
+        "lowlight/economy/market_stalls",
+        "lowlight/economy/jobs",
+        "lowlight/economy/demand_board",
+        "lowlight/economy/server_trader",
+        "lowlight/economy/gambling",
+        "lowlight/economy/inbox",
+        "lowlight/economy/top_balances",
+        "lowlight/economy/commissions",
+        "lowlight/economy/contracts",
+        "lowlight/economy/gambling_lottery",
+        "lowlight/economy/gambling_coinflip",
+        "lowlight/economy/gambling_slots",
+        "lowlight/economy/slots_small",
+        "lowlight/economy/slots_standard",
+        "lowlight/economy/slots_high",
+        "lowlight/economy/slots_rules",
+        "lowlight/economy/slots_symbols"
+      ]
+    },
+    {
+      "source": "crowns_end_library.bbmodel",
+      "family": "end",
+      "count": 16,
+      "model_paths": [
+        "lowlight/suite/endfall_week",
+        "lowlight/suite/lowlight_god",
+        "lowlight/end/echo_shard",
+        "lowlight/end/shulker_sigil",
+        "lowlight/end/starchart_fragment",
         "lowlight/end/void_core",
         "lowlight/end/crown_of_the_void",
-        "lowlight/nether/crown_fragment"
+        "lowlight/end/reward/starchart_compass",
+        "lowlight/end/reward/voidwalker_boots",
+        "lowlight/end/reward/gateway_lantern",
+        "lowlight/end/reward/chorus_satchel",
+        "lowlight/end/reward/crown_beyond_stars",
+        "lowlight/end/reward/endfall_trophy",
+        "lowlight/end/material/void_filament",
+        "lowlight/end/material/chorus_weave",
+        "lowlight/end/material/gateway_residue"
       ]
     },
     {
-      "source": "mmo_gate_gear.bbmodel",
-      "palette": "mmo",
-      "intended_model_paths": [
+      "source": "crowns_magic_library.bbmodel",
+      "family": "magic",
+      "count": 21,
+      "model_paths": [
+        "lowlight/magic/focus",
+        "lowlight/magic/spellbook",
+        "lowlight/magic/schools/elemental",
+        "lowlight/magic/schools/restoration",
+        "lowlight/magic/schools/astral",
+        "lowlight/magic/spells/starlight_flicker",
+        "lowlight/magic/spells/ember_bolt",
+        "lowlight/magic/spells/aether_step",
+        "lowlight/magic/spells/verdant_mend",
+        "lowlight/magic/spells/arcane_ward",
+        "lowlight/magic/spells/gravity_snare",
+        "lowlight/magic/spells/starfall_spark",
+        "lowlight/magic/spells/moonlit_veil",
+        "lowlight/magic/spells/astral_lance",
+        "lowlight/magic/spells/flame_wave",
+        "lowlight/magic/spells/wind_step",
+        "lowlight/magic/spells/stone_skin",
+        "lowlight/magic/spells/cleansing_light",
+        "lowlight/magic/spells/renewing_circle",
+        "lowlight/magic/spells/stellar_beacon",
+        "lowlight/magic/spells/void_tether"
+      ]
+    },
+    {
+      "source": "crowns_mmo_library.bbmodel",
+      "family": "mmo",
+      "count": 26,
+      "model_paths": [
+        "lowlight/suite/mmo",
         "lowlight/mmo/floors",
+        "lowlight/mmo/resources",
+        "lowlight/mmo/gear",
+        "lowlight/mmo/recipes",
+        "lowlight/mmo/party",
+        "lowlight/mmo/guild",
+        "lowlight/mmo/skills",
+        "lowlight/mmo/professions",
+        "lowlight/mmo/combat",
+        "lowlight/mmo/actives",
+        "lowlight/mmo/guide",
+        "lowlight/mmo/quests",
+        "lowlight/mmo/quest",
+        "lowlight/mmo/quest_active",
+        "lowlight/mmo/quest_complete",
+        "lowlight/mmo/quest_detail",
+        "lowlight/mmo/quest_reward",
+        "lowlight/mmo/quest_turnin",
+        "lowlight/mmo/custom_floor_drop",
+        "lowlight/mmo/gear/pathfinder_boots",
+        "lowlight/mmo/gear/deep_miner_charm",
         "lowlight/mmo/gear/gatebreaker_compass",
+        "lowlight/mmo/gear/forager_satchel",
+        "lowlight/mmo/gear/wardenhide_cloak",
+        "lowlight/mmo/gear/veilwalkers_lantern"
+      ]
+    },
+    {
+      "source": "crowns_mmo_f1_library.bbmodel",
+      "family": "mmo_f1",
+      "count": 5,
+      "model_paths": [
+        "lowlight/mmo/floor1/skyroot_fiber",
+        "lowlight/mmo/floor1/gate_splinter",
+        "lowlight/mmo/floor1/copperleaf",
+        "lowlight/mmo/floor1/gatekeeper_eye",
         "lowlight/mmo/floor1/gatekeeper_trophy"
       ]
     },
     {
-      "source": "economy_trade_seals.bbmodel",
-      "palette": "economy",
-      "intended_model_paths": [
-        "lowlight/economy/wallet",
-        "lowlight/economy/server_trader",
-        "lowlight/economy/market_stalls"
+      "source": "crowns_mmo_f2_library.bbmodel",
+      "family": "mmo_f2",
+      "count": 5,
+      "model_paths": [
+        "lowlight/mmo/floor2/ironbark_plate",
+        "lowlight/mmo/floor2/deep_crystal",
+        "lowlight/mmo/floor2/warden_thread",
+        "lowlight/mmo/floor2/gatekeeper_heart",
+        "lowlight/mmo/floor2/gatekeeper_trophy"
       ]
+    },
+    {
+      "source": "crowns_mmo_f3_library.bbmodel",
+      "family": "mmo_f3",
+      "count": 5,
+      "model_paths": [
+        "lowlight/mmo/floor3/void_silk",
+        "lowlight/mmo/floor3/ancient_lumen",
+        "lowlight/mmo/floor3/starmetal_flake",
+        "lowlight/mmo/floor3/gatekeeper_core",
+        "lowlight/mmo/floor3/gatekeeper_trophy"
+      ]
+    },
+    {
+      "source": "crowns_nether_library.bbmodel",
+      "family": "nether",
+      "count": 12,
+      "model_paths": [
+        "lowlight/suite/nether_week",
+        "lowlight/nether/ember_shard",
+        "lowlight/nether/gilded_fang",
+        "lowlight/nether/blaze_sigil",
+        "lowlight/nether/ancient_core",
+        "lowlight/nether/crown_fragment",
+        "lowlight/nether/reward/scout_lantern",
+        "lowlight/nether/reward/ashwalker_boots",
+        "lowlight/nether/reward/blazebound_bow",
+        "lowlight/nether/reward/bastion_guard",
+        "lowlight/nether/reward/crown_of_cinders",
+        "lowlight/nether/reward/opening_trophy"
+      ]
+    },
+    {
+      "source": "crowns_suite_library.bbmodel",
+      "family": "suite",
+      "count": 18,
+      "model_paths": [
+        "lowlight/suite/economy",
+        "lowlight/suite/api",
+        "lowlight/suite/events",
+        "lowlight/suite/profile",
+        "lowlight/suite/inbox",
+        "lowlight/suite/alerts",
+        "lowlight/suite/status",
+        "lowlight/suite/resource_pack",
+        "lowlight/suite/resource_pack_share",
+        "lowlight/suite/resource_pack_broadcast",
+        "lowlight/suite/nav_back",
+        "lowlight/suite/nav_close",
+        "lowlight/suite/event_live",
+        "lowlight/suite/event_archive",
+        "lowlight/suite/event_rewards",
+        "lowlight/suite/event_guide",
+        "lowlight/suite/event_turnin_hand",
+        "lowlight/suite/event_turnin_all"
+      ]
+    },
+    {
+      "source": "crowns_swords_library.bbmodel",
+      "family": "swords",
+      "count": 22,
+      "model_paths": [
+        "lowlight/swords/skillbook",
+        "lowlight/swords/training_blade",
+        "lowlight/swords/excalibur",
+        "lowlight/swords/styles/flash",
+        "lowlight/swords/styles/guard",
+        "lowlight/swords/styles/phantom",
+        "lowlight/swords/skills/linear",
+        "lowlight/swords/skills/horizontal_arc",
+        "lowlight/swords/skills/starburst_step",
+        "lowlight/swords/skills/guard_breaker",
+        "lowlight/swords/skills/aegis_parry",
+        "lowlight/swords/skills/whirling_edge",
+        "lowlight/swords/skills/rising_cut",
+        "lowlight/swords/skills/crescent_lunge",
+        "lowlight/swords/skills/phantom_riposte",
+        "lowlight/swords/skills/piercing_flash",
+        "lowlight/swords/skills/meteor_slash",
+        "lowlight/swords/skills/afterimage_chain",
+        "lowlight/swords/skills/iron_wall",
+        "lowlight/swords/skills/counter_cross",
+        "lowlight/swords/skills/shadowstep_cut",
+        "lowlight/swords/skills/mirage_edge"
+      ]
+    },
+    {
+      "source": "crowns_terrain_library.bbmodel",
+      "family": "terrain",
+      "count": 14,
+      "model_paths": [
+        "lowlight/suite/terrain",
+        "lowlight/terrain/hub",
+        "lowlight/terrain/village",
+        "lowlight/terrain/arena",
+        "lowlight/terrain/landmark",
+        "lowlight/terrain/camp",
+        "lowlight/terrain/road_marker",
+        "lowlight/terrain/waystone",
+        "lowlight/terrain/shrine",
+        "lowlight/terrain/market",
+        "lowlight/terrain/watchtower",
+        "lowlight/terrain/floor_1",
+        "lowlight/terrain/floor_2",
+        "lowlight/terrain/floor_3"
+      ]
+    },
+    {
+      "source": "crowns_swords_excalibur.bbmodel",
+      "family": "swords",
+      "count": 1,
+      "model_paths": [
+        "lowlight/swords/excalibur"
+      ],
+      "dedicated": true
     }
-  ],
-  "note": "These are editable source models for the 1.6.0 premium redraw pipeline. Runtime still uses generated lowlight/... model paths."
+  ]
 }

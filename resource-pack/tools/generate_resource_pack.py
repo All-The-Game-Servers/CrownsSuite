@@ -14,7 +14,7 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
 ROOT = Path(__file__).resolve().parents[2]
-VERSION = "1.7.0"
+VERSION = "1.8.1"
 PACK_NAME = f"CrownsSuite-ResourcePack-{VERSION}"
 PACK_DIR = ROOT / "resource-pack" / PACK_NAME
 BUILD_DIR = ROOT / "build" / "resource-pack"
@@ -27,7 +27,7 @@ INDEX_PATH = ROOT / "resource-pack" / "ASSET_INDEX.md"
 CONTACT_SHEET_PATH = BUILD_DIR / f"{PACK_NAME}-contact-sheet.png"
 MODEL_REPORT_PATH = BUILD_DIR / f"{PACK_NAME}-model-report.json"
 BLOCKBENCH_SOURCE_DIR = ROOT / "resource-pack" / "source" / "blockbench"
-RESOURCE_PACK_FORMAT = 75
+RESOURCE_PACK_FORMAT = 84
 TRANSPARENT = (0, 0, 0, 0)
 
 
@@ -87,24 +87,28 @@ def infer_archetype(key: str, model_path: str) -> str:
         return "crystal"
     if key in {"spellbook"}:
         return "scroll"
-    if key in {"starlight_flicker", "arcane_ward", "gravity_snare"}:
+    if key in {"elemental", "restoration", "astral", "starlight_flicker", "arcane_ward", "gravity_snare", "starfall_spark", "moonlit_veil", "flame_wave", "stone_skin", "cleansing_light", "renewing_circle", "stellar_beacon", "void_tether"}:
         return "sigil"
-    if key in {"ember_bolt"}:
+    if key in {"ember_bolt", "astral_lance"}:
         return "crystal"
-    if key in {"aether_step"}:
+    if key in {"aether_step", "wind_step"}:
         return "gate"
     if key in {"verdant_mend"}:
         return "herb"
+    if key in {"excalibur"}:
+        return "excalibur"
     if key in {"training_blade"}:
         return "bow"
     if key in {"skillbook"}:
         return "scroll"
-    if key in {"linear", "horizontal_arc", "guard_breaker", "whirling_edge"}:
+    if key in {"flash", "linear", "horizontal_arc", "guard_breaker", "whirling_edge", "rising_cut", "crescent_lunge", "piercing_flash", "meteor_slash", "afterimage_chain", "mirage_edge"}:
         return "sigil"
-    if key in {"starburst_step"}:
+    if key in {"starburst_step", "shadowstep_cut"}:
         return "gate"
-    if key in {"aegis_parry"}:
+    if key in {"guard", "aegis_parry", "phantom_riposte", "iron_wall", "counter_cross"}:
         return "shield"
+    if key in {"phantom"}:
+        return "eye"
     if key in {"wallet", "crowns_economy", "top_balances", "gambling_coinflip", "gambling_lottery", "slots_small", "slots_standard", "slots_high"}:
         return "coin"
     if key in {"auction_house"}:
@@ -224,9 +228,19 @@ ASSETS: list[Asset] = (
     + group("mmo/gear", "mmo", ["pathfinder_boots", "deep_miner_charm", "gatebreaker_compass", "forager_satchel", "wardenhide_cloak", "veilwalkers_lantern"])
     + group("terrain", "terrain", ["hub", "village", "arena", "landmark", "camp", "road_marker", "waystone", "shrine", "market", "watchtower", "floor_1", "floor_2", "floor_3"])
     + group("magic", "magic", ["focus", "spellbook"])
-    + group("magic/spells", "magic", ["starlight_flicker", "ember_bolt", "aether_step", "verdant_mend", "arcane_ward", "gravity_snare"])
-    + group("swords", "swords", ["skillbook", "training_blade"])
-    + group("swords/skills", "swords", ["linear", "horizontal_arc", "starburst_step", "guard_breaker", "aegis_parry", "whirling_edge"])
+    + group("magic/schools", "magic", ["elemental", "restoration", "astral"])
+    + group("magic/spells", "magic", [
+        "starlight_flicker", "ember_bolt", "aether_step", "verdant_mend", "arcane_ward", "gravity_snare",
+        "starfall_spark", "moonlit_veil", "astral_lance", "flame_wave", "wind_step", "stone_skin",
+        "cleansing_light", "renewing_circle", "stellar_beacon", "void_tether",
+    ])
+    + group("swords", "swords", ["skillbook", "training_blade", "excalibur"])
+    + group("swords/styles", "swords", ["flash", "guard", "phantom"])
+    + group("swords/skills", "swords", [
+        "linear", "horizontal_arc", "starburst_step", "guard_breaker", "aegis_parry", "whirling_edge",
+        "rising_cut", "crescent_lunge", "phantom_riposte", "piercing_flash", "meteor_slash",
+        "afterimage_chain", "iron_wall", "counter_cross", "shadowstep_cut", "mirage_edge",
+    ])
 )
 
 
@@ -372,6 +386,14 @@ def xrot(angle: float, origin: list[float] | None = None) -> dict[str, object]:
 
 def display(kind: str) -> dict[str, object]:
     handheld = kind in {"bow", "gavel", "compass", "lantern", "flask", "crystal", "charm"}
+    if kind == "excalibur":
+        return {
+            "gui": {"rotation": [35, 225, -22], "translation": [0, 0, 0], "scale": [0.92, 0.92, 0.92]},
+            "ground": {"rotation": [0, 0, -35], "translation": [0, 3, 0], "scale": [0.48, 0.48, 0.48]},
+            "fixed": {"rotation": [0, 180, -35], "translation": [0, 0, 0], "scale": [0.78, 0.78, 0.78]},
+            "thirdperson_righthand": {"rotation": [70, -25, 0], "translation": [0, 3.5, 1], "scale": [0.72, 0.72, 0.72]},
+            "firstperson_righthand": {"rotation": [0, -90, 35], "translation": [1.13, 3.2, 1.13], "scale": [0.72, 0.72, 0.72]},
+        }
     return {
         "gui": {"rotation": [30, 225, 0], "translation": [0, 0, 0], "scale": [0.82, 0.82, 0.82]},
         "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.42, 0.42, 0.42]},
@@ -488,6 +510,23 @@ def model_elements(archetype: str) -> list[dict[str, object]]:
             element("bow_lower", [9, 6, 7], [11, 13, 9], "wood", zrot(-22.5)),
             element("bow_string", [7.5, 3, 7.6], [8.5, 13, 8.4], "paper", zrot(22.5)),
             element("bow_flame", [7, 7, 6.4], [10, 10, 9.6], "glow"),
+        ]
+    elif archetype == "excalibur":
+        e += [
+            element("excalibur_blade_core", [7.2, 1.2, 7.1], [8.8, 12.4, 8.9], "metal", zrot(-35)),
+            element("excalibur_blade_left_bevel", [6.45, 2.0, 7.2], [7.35, 11.8, 8.8], "paper", zrot(-35)),
+            element("excalibur_blade_right_bevel", [8.65, 2.0, 7.2], [9.55, 11.8, 8.8], "paper", zrot(-35)),
+            element("excalibur_tip", [7.05, 0.2, 7.2], [8.95, 2.3, 8.8], "glow", zrot(-35)),
+            element("excalibur_fuller", [7.75, 2.1, 6.75], [8.25, 10.6, 9.25], "glow", zrot(-35)),
+            element("excalibur_guard_bar", [4.1, 11.2, 6.6], [11.9, 12.55, 9.4], "gold", zrot(-35)),
+            element("excalibur_guard_left_flare", [3.2, 10.6, 6.7], [5.4, 12.2, 9.3], "gold", zrot(-57.5)),
+            element("excalibur_guard_right_flare", [10.6, 11.6, 6.7], [12.8, 13.2, 9.3], "gold", zrot(-12.5)),
+            element("excalibur_sapphire_cross", [6.7, 10.4, 6.1], [9.3, 12.6, 9.9], "glow", zrot(-35)),
+            element("excalibur_grip", [7.0, 12.0, 7.1], [9.0, 15.4, 8.9], "shade", zrot(-35)),
+            element("excalibur_grip_wrap_a", [6.75, 12.6, 6.8], [9.25, 13.05, 9.2], "trim", zrot(-35)),
+            element("excalibur_grip_wrap_b", [6.75, 13.65, 6.8], [9.25, 14.1, 9.2], "trim", zrot(-35)),
+            element("excalibur_pommel", [6.6, 14.9, 6.5], [9.4, 16.0, 9.5], "gold", zrot(-35)),
+            element("excalibur_pommel_gem", [7.25, 14.55, 6.1], [8.75, 15.85, 9.9], "glow", zrot(-35)),
         ]
     elif archetype == "compass":
         e += [
@@ -684,7 +723,7 @@ def write_pack_files() -> None:
         "pack": {
             "min_format": RESOURCE_PACK_FORMAT,
             "max_format": RESOURCE_PACK_FORMAT,
-            "description": "Crowns Suite Resource Pack 1.7.0 - required 1.21.11 3D dark fantasy redraw."
+            "description": f"Crowns Suite Resource Pack {VERSION} - required 26.1.2 3D dark fantasy redraw."
         }
     }, indent=2), encoding="utf-8")
     lowlight = PACK_DIR / "assets" / "lowlight"
@@ -693,7 +732,7 @@ def write_pack_files() -> None:
     (lowlight / "font" / "default.json").write_text(json.dumps({"providers": []}, indent=2), encoding="utf-8")
     (lowlight / "sounds.json").write_text("{}", encoding="utf-8")
     (PACK_DIR / "credits.txt").write_text(
-        "Crowns Suite Resource Pack 1.7.0\n"
+        f"Crowns Suite Resource Pack {VERSION}\n"
         "Theme: 3D Dark Fantasy Relics\n"
         "Runtime: stable lowlight/... item model ids with generated Blockbench-style JSON models\n",
         encoding="utf-8"
@@ -748,6 +787,34 @@ def write_blockbench_sources() -> None:
         source = BLOCKBENCH_SOURCE_DIR / f"crowns_{family}_library.bbmodel"
         source.write_text(json.dumps(model, indent=2), encoding="utf-8")
         manifest.append({"source": source.name, "family": family, "count": len(assets), "model_paths": [asset.path for asset in assets]})
+    excalibur_source = BLOCKBENCH_SOURCE_DIR / "crowns_swords_excalibur.bbmodel"
+    excalibur_model = {
+        "meta": {"format_version": "4.10", "model_format": "free", "box_uv": False},
+        "name": "crowns_swords_excalibur",
+        "geometry_name": "crowns_swords_excalibur",
+        "visible_box": [2, 2, 2],
+        "resolution": {"width": 64, "height": 64},
+        "textures": [{
+            "path": "assets/lowlight/textures/item/atlases/swords.png",
+            "name": "swords_atlas",
+            "folder": "item/atlases",
+            "namespace": "lowlight",
+            "id": "0",
+            "particle": True,
+        }],
+        "elements": model_elements("excalibur"),
+        "outliner": [element_data["name"] for element_data in model_elements("excalibur")],
+        "display": display("excalibur"),
+        "crowns": {
+            "version": VERSION,
+            "family": "swords",
+            "style": "holy_dark_fantasy_excalibur",
+            "intended_model_paths": ["lowlight/swords/excalibur"],
+            "note": "Dedicated Excalibur source model. This is the quality target for future authored sword items.",
+        },
+    }
+    excalibur_source.write_text(json.dumps(excalibur_model, indent=2), encoding="utf-8")
+    manifest.append({"source": excalibur_source.name, "family": "swords", "count": 1, "model_paths": ["lowlight/swords/excalibur"], "dedicated": True})
     (BLOCKBENCH_SOURCE_DIR / "MANIFEST.json").write_text(json.dumps({
         "version": VERSION,
         "blockbench": "D:\\CrownsSuiteTools\\Apps\\Blockbench-5.1.4-portable.exe",
@@ -760,9 +827,9 @@ def validate_pack() -> None:
     pack_meta = json.loads((PACK_DIR / "pack.mcmeta").read_text(encoding="utf-8"))
     pack = pack_meta.get("pack", {})
     if pack.get("min_format") != RESOURCE_PACK_FORMAT or pack.get("max_format") != RESOURCE_PACK_FORMAT:
-        raise RuntimeError("pack.mcmeta must target Minecraft 1.21.11 resource pack format 75.")
+        raise RuntimeError("pack.mcmeta must target Minecraft 26.1.2 resource pack format 84.")
     if "pack_format" in pack or "supported_formats" in pack:
-        raise RuntimeError("1.21.11 pack.mcmeta must not include pack_format or supported_formats.")
+        raise RuntimeError("26.1.2 pack.mcmeta must not include pack_format or supported_formats.")
 
     expected = {asset.path for asset in ASSETS}
     for asset in ASSETS:
@@ -775,7 +842,7 @@ def validate_pack() -> None:
                 raise RuntimeError(f"Missing resource-pack asset: {required.relative_to(PACK_DIR)}")
         model_json = json.loads(model_def.read_text(encoding="utf-8"))
         if model_json.get("parent") == "minecraft:item/generated":
-            raise RuntimeError(f"Flat generated item model is forbidden in 1.7.0: {asset.path}")
+            raise RuntimeError(f"Flat generated item model is forbidden in {VERSION}: {asset.path}")
         if not model_json.get("elements"):
             raise RuntimeError(f"Model has no 3D elements: {asset.path}")
         texture_ref = model_json.get("textures", {}).get("0", "")
@@ -785,7 +852,7 @@ def validate_pack() -> None:
 
     pattern = re.compile(r"lowlight/[a-z0-9_./-]+")
     referenced: set[str] = set()
-    for module in ("api", "economy", "admin", "events", "drugs", "mmo", "terrain"):
+    for module in ("api", "magic", "swords", "economy", "admin", "events", "drugs", "mmo", "terrain"):
         search_root = ROOT / module / "src" / "main"
         if not search_root.exists():
             continue

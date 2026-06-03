@@ -4,6 +4,7 @@ import com.xkstudios.crowns.api.CrownsAPI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -55,10 +56,57 @@ public class MagicCommand implements TabExecutor {
         if (root.equals("mana")) {
             return this.showMana(sender);
         }
+        if (root.equals("progress")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Only players have Arcane progress.");
+                return true;
+            }
+            this.plugin.gui().openProgress(player);
+            return true;
+        }
+        if (root.equals("playtest")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Only players can open playtest notes.");
+                return true;
+            }
+            this.plugin.gui().openPlaytest(player);
+            return true;
+        }
         if (root.equals("spells")) {
             sender.sendMessage("Crowns Magic Spells");
             for (MagicSpell spell : this.plugin.spells().spells()) {
-                sender.sendMessage("- " + spell.key() + " | " + spell.displayName() + " | mana " + spell.manaCost());
+                sender.sendMessage("- " + spell.key() + " | " + spell.displayName() + " | " + spell.schoolName() + " " + spell.rank().displayName() + " | mana " + spell.manaCost());
+            }
+            return true;
+        }
+        if (root.equals("schools")) {
+            if (sender instanceof Player player) {
+                for (String school : MagicProfileManager.SCHOOLS.keySet()) {
+                    sender.sendMessage(MagicProfileManager.SCHOOLS.get(school) + ": " + this.plugin.profiles().masteryRank(player.getUniqueId(), school).displayName() + " (" + this.plugin.profiles().schoolXp(player.getUniqueId(), school) + " XP)");
+                }
+            } else {
+                sender.sendMessage("Schools: " + String.join(", ", MagicProfileManager.SCHOOLS.keySet()));
+            }
+            return true;
+        }
+        if (root.equals("school")) {
+            if (args.length < 2) {
+                sender.sendMessage("Usage: /" + label + " school <elemental|restoration|astral>");
+                return true;
+            }
+            String school = args[1].toLowerCase(Locale.ROOT);
+            if (!MagicProfileManager.SCHOOLS.containsKey(school)) {
+                sender.sendMessage("Unknown school. Valid: " + String.join(", ", MagicProfileManager.SCHOOLS.keySet()));
+                return true;
+            }
+            if (sender instanceof Player player) {
+                this.plugin.gui().openSchool(player, school);
+            } else {
+                for (MagicSpell spell : this.plugin.spells().spells()) {
+                    if (spell.schoolKey().equals(school)) {
+                        sender.sendMessage("- " + spell.key() + " | " + spell.displayName() + " | " + spell.rank().displayName());
+                    }
+                }
             }
             return true;
         }
@@ -77,9 +125,8 @@ public class MagicCommand implements TabExecutor {
                 sender.sendMessage("Unknown spell. Use /" + label + " spells.");
                 return true;
             }
-            MagicProfile profile = this.plugin.profiles().get(player.getUniqueId());
-            if (!profile.learnedSpells().contains(spellKey)) {
-                sender.sendMessage("You have not learned that spell.");
+            if (!this.plugin.profiles().isUnlocked(player.getUniqueId(), spell)) {
+                sender.sendMessage("That spell requires " + spell.schoolName() + " " + spell.rank().displayName() + " mastery.");
                 return true;
             }
             String gestureKey = MagicGestures.normalize(args[2]);
@@ -101,8 +148,100 @@ public class MagicCommand implements TabExecutor {
             sender.sendMessage("Crowns Magic config reloaded. Restart is recommended after spell setting changes.");
             return true;
         }
+        if (root.equals("admin")) {
+            return this.admin(sender, label, args);
+        }
         this.sendHelp(sender, label);
         return true;
+    }
+
+    private boolean admin(CommandSender sender, String label, String[] args) {
+        if (!sender.hasPermission("crowns.magic.admin")) {
+            sender.sendMessage("You do not have permission to manage Crowns Magic.");
+            return true;
+        }
+        if (args.length < 3) {
+            sender.sendMessage("Usage: /" + label + " admin <xp|rank|schoolxp|schoolreset|reset|debug> <player> [school] [amount|rank|on|off]");
+            return true;
+        }
+        Player target = Bukkit.getPlayerExact(args[2]);
+        if (target == null) {
+            sender.sendMessage("That player is not online.");
+            return true;
+        }
+        String action = args[1].toLowerCase(Locale.ROOT);
+        if (action.equals("xp")) {
+            if (args.length < 4) {
+                sender.sendMessage("Usage: /" + label + " admin xp <player> <amount>");
+                return true;
+            }
+            int amount = this.parseInt(args[3], 0);
+            this.plugin.profiles().addXp(target, amount, "admin grant");
+            sender.sendMessage("Granted " + amount + " Arcane XP to " + target.getName() + ".");
+            return true;
+        }
+        if (action.equals("rank")) {
+            if (args.length < 4) {
+                sender.sendMessage("Usage: /" + label + " admin rank <player> <1-5>");
+                return true;
+            }
+            int rank = this.parseInt(args[3], 1);
+            this.plugin.profiles().grantRank(target, rank);
+            sender.sendMessage("Set " + target.getName() + " to Arcane Rank " + rank + ".");
+            return true;
+        }
+        if (action.equals("reset")) {
+            this.plugin.profiles().resetProgress(target);
+            sender.sendMessage("Reset Arcane progress for " + target.getName() + ".");
+            return true;
+        }
+        if (action.equals("schoolxp")) {
+            if (args.length < 5) {
+                sender.sendMessage("Usage: /" + label + " admin schoolxp <player> <school> <amount>");
+                return true;
+            }
+            String school = args[3].toLowerCase(Locale.ROOT);
+            if (!MagicProfileManager.SCHOOLS.containsKey(school)) {
+                sender.sendMessage("Unknown school. Valid: " + String.join(", ", MagicProfileManager.SCHOOLS.keySet()));
+                return true;
+            }
+            int amount = this.parseInt(args[4], 0);
+            this.plugin.profiles().addSchoolXp(target, school, amount, "admin grant");
+            sender.sendMessage("Granted " + amount + " " + MagicProfileManager.SCHOOLS.get(school) + " XP to " + target.getName() + ".");
+            return true;
+        }
+        if (action.equals("schoolreset")) {
+            if (args.length < 4) {
+                sender.sendMessage("Usage: /" + label + " admin schoolreset <player> <school>");
+                return true;
+            }
+            String school = args[3].toLowerCase(Locale.ROOT);
+            if (!MagicProfileManager.SCHOOLS.containsKey(school)) {
+                sender.sendMessage("Unknown school. Valid: " + String.join(", ", MagicProfileManager.SCHOOLS.keySet()));
+                return true;
+            }
+            this.plugin.profiles().resetSchool(target, school);
+            sender.sendMessage("Reset " + MagicProfileManager.SCHOOLS.get(school) + " mastery for " + target.getName() + ".");
+            return true;
+        }
+        if (action.equals("debug")) {
+            boolean enabled = args.length < 4 || args[3].equalsIgnoreCase("on") || args[3].equalsIgnoreCase("true");
+            if (CrownsAPI.getActionInputService() != null) {
+                CrownsAPI.getActionInputService().setDebug(target.getUniqueId(), enabled);
+            }
+            sender.sendMessage("Magic input debug for " + target.getName() + ": " + enabled);
+            return true;
+        }
+        sender.sendMessage("Unknown admin action.");
+        return true;
+    }
+
+    private int parseInt(String value, int fallback) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException exception) {
+            return fallback;
+        }
     }
 
     private boolean showMana(CommandSender sender) {
@@ -121,6 +260,10 @@ public class MagicCommand implements TabExecutor {
         sender.sendMessage("/" + label + " - open your spellbook");
         sender.sendMessage("/" + label + " focus - receive a Starlit Focus");
         sender.sendMessage("/" + label + " mana - show mana");
+        sender.sendMessage("/" + label + " progress - view Arcane Rank");
+        sender.sendMessage("/" + label + " schools - view school mastery");
+        sender.sendMessage("/" + label + " school <school> - open a school page");
+        sender.sendMessage("/" + label + " playtest - open playtest notes");
         sender.sendMessage("/" + label + " spells - list spells");
         sender.sendMessage("/" + label + " bind <spell> <gesture> - bind a learned spell");
     }
@@ -129,11 +272,20 @@ public class MagicCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> suggestions = new ArrayList<>();
         if (args.length == 1) {
-            List<String> roots = new ArrayList<>(List.of("spellbook", "focus", "mana", "spells", "bind"));
+            List<String> roots = new ArrayList<>(List.of("spellbook", "focus", "mana", "progress", "playtest", "spells", "schools", "school", "bind"));
             if (sender.hasPermission("crowns.magic.admin")) {
-                roots.add("reload");
+                roots.addAll(List.of("admin", "reload"));
             }
             return StringUtil.copyPartialMatches(args[0], roots, suggestions);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("admin")) {
+            return StringUtil.copyPartialMatches(args[1], List.of("xp", "rank", "schoolxp", "schoolreset", "reset", "debug"), suggestions);
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("school")) {
+            return StringUtil.copyPartialMatches(args[1], MagicProfileManager.SCHOOLS.keySet(), suggestions);
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("admin") && (args[1].equalsIgnoreCase("schoolxp") || args[1].equalsIgnoreCase("schoolreset"))) {
+            return StringUtil.copyPartialMatches(args[3], MagicProfileManager.SCHOOLS.keySet(), suggestions);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("bind")) {
             return StringUtil.copyPartialMatches(args[1], this.plugin.spells().spells().stream().map(MagicSpell::key).toList(), suggestions);

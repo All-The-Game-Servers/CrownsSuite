@@ -8,13 +8,9 @@ $downloads = Join-Path $root "downloads"
 $buildRoot = Join-Path $root "build\verify-suite"
 
 $modules = @(
-    @{ Name = "api"; Jar = "CrownsAPI"; Version = "1.5.0"; Dependencies = @() },
-    @{ Name = "economy"; Jar = "CrownsEconomy"; Version = "1.4.0"; Dependencies = @("api") },
-    @{ Name = "admin"; Jar = "CrownsAdmin"; Version = "1.4.0"; Dependencies = @("api") },
-    @{ Name = "events"; Jar = "CrownsEvents"; Version = "1.5.0"; Dependencies = @("api") },
-    @{ Name = "drugs"; Jar = "CrownsDrugs"; Version = "1.4.0"; Dependencies = @("api") },
-    @{ Name = "mmo"; Jar = "CrownsMMO"; Version = "1.8.0"; Dependencies = @("api") },
-    @{ Name = "terrain"; Jar = "CrownsTerrain"; Version = "1.8.5"; Dependencies = @("api") }
+    @{ Name = "api"; Jar = "CrownsAPI"; Version = "0.1.4"; Dependencies = @() },
+    @{ Name = "magic"; Jar = "CrownsMagic"; Version = "0.3.0"; Dependencies = @("api") },
+    @{ Name = "swords"; Jar = "CrownsSwords"; Version = "0.3.1"; Dependencies = @("api") }
 )
 
 function Get-DependencyClasspath {
@@ -47,7 +43,7 @@ function Compile-Module {
             throw "No Java sources found for $($Module.Name)"
         }
         $classpath = Get-DependencyClasspath $Module.Dependencies
-        & javac -encoding UTF-8 --release 21 -cp $classpath -d $classes @sources
+        & javac -encoding UTF-8 --release 25 -cp $classpath -d $classes @sources
         if ($LASTEXITCODE -ne 0) {
             throw "javac failed for $($Module.Name)"
         }
@@ -77,12 +73,8 @@ function Compile-Module {
 
 New-Item -ItemType Directory -Force -Path $downloads, $buildRoot | Out-Null
 Remove-Item -Path (Join-Path $downloads "CrownsAPI-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsEconomy-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsAdmin-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsEvents-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsDrugs-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsMMO-*.jar") -Force -ErrorAction SilentlyContinue
-Remove-Item -Path (Join-Path $downloads "CrownsTerrain-*.jar") -Force -ErrorAction SilentlyContinue
+Remove-Item -Path (Join-Path $downloads "CrownsMagic-*.jar") -Force -ErrorAction SilentlyContinue
+Remove-Item -Path (Join-Path $downloads "CrownsSwords-*.jar") -Force -ErrorAction SilentlyContinue
 
 $jars = foreach ($module in $modules) {
     Compile-Module $module

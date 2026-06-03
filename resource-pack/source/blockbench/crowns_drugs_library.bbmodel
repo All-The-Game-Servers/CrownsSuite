@@ -1,0 +1,340 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "crowns_drugs_library",
+  "geometry_name": "crowns_drugs_library",
+  "visible_box": [
+    2,
+    2,
+    2
+  ],
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "textures": [
+    {
+      "path": "assets/lowlight/textures/item/atlases/drugs.png",
+      "name": "drugs_atlas",
+      "folder": "item/atlases",
+      "namespace": "lowlight",
+      "id": "0",
+      "particle": true
+    }
+  ],
+  "elements": [
+    {
+      "name": "flask_neck",
+      "from": [
+        6.7,
+        3,
+        6.5
+      ],
+      "to": [
+        9.3,
+        6,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "flask_cork",
+      "from": [
+        6.3,
+        2,
+        6.2
+      ],
+      "to": [
+        9.7,
+        3.3,
+        9.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            32,
+            16,
+            48,
+            32
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "flask_body",
+      "from": [
+        4,
+        6,
+        5.2
+      ],
+      "to": [
+        12,
+        13,
+        10.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            32,
+            32,
+            48
+          ],
+          "texture": "#0"
+        }
+      }
+    },
+    {
+      "name": "flask_liquid",
+      "from": [
+        4.7,
+        9,
+        4.8
+      ],
+      "to": [
+        11.3,
+        12.4,
+        11.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ],
+  "outliner": [
+    "flask_neck",
+    "flask_cork",
+    "flask_body",
+    "flask_liquid"
+  ],
+  "crowns": {
+    "version": "1.8.1",
+    "family": "drugs",
+    "style": "3d_dark_fantasy_relics",
+    "intended_model_paths": [
+      "lowlight/suite/drugs",
+      "lowlight/drugs/grow",
+      "lowlight/drugs/process",
+      "lowlight/drugs/use",
+      "lowlight/drugs/sell",
+      "lowlight/drugs/upgrades",
+      "lowlight/drugs/storage",
+      "lowlight/drugs/crowns_economy",
+      "lowlight/drugs/restock_seeds",
+      "lowlight/drugs/restock_supplies",
+      "lowlight/drugs/upgrade_lab",
+      "lowlight/drugs/upgrade_storage",
+      "lowlight/drugs/upgrade_processor",
+      "lowlight/drugs/storage_capacity",
+      "lowlight/drugs/marijuana_raw",
+      "lowlight/drugs/marijuana_packaged",
+      "lowlight/drugs/cocaine_raw",
+      "lowlight/drugs/cocaine_packaged",
+      "lowlight/drugs/meth_raw",
+      "lowlight/drugs/meth_packaged"
+    ],
+    "note": "This file is an editable Blockbench seed library. Runtime pack generation emits one model per stable lowlight/... path."
+  }
+}

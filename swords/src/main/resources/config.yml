@@ -49,3 +49,60 @@ swords:
       cooldown-ms: 14000
       damage: 3.5
       radius: 4.0
+    rising_cut:
+      enabled: true
+      stamina-cost: 18
+      cooldown-ms: 6000
+      damage: 4.0
+      range: 4.0
+    crescent_lunge:
+      enabled: true
+      stamina-cost: 26
+      cooldown-ms: 9000
+      damage: 4.0
+      range: 5.0
+    phantom_riposte:
+      enabled: true
+      stamina-cost: 24
+      cooldown-ms: 13000
+      damage: 4.0
+      window-ms: 3000
+    piercing_flash:
+      enabled: true
+      stamina-cost: 20
+      cooldown-ms: 6500
+      damage: 4.5
+      range: 6.5
+    meteor_slash:
+      enabled: true
+      stamina-cost: 30
+      cooldown-ms: 11000
+      damage: 5.0
+      range: 6.0
+    afterimage_chain:
+      enabled: true
+      stamina-cost: 38
+      cooldown-ms: 15000
+      damage: 3.0
+      range: 5.0
+    iron_wall:
+      enabled: true
+      stamina-cost: 22
+      cooldown-ms: 12000
+    counter_cross:
+      enabled: true
+      stamina-cost: 28
+      cooldown-ms: 15000
+      window-ms: 3600
+    shadowstep_cut:
+      enabled: true
+      stamina-cost: 24
+      cooldown-ms: 9000
+      damage: 4.0
+      range: 4.5
+    mirage_edge:
+      enabled: true
+      stamina-cost: 30
+      cooldown-ms: 13000
+      damage: 3.25
+      radius: 3.5

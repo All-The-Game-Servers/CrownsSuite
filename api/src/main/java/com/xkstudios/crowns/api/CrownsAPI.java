@@ -3,6 +3,11 @@ package com.xkstudios.crowns.api;
 import com.xkstudios.crowns.data.DataManager;
 import com.xkstudios.crowns.gui.SuiteGuiManager;
 import com.xkstudios.crowns.api.action.ActionInputService;
+import com.xkstudios.crowns.api.action.AbilityCastContext;
+import com.xkstudios.crowns.api.action.AbilityLifecycleEvent;
+import com.xkstudios.crowns.api.action.AbilityLifecyclePhase;
+import com.xkstudios.crowns.api.action.AbilityRegistration;
+import com.xkstudios.crowns.api.action.AbilityTelemetryService;
 import com.xkstudios.crowns.api.action.CooldownService;
 import com.xkstudios.crowns.api.action.ParticlePatternService;
 import com.xkstudios.crowns.api.action.ResourceMeterService;
@@ -13,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public final class CrownsAPI {
@@ -28,6 +34,7 @@ public final class CrownsAPI {
     private static SuiteGuiManager suiteGuiManager;
     private static ResourcePackService resourcePackService;
     private static ActionInputService actionInputService;
+    private static AbilityTelemetryService abilityTelemetryService;
     private static CooldownService cooldownService;
     private static ResourceMeterService resourceMeterService;
     private static ParticlePatternService particlePatternService;
@@ -41,9 +48,9 @@ public final class CrownsAPI {
     private static final List<SuiteActivityListener> activityListeners = new CopyOnWriteArrayList<>();
 
     static {
-        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "0.1.2", List.of(), List.of(), List.of("data", "gui", "modules", "resource-pack", "input", "particles", "resources", "action-combat")));
-        registerExpectedModule(new ModuleDescriptor("magic", "CrownsMagic", "CrownsMagic", "unknown", "0.1.1", List.of("CrownsAPI"), List.of(), List.of("magic", "abilities")));
-        registerExpectedModule(new ModuleDescriptor("swords", "CrownsSwords", "CrownsSwords", "unknown", "0.1.2", List.of("CrownsAPI"), List.of(), List.of("swords", "weapon-arts")));
+        registerExpectedModule(new ModuleDescriptor("api", "CrownsAPI", "CrownsAPI", "unknown", "0.1.4", List.of(), List.of(), List.of("data", "gui", "modules", "resource-pack", "input", "particles", "resources", "action-combat", "telemetry", "ability-families")));
+        registerExpectedModule(new ModuleDescriptor("magic", "CrownsMagic", "CrownsMagic", "unknown", "0.1.4", List.of("CrownsAPI"), List.of(), List.of("magic", "schools", "abilities", "progression")));
+        registerExpectedModule(new ModuleDescriptor("swords", "CrownsSwords", "CrownsSwords", "unknown", "0.1.4", List.of("CrownsAPI"), List.of(), List.of("swords", "styles", "weapon-arts", "progression")));
     }
 
     private CrownsAPI() {
@@ -143,6 +150,14 @@ public final class CrownsAPI {
 
     public static ActionInputService getActionInputService() {
         return actionInputService;
+    }
+
+    public static void setAbilityTelemetryService(AbilityTelemetryService service) {
+        abilityTelemetryService = service;
+    }
+
+    public static AbilityTelemetryService getAbilityTelemetryService() {
+        return abilityTelemetryService;
     }
 
     public static void setCooldownService(CooldownService service) {
@@ -306,6 +321,13 @@ public final class CrownsAPI {
         if (inboxBacked && inboxProvider != null && targetPlayer != null) {
             inboxProvider.sendNotification(targetPlayer, title, body == null ? "" : body);
         }
+    }
+
+    public static void publishAbilityLifecycle(AbilityRegistration registration, AbilityCastContext context, AbilityLifecyclePhase phase, String message) {
+        if (registration == null || context == null || phase == null) {
+            return;
+        }
+        Bukkit.getPluginManager().callEvent(new AbilityLifecycleEvent(registration, context, phase, message));
     }
 
     public static void openSuiteHome(Player player) {
